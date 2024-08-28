@@ -32,6 +32,11 @@
 $ npm install
 ```
 
+## Create resource
+```bash
+$ nest g res <resource_name>
+```
+
 ## Compile and run the project
 
 ```bash

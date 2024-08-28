@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 
 const envModule = ConfigModule.forRoot({
@@ -14,7 +14,11 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     envModule,
-    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({ autoLoadEntities: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -26,7 +30,7 @@ import { AppService } from './app.service';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
