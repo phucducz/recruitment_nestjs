@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import 'reflect-metadata';
 
 const envModule = ConfigModule.forRoot({
   isGlobal: true,
@@ -10,6 +11,23 @@ const envModule = ConfigModule.forRoot({
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AchivementsModule } from './modules/achivements/achivements.module';
+import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
+import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
+import { JobFieldsModule } from './modules/job_fields/job_fields.module';
+import { JobPositionsModule } from './modules/job_positions/job_positions.module';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
+import { PlacementsModule } from './modules/placements/placements.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { SkillsModule } from './modules/skills/skills.module';
+import { UsersModule } from './modules/users/users.module';
+import { UsersForeignLanguagesModule } from './modules/users_foreign_languages/users_foreign_languages.module';
+import { UsersJobFieldsModule } from './modules/users_job_fields/users_job_fields.module';
+import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
+import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
+import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
+import { WorkTypesModule } from './modules/work_types/work_types.module';
 
 @Module({
   imports: [
@@ -18,7 +36,6 @@ import { AppService } from './app.service';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({ autoLoadEntities: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,9 +48,27 @@ import { AppService } from './app.service';
         database: configService.get('DB_NAME'),
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
         synchronize: true,
+        autoLoadEntities: true,
       }),
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
+    UsersModule,
+    RolesModule,
+    JobPositionsModule,
+    SkillsModule,
+    UsersSkillsModule,
+    ForeignLanguagesModule,
+    UsersForeignLanguagesModule,
+    AchivementsModule,
+    WorkExperiencesModule,
+    WorkTypesModule,
+    PlacementsModule,
+    JobsModule,
+    JobCategoriesModule,
+    JobFieldsModule,
+    UsersJobFieldsModule,
+    JobsPlacementsModule,
+    UsersJobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
