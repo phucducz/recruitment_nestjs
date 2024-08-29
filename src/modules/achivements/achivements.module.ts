@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AchivementsService } from './achivements.service';
+import { AchivementsService } from '../../services/achivements.service';
 import { AchivementsController } from './achivements.controller';
 
 @Module({

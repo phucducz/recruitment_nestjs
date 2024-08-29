@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PlacementsService } from './placements.service';
-import { CreatePlacementDto } from './dto/create-placement.dto';
-import { UpdatePlacementDto } from './dto/update-placement.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
+import { UpdatePlacementDto } from 'src/dto/placements/update-placement.dto';
+import { PlacementsService } from '../../services/placements.service';
 
 @Controller('placements')
 export class PlacementsController {
@@ -23,7 +32,10 @@ export class PlacementsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlacementDto: UpdatePlacementDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePlacementDto: UpdatePlacementDto,
+  ) {
     return this.placementsService.update(+id, updatePlacementDto);
   }
 

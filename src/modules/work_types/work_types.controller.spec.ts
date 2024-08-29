@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkTypesController } from './work_types.controller';
-import { WorkTypesService } from './work_types.service';
+import { WorkTypesService } from '../../services/work_types.service';
 
 describe('WorkTypesController', () => {
   let controller: WorkTypesController;

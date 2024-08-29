@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JobFieldsService } from './job_fields.service';
+import { JobFieldsService } from '../../services/job_fields.service';
 
 describe('JobFieldsService', () => {
   let service: JobFieldsService;

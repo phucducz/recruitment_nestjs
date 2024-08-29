@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateJobCategoryDto } from './dto/create-job_category.dto';
-import { UpdateJobCategoryDto } from './dto/update-job_category.dto';
+
+import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
+import { UpdateJobCategoryDto } from 'src/dto/job_categories/update-job_category.dto';
 
 @Injectable()
 export class JobCategoriesService {

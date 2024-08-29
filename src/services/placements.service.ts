@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePlacementDto } from './dto/create-placement.dto';
-import { UpdatePlacementDto } from './dto/update-placement.dto';
+
+import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
+import { UpdatePlacementDto } from 'src/dto/placements/update-placement.dto';
 
 @Injectable()
 export class PlacementsService {

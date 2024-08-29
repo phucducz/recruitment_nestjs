@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { JobCategoriesService } from './job_categories.service';
-import { CreateJobCategoryDto } from './dto/create-job_category.dto';
-import { UpdateJobCategoryDto } from './dto/update-job_category.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
+import { UpdateJobCategoryDto } from 'src/dto/job_categories/update-job_category.dto';
+import { JobCategoriesService } from '../../services/job_categories.service';
 
 @Controller('job-categories')
 export class JobCategoriesController {
@@ -23,7 +32,10 @@ export class JobCategoriesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJobCategoryDto: UpdateJobCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateJobCategoryDto: UpdateJobCategoryDto,
+  ) {
     return this.jobCategoriesService.update(+id, updateJobCategoryDto);
   }
 

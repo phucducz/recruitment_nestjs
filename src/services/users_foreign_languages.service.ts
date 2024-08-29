@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUsersForeignLanguageDto } from './dto/create-users_foreign_language.dto';
-import { UpdateUsersForeignLanguageDto } from './dto/update-users_foreign_language.dto';
+
+import { CreateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/create-users_foreign_language.dto';
+import { UpdateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/update-users_foreign_language.dto';
 
 @Injectable()
 export class UsersForeignLanguagesService {

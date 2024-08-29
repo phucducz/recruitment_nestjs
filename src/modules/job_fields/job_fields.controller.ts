@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { JobFieldsService } from './job_fields.service';
-import { CreateJobFieldDto } from './dto/create-job_field.dto';
-import { UpdateJobFieldDto } from './dto/update-job_field.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
+import { UpdateJobFieldDto } from 'src/dto/job_fields/update-job_field.dto';
+import { JobFieldsService } from '../../services/job_fields.service';
 
 @Controller('job-fields')
 export class JobFieldsController {
@@ -23,7 +32,10 @@ export class JobFieldsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJobFieldDto: UpdateJobFieldDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateJobFieldDto: UpdateJobFieldDto,
+  ) {
     return this.jobFieldsService.update(+id, updateJobFieldDto);
   }
 

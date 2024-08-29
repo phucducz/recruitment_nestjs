@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersForeignLanguagesService } from './users_foreign_languages.service';
+import { UsersForeignLanguagesService } from '../../services/users_foreign_languages.service';
 import { UsersForeignLanguagesController } from './users_foreign_languages.controller';
 
 @Module({

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { WorkTypesService } from './work_types.service';
+import { WorkTypesService } from '../../services/work_types.service';
 import { WorkTypesController } from './work_types.controller';
 
 @Module({

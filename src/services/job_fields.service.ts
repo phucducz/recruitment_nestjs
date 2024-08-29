@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateJobFieldDto } from './dto/create-job_field.dto';
-import { UpdateJobFieldDto } from './dto/update-job_field.dto';
+
+import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
+import { UpdateJobFieldDto } from 'src/dto/job_fields/update-job_field.dto';
 
 @Injectable()
 export class JobFieldsService {

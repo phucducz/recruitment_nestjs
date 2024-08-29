@@ -11,23 +11,23 @@ const envModule = ConfigModule.forRoot({
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { RolesModule } from './roles/roles.module';
-import { JobPositionsModule } from './job_positions/job_positions.module';
-import { SkillsModule } from './skills/skills.module';
-import { UsersSkillsModule } from './users_skills/users_skills.module';
-import { ForeignLanguagesModule } from './foreign_languages/foreign_languages.module';
-import { UsersForeignLanguagesModule } from './users_foreign_languages/users_foreign_languages.module';
-import { AchivementsModule } from './achivements/achivements.module';
-import { WorkExperiencesModule } from './work_experiences/work_experiences.module';
-import { WorkTypesModule } from './work_types/work_types.module';
-import { PlacementsModule } from './placements/placements.module';
-import { JobsModule } from './jobs/jobs.module';
-import { JobCategoriesModule } from './job_categories/job_categories.module';
-import { JobFieldsModule } from './job_fields/job_fields.module';
-import { UsersJobFieldsModule } from './users_job_fields/users_job_fields.module';
-import { JobsPlacementsModule } from './jobs_placements/jobs_placements.module';
-import { UsersJobsModule } from './users_jobs/users_jobs.module';
+import { AchivementsModule } from './modules/achivements/achivements.module';
+import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
+import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
+import { JobFieldsModule } from './modules/job_fields/job_fields.module';
+import { JobPositionsModule } from './modules/job_positions/job_positions.module';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
+import { PlacementsModule } from './modules/placements/placements.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { SkillsModule } from './modules/skills/skills.module';
+import { UsersModule } from './modules/users/users.module';
+import { UsersForeignLanguagesModule } from './modules/users_foreign_languages/users_foreign_languages.module';
+import { UsersJobFieldsModule } from './modules/users_job_fields/users_job_fields.module';
+import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
+import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
+import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
+import { WorkTypesModule } from './modules/work_types/work_types.module';
 
 @Module({
   imports: [

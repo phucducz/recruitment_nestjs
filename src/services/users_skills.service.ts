@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUsersSkillDto } from './dto/create-users_skill.dto';
-import { UpdateUsersSkillDto } from './dto/update-users_skill.dto';
+
+import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
+import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
 
 @Injectable()
 export class UsersSkillsService {

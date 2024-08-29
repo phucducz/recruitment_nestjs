@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ForeignLanguagesService } from './foreign_languages.service';
-import { CreateForeignLanguageDto } from './dto/create-foreign_language.dto';
-import { UpdateForeignLanguageDto } from './dto/update-foreign_language.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateForeignLanguageDto } from 'src/dto/foreign_languages/create-foreign_language.dto';
+import { UpdateForeignLanguageDto } from 'src/dto/foreign_languages/update-foreign_language.dto';
+import { ForeignLanguagesService } from '../../services/foreign_languages.service';
 
 @Controller('foreign-languages')
 export class ForeignLanguagesController {
-  constructor(private readonly foreignLanguagesService: ForeignLanguagesService) {}
+  constructor(
+    private readonly foreignLanguagesService: ForeignLanguagesService,
+  ) {}
 
   @Post()
   create(@Body() createForeignLanguageDto: CreateForeignLanguageDto) {
@@ -23,7 +34,10 @@ export class ForeignLanguagesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateForeignLanguageDto: UpdateForeignLanguageDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateForeignLanguageDto: UpdateForeignLanguageDto,
+  ) {
     return this.foreignLanguagesService.update(+id, updateForeignLanguageDto);
   }
 

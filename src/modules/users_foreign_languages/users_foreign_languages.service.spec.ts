@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersForeignLanguagesService } from './users_foreign_languages.service';
+import { UsersForeignLanguagesService } from '../../services/users_foreign_languages.service';
 
 describe('UsersForeignLanguagesService', () => {
   let service: UsersForeignLanguagesService;

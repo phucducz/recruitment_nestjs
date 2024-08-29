@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersForeignLanguagesController } from './users_foreign_languages.controller';
-import { UsersForeignLanguagesService } from './users_foreign_languages.service';
+import { UsersForeignLanguagesService } from '../../services/users_foreign_languages.service';
 
 describe('UsersForeignLanguagesController', () => {
   let controller: UsersForeignLanguagesController;

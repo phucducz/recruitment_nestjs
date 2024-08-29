@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SkillsService } from './skills.service';
-import { CreateSkillDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateSkillDto } from 'src/dto/skills/create-skill.dto';
+import { UpdateSkillDto } from 'src/dto/skills/update-skill.dto';
+import { SkillsService } from '../../services/skills.service';
 
 @Controller('skills')
 export class SkillsController {

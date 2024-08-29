@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { WorkTypesService } from './work_types.service';
-import { CreateWorkTypeDto } from './dto/create-work_type.dto';
-import { UpdateWorkTypeDto } from './dto/update-work_type.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateWorkTypeDto } from 'src/dto/work_types/create-work_type.dto';
+import { UpdateWorkTypeDto } from 'src/dto/work_types/update-work_type.dto';
+import { WorkTypesService } from '../../services/work_types.service';
 
 @Controller('work-types')
 export class WorkTypesController {
@@ -23,7 +32,10 @@ export class WorkTypesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWorkTypeDto: UpdateWorkTypeDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateWorkTypeDto: UpdateWorkTypeDto,
+  ) {
     return this.workTypesService.update(+id, updateWorkTypeDto);
   }
 

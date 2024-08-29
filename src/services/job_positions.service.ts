@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateJobPositionDto } from './dto/create-job_position.dto';
-import { UpdateJobPositionDto } from './dto/update-job_position.dto';
+
+import { CreateJobPositionDto } from 'src/dto/job_positions/create-job_position.dto';
+import { UpdateJobPositionDto } from 'src/dto/job_positions/update-job_position.dto';
 
 @Injectable()
 export class JobPositionsService {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateJobsPlacementDto } from './dto/create-jobs_placement.dto';
-import { UpdateJobsPlacementDto } from './dto/update-jobs_placement.dto';
+
+import { CreateJobsPlacementDto } from 'src/dto/jobs_placement/create-jobs_placement.dto';
+import { UpdateJobsPlacementDto } from 'src/dto/jobs_placement/update-jobs_placement.dto';
 
 @Injectable()
 export class JobsPlacementsService {

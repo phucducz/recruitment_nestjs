@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateWorkExperienceDto } from './dto/create-work_experience.dto';
-import { UpdateWorkExperienceDto } from './dto/update-work_experience.dto';
+
+import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
+import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 
 @Injectable()
 export class WorkExperiencesService {
