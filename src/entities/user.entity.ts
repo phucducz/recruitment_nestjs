@@ -34,7 +34,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   password: string;
 
-  @Column({ type: 'varchar', length: 45 })
+  @Column({ type: 'varchar', length: 45, nullable: true })
   avatar_url: string;
 
   @Column({ type: 'enum', enum: GENDER_ENUM })
@@ -46,7 +46,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   company_url: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: true, nullable: true })
   isActive: boolean;
 
   @ManyToOne(() => Role, (role) => role.users)

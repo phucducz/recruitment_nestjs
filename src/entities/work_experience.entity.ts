@@ -13,16 +13,16 @@ export class WorkExperience extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   position: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: false })
   is_working: boolean;
 
   @Column({ type: 'timestamp without time zone' })
   start_date: Timestamp;
 
-  @Column({ type: 'timestamp without time zone' })
+  @Column({ type: 'timestamp without time zone', nullable: true })
   end_date: Timestamp;
 
-  @Column({ type: 'varchar', length: 1000 })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   description: string;
 
   @ManyToOne(() => User, (user) => user.workExperiences)

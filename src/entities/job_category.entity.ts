@@ -8,7 +8,7 @@ export class JobCategory extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   name: string;
 
-  @Column({ type: 'varchar', length: 1000 })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   description: string;
 
   @OneToMany(() => Job, (job) => job.jobCategory)

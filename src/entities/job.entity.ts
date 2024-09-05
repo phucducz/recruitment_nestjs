@@ -21,16 +21,16 @@ export class Job extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   start_price: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   end_price: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   start_exp_year_required: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   end_exp_year_required: number;
 
   @Column({ type: 'timestamp without time zone' })
@@ -40,12 +40,15 @@ export class Job extends BaseEntity {
   work_time: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
+  @JoinColumn({ name: 'job_categories_id' })
   jobCategory: JobCategory;
 
   @ManyToOne(() => JobPosition, (jobPosition) => jobPosition.jobs)
+  @JoinColumn({ name: 'job_positions_id' })
   jobPosition: JobPosition;
 
   @ManyToOne(() => JobField, (jobField) => jobField.jobs)
+  @JoinColumn({ name: 'job_fields_id' })
   jobField: JobField;
 
   @OneToMany(() => JobsPlacement, (jobsPlacement) => jobsPlacement.job)
@@ -59,5 +62,6 @@ export class Job extends BaseEntity {
   usersJobs: UsersJob[];
 
   @ManyToOne(() => WorkType, (workType) => workType.jobs)
+  @JoinColumn({ name: 'work_types_id' })
   workType: WorkType;
 }
