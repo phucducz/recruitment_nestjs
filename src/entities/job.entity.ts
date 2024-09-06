@@ -36,7 +36,7 @@ export class Job extends BaseEntity {
   @Column({ type: 'timestamp without time zone' })
   application_deadline: Timestamp;
 
-  @Column({ type: 'varchar', length: 45 })
+  @Column({ type: 'varchar', length: 1000 })
   work_time: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)

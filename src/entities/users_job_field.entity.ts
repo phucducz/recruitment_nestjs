@@ -6,14 +6,14 @@ import { User } from './user.entity';
 @Entity({ name: 'users_job_fields' })
 export class UsersJobField {
   @PrimaryColumn({ name: 'users_id', type: 'int' })
-  users_id: number;
+  users_id?: number;
 
   @ManyToOne(() => User, (user) => user.usersJobFields)
   @JoinColumn([{ name: 'users_id', referencedColumnName: 'id' }])
   user: User;
 
   @PrimaryColumn({ name: 'job_fields_id', type: 'int' })
-  job_fields_id: number;
+  job_fields_id?: number;
 
   @ManyToOne(() => JobField, (jobField) => jobField.usersJobFields)
   @JoinColumn([{ name: 'job_fields_id', referencedColumnName: 'id' }])

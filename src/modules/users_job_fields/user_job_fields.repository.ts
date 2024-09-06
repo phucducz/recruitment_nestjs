@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class UsersJobFieldsService {
-  
+export class UsersJobFieldRepository {
+  constructor() {}
 }
