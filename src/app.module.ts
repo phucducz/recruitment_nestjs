@@ -48,6 +48,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
+        ssl: { rejectUnauthorized: false },
         synchronize: true,
         autoLoadEntities: true,
       }),
