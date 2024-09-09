@@ -19,34 +19,33 @@ export enum GENDER_ENUM {
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
-  @Column({ type: 'varchar', length: 100 })
-  full_name: string;
+  @Column({ type: 'varchar', name: 'full_name', length: 100 })
+  fullName: string;
 
-  @Column({ type: 'varchar', length: 11 })
-  phone_number: string;
+  @Column({ type: 'varchar', name: 'phone_number', length: 11, nullable: true })
+  phoneNumber: string;
 
   @Column({ type: 'varchar', length: 45 })
   email: string;
 
-  @Column({ type: 'varchar', length: 45 })
-  user_name: string;
-
-  @Column({ type: 'varchar', length: 45 })
+  @Column({ type: 'varchar', length: 200, nullable: false })
   password: string;
 
-  @Column({ type: 'varchar', length: 45 })
-  avatar_url: string;
+  @Column({ type: 'varchar', name: 'avatar_url', length: 45, nullable: true })
+  avatarUrl: string;
 
-  @Column({ type: 'enum', enum: GENDER_ENUM })
-  gender: number;
+  @Column({
+    type: 'varchar',
+    name: 'company_name',
+    length: 100,
+    nullable: true,
+  })
+  companyName: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  company_name: string;
+  @Column({ type: 'varchar', name: 'company_url', length: 45, nullable: true })
+  companyUrl: string;
 
-  @Column({ type: 'varchar', length: 45 })
-  company_url: string;
-
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', name: 'is_active', default: true, nullable: true })
   isActive: boolean;
 
   @ManyToOne(() => Role, (role) => role.users)

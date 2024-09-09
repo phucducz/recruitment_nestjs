@@ -1,46 +1,35 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
-
-import { CreateJobPositionDto } from 'src/dto/job_positions/create-job_position.dto';
-import { UpdateJobPositionDto } from 'src/dto/job_positions/update-job_position.dto';
-import { JobPositionsService } from '../../services/job_positions.service';
+import { Controller, Get, Query } from '@nestjs/common';
+import { JobPositionsService } from 'src/services/job_positions.service';
 
 @Controller('job-positions')
 export class JobPositionsController {
   constructor(private readonly jobPositionsService: JobPositionsService) {}
 
-  @Post()
-  create(@Body() createJobPositionDto: CreateJobPositionDto) {
-    return this.jobPositionsService.create(createJobPositionDto);
+  // @Post()
+  // create(@Body() createJobPositionDto: CreateJobPositionDto) {
+  //   return this.jobPositionsService.create(createJobPositionDto);
+  // }
+
+  @Get('?')
+  findById(@Query('id') id: number) {
+    return this.jobPositionsService.findById(id);
   }
 
-  @Get()
-  findAll() {
-    return this.jobPositionsService.findAll();
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.jobPositionsService.findOne(+id);
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobPositionsService.findOne(+id);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateJobPositionDto: UpdateJobPositionDto,
+  // ) {
+  //   return this.jobPositionsService.update(+id, updateJobPositionDto);
+  // }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateJobPositionDto: UpdateJobPositionDto,
-  ) {
-    return this.jobPositionsService.update(+id, updateJobPositionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobPositionsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.jobPositionsService.remove(+id);
+  // }
 }

@@ -1,27 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { CreateJobPositionDto } from 'src/dto/job_positions/create-job_position.dto';
-import { UpdateJobPositionDto } from 'src/dto/job_positions/update-job_position.dto';
+import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.repository';
 
 @Injectable()
 export class JobPositionsService {
-  create(createJobPositionDto: CreateJobPositionDto) {
-    return 'This action adds a new jobPosition';
-  }
+  constructor(
+    @Inject(JobPositionsRepository)
+    private readonly jobPositionRepository: JobPositionsRepository,
+  ) {}
 
-  findAll() {
-    return `This action returns all jobPositions`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} jobPosition`;
-  }
-
-  update(id: number, updateJobPositionDto: UpdateJobPositionDto) {
-    return `This action updates a #${id} jobPosition`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} jobPosition`;
+  async findById(id: number) {
+    return await this.jobPositionRepository.findById(id);
   }
 }

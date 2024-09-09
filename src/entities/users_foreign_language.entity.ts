@@ -1,10 +1,13 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_foreign_languages' })
 export class UsersForeignLanguage {
+  @Column({ type: 'int' })
+  level: number;
+
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   users_id: number;
 
