@@ -51,6 +51,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
         ssl: { rejectUnauthorized: false },
         synchronize: true,
         autoLoadEntities: true,
+        connectTimeoutMS: 30000,
       }),
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
