@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    await this.userService.create({
+    return await this.userService.create({
       ...registerDto,
       password: await this.hashPassword(registerDto.password),
     });

@@ -21,6 +21,6 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto) {
-    await this.userRepository.save(registerDto);
+    return await this.userRepository.save(registerDto);
   }
 }

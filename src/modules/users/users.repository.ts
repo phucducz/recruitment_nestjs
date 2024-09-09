@@ -4,15 +4,16 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
 import { RolesService } from 'src/services/roles.service';
+import { UsersConverter } from './users.converter';
 
 @Injectable()
 export class UsersRepository {
@@ -29,6 +30,7 @@ export class UsersRepository {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(UsersJobField)
     private readonly usersJobFieldRepository: Repository<UsersJobField>,
+    private readonly usersConverter: UsersConverter,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -46,24 +48,27 @@ export class UsersRepository {
   async save(registerDto: RegisterDto) {
     try {
       const { type, email, fullName, password } = registerDto;
+      let newUserRecord = null;
 
-      if (type === 'user') {
-        this.logger.log(`${this.save.name} register user account`);
+      if (type === 'admin') {
+        this.logger.log(`${this.save.name} register admin account`);
 
-        this.userRepository.save({
+        newUserRecord = await this.userRepository.save({
           createAt: new Date().toString(),
           fullName: fullName,
           password: password,
           email: email,
+          phoneNumber: registerDto.phoneNumber,
+          role: await this.roleService.findByTitle(type),
         });
       } else if (type === 'employer') {
         this.logger.log(`${this.save.name} register employer account`);
 
         const { companyName, companyUrl, phoneNumber } = registerDto;
 
-        await this.dataSource.manager.transaction(
+        return await this.dataSource.manager.transaction(
           async (transactionalEntityManager) => {
-            const newUserRecord = await transactionalEntityManager.save(User, {
+            newUserRecord = await transactionalEntityManager.save(User, {
               id: undefined,
               companyName: companyName,
               companyUrl: companyUrl,
@@ -76,7 +81,7 @@ export class UsersRepository {
               jobPosition: await this.jobPositionService.findById(
                 registerDto.jobPositionsId,
               ),
-              role: await this.roleService.findByTitle('employer'),
+              role: await this.roleService.findByTitle(type),
             });
 
             const jobFields = await this.jobFieldService.findByIds(
@@ -96,11 +101,23 @@ export class UsersRepository {
             );
           },
         );
+      } else {
+        this.logger.log(`${this.save.name} register user account`);
+
+        newUserRecord = await this.userRepository.save({
+          createAt: new Date().toString(),
+          fullName: fullName,
+          password: password,
+          email: email,
+          role: await this.roleService.findByTitle(type),
+        });
       }
+
+      return this.usersConverter.entityToBasicInfo(newUserRecord);
     } catch (error: any) {
       this.logger.log(error);
       throw new InternalServerErrorException(
-        'Failed to execute stored procedure "register_user"',
+        `Failed to register "register_${registerDto.type}"`,
       );
     }
   }

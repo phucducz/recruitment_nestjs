@@ -9,6 +9,7 @@ import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersJobFieldsModule } from '../users_job_fields/users_job_fields.module';
 import { UsersController } from './users.controller';
+import { UsersConverter } from './users.converter';
 import { UsersRepository } from './users.repository';
 
 @Module({
@@ -20,7 +21,7 @@ import { UsersRepository } from './users.repository';
     UsersJobFieldsModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository],
+  providers: [UsersService, UsersRepository, UsersConverter],
   exports: [UsersService],
 })
 export class UsersModule {}
