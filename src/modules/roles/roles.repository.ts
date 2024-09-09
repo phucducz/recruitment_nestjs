@@ -11,19 +11,18 @@ export class RolesRepository {
   ) {}
 
   async findById(id: number) {
-    const queryBuilder = this.rolesRepository
-      .createQueryBuilder('r')
-      .select('r')
-      .where(`r.id = ${id}`);
-    return (await queryBuilder.getRawOne()) as Role;
+    return await this.rolesRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
   }
 
   async findByTitle(title: string) {
-    const queryBuilder = this.rolesRepository
-      .createQueryBuilder('r')
-      .select('r')
-      .where('r.title = :title', { title });
-
-    return (await queryBuilder.getRawOne()) as Role;
+    return await this.rolesRepository.findOne({
+      where: {
+        title: title,
+      },
+    });
   }
 }

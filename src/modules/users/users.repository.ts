@@ -9,6 +9,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
+import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
 import { RolesService } from 'src/services/roles.service';
@@ -26,85 +27,75 @@ export class UsersRepository {
     @Inject(JobFieldsService)
     private readonly jobFieldService: JobFieldsService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(UsersJobField)
+    private readonly usersJobFieldRepository: Repository<UsersJobField>,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    const [result] = await this.dataSource.query(
-      'SELECT * FROM get_user_by_email($1)',
-      [email],
-    );
-
-    return result;
+    return this.userRepository.findOne({ where: { email: email } });
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
-    return await this.dataSource.query('SELECT * FROM get_user_list()');
+    return this.userRepository.find();
   }
 
   async isExist(email: string): Promise<boolean> {
-    const [result] = await this.dataSource.query(
-      'SELECT * FROM check_user_exist_by_email($1)',
-      [email],
-    );
-
-    if (!result?.check_user_exist_by_email) return false;
-    return true;
+    return (await this.userRepository.countBy({ email })) > 0;
   }
 
   async save(registerDto: RegisterDto) {
     try {
       const { type, email, fullName, password } = registerDto;
 
-      this.logger.log(registerDto);
-
       if (type === 'user') {
         this.logger.log(`${this.save.name} register user account`);
 
-        const userEntity = new User();
-        userEntity.createAt = new Date().toString();
-        userEntity.fullName = fullName;
-        userEntity.password = password;
-        userEntity.email = email;
-
-        this.userRepository.save(userEntity);
+        this.userRepository.save({
+          createAt: new Date().toString(),
+          fullName: fullName,
+          password: password,
+          email: email,
+        });
       } else if (type === 'employer') {
         this.logger.log(`${this.save.name} register employer account`);
 
         const { companyName, companyUrl, phoneNumber } = registerDto;
 
-        const userEntity = new User();
-        userEntity.id = undefined;
-        userEntity.companyName = companyName;
-        userEntity.companyUrl = companyUrl;
-        userEntity.email = email;
-        userEntity.fullName = fullName;
-        userEntity.isActive = true;
-        userEntity.createAt = null;
-        userEntity.createAt = new Date().toString();
-        userEntity.password = password;
-        userEntity.phoneNumber = phoneNumber;
+        await this.dataSource.manager.transaction(
+          async (transactionalEntityManager) => {
+            const newUserRecord = await transactionalEntityManager.save(User, {
+              id: undefined,
+              companyName: companyName,
+              companyUrl: companyUrl,
+              email: email,
+              fullName: fullName,
+              isActive: true,
+              createAt: new Date().toString(),
+              password: password,
+              phoneNumber: phoneNumber,
+              jobPosition: await this.jobPositionService.findById(
+                registerDto.jobPositionsId,
+              ),
+              role: await this.roleService.findByTitle('employer'),
+            });
 
-        // userEntity.jobPosition = await this.jobPositionService.findById(
-        //   registerDto.jobPositionsId,
-        // );
+            const jobFields = await this.jobFieldService.findByIds(
+              registerDto.jobFieldsIds,
+            );
 
-        // userEntity.role = await this.roleService.findByTitle('employer');
-
-        // const jobFields = await this.jobFieldService.findByIds(
-        //   registerDto.jobFieldsIds,
-        // );
-        // userEntity.usersJobFields = jobFields.map((jobField) => {
-        //   let userJobField = new UsersJobField();
-
-        //   userJobField.jobField = jobField;
-        //   userJobField.user = userEntity;
-
-        //   return userJobField;
-        // });
-
-        console.log('User Entity:', userEntity);
-
-        await this.userRepository.save(userEntity);
+            await transactionalEntityManager.save(
+              UsersJobField,
+              jobFields.map((jobField) => {
+                return this.usersJobFieldRepository.create({
+                  job_fields_id: jobField.id,
+                  jobField: jobField,
+                  user: newUserRecord,
+                  users_id: newUserRecord.id,
+                });
+              }),
+            );
+          },
+        );
       }
     } catch (error: any) {
       this.logger.log(error);

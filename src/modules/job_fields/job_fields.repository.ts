@@ -12,11 +12,7 @@ export class JobFieldsRepository {
   ) {}
 
   async findById(id: number) {
-    const queryBuilder = this.jobFieldRepository
-      .createQueryBuilder('jf')
-      .select('jf')
-      .where('jf.id = :id', { id });
-    return (await queryBuilder.getRawOne()) as JobField;
+    return await this.jobFieldRepository.findOne({ where: { id: id } });
   }
 
   async findByIds(ids: number[]) {
