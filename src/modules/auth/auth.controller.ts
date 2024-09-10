@@ -39,12 +39,12 @@ export class AuthController {
 
     const result = await this.authService.register(registerDto);
 
-    if (this.userService.isExist(registerDto.email))
+    if (result.id)
       return {
         message: 'Đăng ký tài khoản thành công!',
         statusCode: 200,
-        ...result,
       };
+
     return {
       message: 'Đăng ký tài khoản thất bại!',
       statusCode: 401,

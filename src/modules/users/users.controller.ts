@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 
 import { UsersService } from '../../services/users.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -21,6 +21,12 @@ export class UsersController {
   @Get('/all')
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/me?')
+  findMe(@Query('email') email: string) {
+    return this.usersService.findByEmail(email);
   }
 
   // @Patch(':id')
