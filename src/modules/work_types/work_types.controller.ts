@@ -52,7 +52,9 @@ export class WorkTypesController {
       });
 
       if (result.length > 0)
-        return res.status(200).json({ message: 'Thêm thành công!', ...result });
+        return res
+          .status(200)
+          .json({ message: 'Thêm thành công!', record: result });
 
       return res.status(401).json({ message: 'Thêm mới không thành công!' });
     } catch (error) {
