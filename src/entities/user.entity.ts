@@ -28,7 +28,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   email: string;
 
-  @Column({ type: 'varchar', length: 200, nullable: false })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   password: string;
 
   @Column({ type: 'varchar', name: 'avatar_url', length: 45, nullable: true })
@@ -54,7 +54,7 @@ export class User extends BaseEntity {
 
   @ManyToOne(() => JobPosition, (jobPosition) => jobPosition.users)
   @JoinColumn({ name: 'job_positions_id' })
-  jobPosition: JobPosition;
+  jobPosition?: JobPosition;
 
   @OneToMany(() => UsersSkill, (usersSkills) => usersSkills.user)
   userSkills: UsersSkill[];
