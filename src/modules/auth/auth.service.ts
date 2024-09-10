@@ -29,15 +29,38 @@ export class AuthService {
     return await this.jwtService.decode(accessToken);
   }
 
+  async generateToken(id: number, email: string, fullName: string) {
+    return await this.jwtService.signAsync({ id, email, fullName });
+  }
+
+  async validateUser(payload: any) {
+    return {
+      userId: payload.id,
+      fullName: payload.fullName,
+      email: payload.email,
+    };
+  }
+
   async signIn(
     signInDto: SignInDto,
-  ): Promise<(any & { accessToken: string }) | null> {
+  ): Promise<(any & { accessToken: string | null }) | null> {
     this.logger.log(this.signIn.name);
     const { type } = signInDto;
 
     try {
       const currentUser = await this.userService.findByEmail(signInDto.email);
-      const userInfo = this.userConverter.entityToBasicInfo(currentUser);
+      const accessToken = currentUser
+        ? await this.generateToken(
+            currentUser.id,
+            currentUser.email,
+            currentUser.fullName,
+          )
+        : null;
+
+      const userInfo = {
+        ...this.userConverter.entityToBasicInfo(currentUser),
+        accessToken,
+      };
 
       if (type === 'google') {
         if (!currentUser) {
@@ -48,9 +71,16 @@ export class AuthService {
             type: 'user',
           });
 
-          return this.userConverter.entityToBasicInfo(
-            await this.userService.findByEmail(result.email),
-          );
+          return {
+            ...this.userConverter.entityToBasicInfo(
+              await this.userService.findByEmail(result.email),
+            ),
+            accessToken: await this.generateToken(
+              result.id,
+              result.email,
+              result.fullName,
+            ),
+          };
         }
 
         return userInfo;
