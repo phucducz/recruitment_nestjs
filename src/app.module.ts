@@ -48,8 +48,13 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
+        ssl: {
+          rejectUnauthorized: false,
+          require: true, // Thêm dòng này nếu cần thiết
+        },
         synchronize: true,
         autoLoadEntities: true,
+        connectTimeoutMS: 30000,
       }),
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),

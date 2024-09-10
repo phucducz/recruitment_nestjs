@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RegisterDto } from 'src/dto/auth/register.dto';
+import { SignInDto } from 'src/dto/auth/sign-in.dto';
 
 import { User } from 'src/entities/user.entity';
 import { UsersRepository } from 'src/modules/users/users.repository';

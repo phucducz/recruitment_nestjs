@@ -34,7 +34,20 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email: email } });
+    return this.userRepository.findOne({
+      where: { email: email },
+      relations: [
+        'role',
+        'jobPosition',
+        'userSkills',
+        // 'userLanguages',
+        'achivements',
+        // 'workExperiences',
+        // 'usersJobFields',
+        // 'jobs',
+        // 'usersJobs',
+      ],
+    });
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
@@ -45,10 +58,10 @@ export class UsersRepository {
     return (await this.userRepository.countBy({ email })) > 0;
   }
 
-  async save(registerDto: RegisterDto) {
+  async save(registerDto: RegisterDto): Promise<User> {
     try {
       const { type, email, fullName, password } = registerDto;
-      let newUserRecord = null;
+      let newUserRecord: User | null = null;
 
       if (type === 'admin') {
         this.logger.log(`${this.save.name} register admin account`);
@@ -66,7 +79,7 @@ export class UsersRepository {
 
         const { companyName, companyUrl, phoneNumber } = registerDto;
 
-        return await this.dataSource.manager.transaction(
+        await this.dataSource.manager.transaction(
           async (transactionalEntityManager) => {
             newUserRecord = await transactionalEntityManager.save(User, {
               id: undefined,
@@ -113,7 +126,7 @@ export class UsersRepository {
         });
       }
 
-      return this.usersConverter.entityToBasicInfo(newUserRecord);
+      return newUserRecord;
     } catch (error: any) {
       this.logger.log(error);
       throw new InternalServerErrorException(
