@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
+import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
@@ -11,6 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports: [
     UsersModule,
+    RolesModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

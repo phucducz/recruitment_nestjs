@@ -13,7 +13,6 @@ import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
 import { RolesService } from 'src/services/roles.service';
-import { UsersConverter } from './users.converter';
 
 @Injectable()
 export class UsersRepository {
@@ -21,7 +20,6 @@ export class UsersRepository {
 
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(JobPositionsService)
     @Inject(JobPositionsService)
     private readonly jobPositionService: JobPositionsService,
     @Inject(RolesService) private readonly roleService: RolesService,
@@ -49,10 +47,15 @@ export class UsersRepository {
 
   async save(registerDto: RegisterDto): Promise<User> {
     try {
-      const { type, email, fullName, password } = registerDto;
+      const { roleId, email, fullName, password } = registerDto;
       let newUserRecord: User | null = null;
 
-      if (type === 'admin') {
+      const role = await this.roleService.findById(roleId);
+      if (!role) return null;
+
+      console.log(role);
+
+      if (role.title === 'admin') {
         this.logger.log(`${this.save.name} register admin account`);
 
         newUserRecord = await this.userRepository.save({
@@ -61,9 +64,9 @@ export class UsersRepository {
           password: password,
           email: email,
           phoneNumber: registerDto.phoneNumber,
-          role: await this.roleService.findByTitle(type),
+          role: role,
         });
-      } else if (type === 'employer') {
+      } else if (role.title === 'employer') {
         this.logger.log(`${this.save.name} register employer account`);
 
         const { companyName, companyUrl, phoneNumber } = registerDto;
@@ -83,7 +86,7 @@ export class UsersRepository {
               jobPosition: await this.jobPositionService.findById(
                 registerDto.jobPositionsId,
               ),
-              role: await this.roleService.findByTitle(type),
+              role,
             });
 
             const jobFields = await this.jobFieldService.findByIds(
@@ -111,16 +114,14 @@ export class UsersRepository {
           fullName: fullName,
           password: password,
           email: email,
-          role: await this.roleService.findByTitle(type),
+          role: role,
         });
       }
 
       return newUserRecord;
     } catch (error: any) {
       this.logger.log(error);
-      throw new InternalServerErrorException(
-        `Failed to register "register_${registerDto.type}"`,
-      );
+      throw new InternalServerErrorException('Failed to register account');
     }
   }
 }
