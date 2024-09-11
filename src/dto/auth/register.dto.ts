@@ -37,9 +37,13 @@ export class RegisterDto {
   @IsNotEmpty()
   email: string;
 
-  @IsString()
+  // @IsString()
+  // @IsNotEmpty()
+  // type: 'user' | 'employer' | 'admin';
+
+  @IsNumber()
   @IsNotEmpty()
-  type: 'user' | 'employer' | 'admin';
+  roleId: number;
 
   @IsString()
   @IsNotEmpty()
