@@ -1,46 +1,68 @@
 import {
   Body,
   Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
   Post,
+  Request,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
-import { UpdateJobCategoryDto } from 'src/dto/job_categories/update-job_category.dto';
 import { JobCategoriesService } from '../../services/job_categories.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('job-categories')
 export class JobCategoriesController {
   constructor(private readonly jobCategoriesService: JobCategoriesService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createJobCategoryDto: CreateJobCategoryDto) {
-    return this.jobCategoriesService.create(createJobCategoryDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.jobCategoriesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobCategoriesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateJobCategoryDto: UpdateJobCategoryDto,
+  async create(
+    @Body() createJobCategoryDto: CreateJobCategoryDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.jobCategoriesService.update(+id, updateJobCategoryDto);
+    try {
+      const result = await this.jobCategoriesService.create({
+        variable: createJobCategoryDto,
+        createBy: request.user.userId,
+      });
+
+      if (result)
+        return res.status(200).json({ message: 'Tạo thành công!', ...result });
+
+      return res
+        .status(401)
+        .json({ message: 'Tạo không thành công!', ...result });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobCategoriesService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Post('/many')
+  async createMany(
+    @Body() createManyJobCategoryDto: CreateJobCategoryDto[],
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.jobCategoriesService.createMany({
+        variables: createManyJobCategoryDto,
+        createBy: request.user.userId,
+      });
+
+      if (result.length > 0)
+        return res
+          .status(200)
+          .json({ message: 'Tạo thành công!', records: result });
+
+      return res
+        .status(401)
+        .json({ message: 'Tạo không thành công!', records: result });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
   }
 }

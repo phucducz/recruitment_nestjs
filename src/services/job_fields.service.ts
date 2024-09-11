@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
 
 import { JobFieldsRepository } from 'src/modules/job_fields/job_fields.repository';
 
@@ -14,5 +15,13 @@ export class JobFieldsService {
 
   async findByIds(ids: number[]) {
     return await this.jobFieldRepository.findByIds(ids);
+  }
+
+  async create(createJobField: ICreate<CreateJobFieldDto>) {
+    return this.jobFieldRepository.create(createJobField);
+  }
+
+  async createMany(createJobField: ICreateMany<CreateJobFieldDto>) {
+    return this.jobFieldRepository.createMany(createJobField);
   }
 }

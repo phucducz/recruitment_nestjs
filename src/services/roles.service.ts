@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
 
 @Injectable()
@@ -15,5 +16,13 @@ export class RolesService {
 
   async findByTitle(title: 'user' | 'employer' | 'admin') {
     return this.roleRepository.findByTitle(title);
+  }
+
+  async create(createRoleDto: ICreate<CreateRoleDto>) {
+    return await this.roleRepository.create(createRoleDto);
+  }
+
+  async createMany(createManyRoleDto: ICreateMany<CreateRoleDto>) {
+    return await this.roleRepository.createMany(createManyRoleDto);
   }
 }

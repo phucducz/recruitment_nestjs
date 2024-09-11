@@ -1,27 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
-import { UpdateJobCategoryDto } from 'src/dto/job_categories/update-job_category.dto';
+import { JobCategoriesRepository } from 'src/modules/job_categories/job_categories.repository';
 
 @Injectable()
 export class JobCategoriesService {
-  create(createJobCategoryDto: CreateJobCategoryDto) {
-    return 'This action adds a new jobCategory';
+  constructor(
+    @Inject(JobCategoriesRepository)
+    private readonly jobCategoryRepository: JobCategoriesRepository,
+  ) {}
+
+  async create(createJobCategory: ICreate<CreateJobCategoryDto>) {
+    return await this.jobCategoryRepository.create(createJobCategory);
   }
 
-  findAll() {
-    return `This action returns all jobCategories`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} jobCategory`;
-  }
-
-  update(id: number, updateJobCategoryDto: UpdateJobCategoryDto) {
-    return `This action updates a #${id} jobCategory`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} jobCategory`;
+  async createMany(createJobCategories: ICreateMany<CreateJobCategoryDto>) {
+    return await this.jobCategoryRepository.createMany(createJobCategories);
   }
 }

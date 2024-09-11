@@ -30,23 +30,12 @@ export class UsersRepository {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(UsersJobField)
     private readonly usersJobFieldRepository: Repository<UsersJobField>,
-    private readonly usersConverter: UsersConverter,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: email },
-      relations: [
-        'role',
-        'jobPosition',
-        'userSkills',
-        // 'userLanguages',
-        'achivements',
-        // 'workExperiences',
-        // 'usersJobFields',
-        // 'jobs',
-        // 'usersJobs',
-      ],
+      relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
     });
   }
 
