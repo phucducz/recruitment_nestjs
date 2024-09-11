@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
+import { RolesService } from 'src/services/roles.service';
 import { UsersService } from 'src/services/users.service';
 import { UsersConverter } from '../users/users.converter';
 
@@ -15,6 +16,7 @@ export class AuthService {
     @Inject(JwtService) private jwtService: JwtService,
     @Inject(UsersService) private readonly userService: UsersService,
     @Inject(UsersConverter) private readonly userConverter: UsersConverter,
+    @Inject(RolesService) private readonly roleService: RolesService,
   ) {}
 
   async comparePassword(password: string, storedPasswordHash: string) {
@@ -64,11 +66,15 @@ export class AuthService {
 
       if (type === 'google') {
         if (!currentUser) {
+          const role = await this.roleService.findByTitle('user');
+
+          if (!role) return null;
+
           const result = await this.register({
             email: signInDto.email,
             password: undefined,
             fullName: signInDto.fullName,
-            type: 'user',
+            roleId: role.id,
           });
 
           return {
