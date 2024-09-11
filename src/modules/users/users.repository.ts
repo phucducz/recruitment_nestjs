@@ -93,6 +93,8 @@ export class UsersRepository {
               registerDto.jobFieldsIds,
             );
 
+            console.log(jobFields);
+
             await transactionalEntityManager.save(
               UsersJobField,
               jobFields.map((jobField) => {

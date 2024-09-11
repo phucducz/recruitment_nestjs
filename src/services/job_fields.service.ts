@@ -9,6 +9,10 @@ export class JobFieldsService {
     @Inject() private readonly jobFieldRepository: JobFieldsRepository,
   ) {}
 
+  async findAll() {
+    return await this.jobFieldRepository.findAll();
+  }
+
   async findById(id: number) {
     return await this.jobFieldRepository.findById(id);
   }
