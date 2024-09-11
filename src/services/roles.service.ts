@@ -18,6 +18,10 @@ export class RolesService {
     return this.roleRepository.findByTitle(title);
   }
 
+  async findAll() {
+    return this.roleRepository.findAll();
+  }
+
   async create(createRoleDto: ICreate<CreateRoleDto>) {
     return await this.roleRepository.create(createRoleDto);
   }
