@@ -18,8 +18,6 @@ export class JobCategoriesRepository {
   ): Promise<JobCategory | null> {
     const { createBy, variable } = createJobCategory;
 
-    if (!createBy) return null;
-
     return (await this.jobCategoryRepository.save({
       name: variable.name,
       createAt: new Date().toString(),
@@ -30,8 +28,6 @@ export class JobCategoriesRepository {
 
   async createMany(createJobCategories: ICreateMany<CreateJobCategoryDto>) {
     const { createBy, variables } = createJobCategories;
-
-    if (!createBy) return [];
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) =>

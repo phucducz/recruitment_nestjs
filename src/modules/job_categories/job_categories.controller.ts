@@ -26,7 +26,7 @@ export class JobCategoriesController {
     try {
       const result = await this.jobCategoriesService.create({
         variable: createJobCategoryDto,
-        createBy: request?.user?.userId ?? undefined,
+        createBy: request.user.userId,
       });
 
       if (result)
@@ -50,7 +50,7 @@ export class JobCategoriesController {
     try {
       const result = await this.jobCategoriesService.createMany({
         variables: createManyJobCategoryDto,
-        createBy: request?.user?.userId ?? undefined,
+        createBy: request.user.userId,
       });
 
       if (result.length > 0)
