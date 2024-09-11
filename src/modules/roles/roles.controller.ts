@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Request,
   Res,
@@ -66,10 +67,10 @@ export class RolesController {
     }
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.rolesService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.rolesService.findAll();
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
