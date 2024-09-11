@@ -73,6 +73,11 @@ export class JobPositionsController {
     return this.jobPositionsService.findById(id);
   }
 
+  @Get('/all')
+  async findAll() {
+    return await this.jobPositionsService.findAll();
+  }
+
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.jobPositionsService.findOne(+id);
