@@ -68,7 +68,7 @@ export class JobFieldsController {
   //   return this.jobFieldsService.create(createJobFieldDto);
   // }
 
-  @Get()
+  @Get('/all')
   findAll() {
     return this.jobFieldService.findAll();
   }

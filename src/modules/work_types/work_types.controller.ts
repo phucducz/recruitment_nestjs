@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Request,
   Res,
@@ -62,10 +63,10 @@ export class WorkTypesController {
     }
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.workTypesService.findAll();
-  // }
+  @Get('/all')
+  findAll() {
+    return this.workTypesService.findAll();
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {
