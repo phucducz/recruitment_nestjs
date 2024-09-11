@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 
 import { UsersService } from '../../services/users.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -17,13 +17,13 @@ export class UsersController {
   //   return this.usersService.findByEmail(email);
   // }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/all')
   findAll() {
     return this.usersService.findAll();
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/me?')
   findMe(@Query('email') email: string) {
     return this.usersService.findByEmail(email);
