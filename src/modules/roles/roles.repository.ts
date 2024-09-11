@@ -28,6 +28,10 @@ export class RolesRepository {
     });
   }
 
+  async findAll() {
+    return await this.rolesRepository.find();
+  }
+
   async create(createRole: ICreate<CreateRoleDto>) {
     const { createBy, variable } = createRole;
 
