@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -17,9 +18,16 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class JobCategoriesController {
   constructor(private readonly jobCategoriesService: JobCategoriesService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('/all')
   async findAll() {
     return await this.jobCategoriesService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('?')
+  async findById(@Query('id') id: number) {
+    return await this.jobCategoriesService.findById(id);
   }
 
   @UseGuards(JwtAuthGuard)

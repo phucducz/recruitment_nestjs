@@ -21,23 +21,32 @@ export class Job extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'float', nullable: true })
-  start_price: number;
+  @Column({ type: 'float', nullable: true, name: 'start_price' })
+  startPrice: number;
 
-  @Column({ type: 'float', nullable: true })
-  end_price: number;
+  @Column({ type: 'float', nullable: true, name: 'end_price' })
+  endPrice: number;
 
-  @Column({ type: 'int', nullable: true })
-  start_exp_year_required: number;
+  @Column({ type: 'int', nullable: true, name: 'start_exp_year_required' })
+  startExpYearRequired: number;
 
-  @Column({ type: 'int', nullable: true })
-  end_exp_year_required: number;
+  @Column({ type: 'int', nullable: true, name: 'end_exp_year_required' })
+  endExpYearRequired: number;
 
-  @Column({ type: 'timestamp without time zone' })
-  application_deadline: Timestamp;
+  @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
+  applicationDeadline: Timestamp;
 
-  @Column({ type: 'varchar', length: 1000 })
-  work_time: string;
+  @Column({ type: 'varchar', length: 1000, name: 'work_time' })
+  workTime: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ type: 'text', nullable: true })
+  required: string;
+
+  @Column({ type: 'text', name: 'why_love_working_here', nullable: true })
+  whyLove: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
   @JoinColumn({ name: 'job_categories_id' })
