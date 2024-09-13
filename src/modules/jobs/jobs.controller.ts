@@ -13,7 +13,7 @@ export class JobsController {
   // }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('/all')
   async findAll() {
     return await this.jobsService.findAll();
   }
