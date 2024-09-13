@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Job } from './job.entity';
 import { Placement } from './placement.entity';
@@ -18,4 +18,10 @@ export class JobsPlacement {
   @ManyToOne(() => Placement, (placement) => placement.jobsPlacements)
   @JoinColumn([{ name: 'placements_id', referencedColumnName: 'id' }])
   placement: Placement;
+
+  @Column({ type: 'varchar', length: 500 })
+  detailAddress: string;
+
+  @Column({ type: 'int' })
+  amount: number;
 }

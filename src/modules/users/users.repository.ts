@@ -53,8 +53,6 @@ export class UsersRepository {
       const role = await this.roleService.findById(roleId);
       if (!role) return null;
 
-      console.log(role);
-
       if (role.title === 'admin') {
         this.logger.log(`${this.save.name} register admin account`);
 
