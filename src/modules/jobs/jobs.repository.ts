@@ -53,13 +53,23 @@ export class JobsRepository {
     return await this.jobRepository.find({
       where: { id: id },
       relations: [
-        'users',
-        'placements',
-        'jobs_placements',
-        'work_types',
-        'job_categories',
-        'job_fields',
+        'user',
+        'jobPosition',
+        'jobField',
+        'jobsPlacements',
+        'workType',
+        'jobCategory',
       ],
+      select: {
+        user: {
+          ...this.userKeys.reduce((acc, key) => {
+            if (key === 'password') acc[key] = false;
+            else acc[key] = true;
+
+            return acc;
+          }, {}),
+        },
+      },
     });
   }
 }
