@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Request,
   Res,
@@ -67,10 +68,10 @@ export class JobFieldsController {
   //   return this.jobFieldsService.create(createJobFieldDto);
   // }
 
-  // @Get()
-  // findAll() {
-  //   return this.jobFieldsService.findAll();
-  // }
+  @Get('/all')
+  findAll() {
+    return this.jobFieldService.findAll();
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

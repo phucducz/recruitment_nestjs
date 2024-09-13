@@ -10,15 +10,19 @@ export class JobPositionsService {
     private readonly jobPositionRepository: JobPositionsRepository,
   ) {}
 
+  async findAll() {
+    return await this.jobPositionRepository.findAll();
+  }
+
   async findById(id: number) {
     return await this.jobPositionRepository.findById(id);
   }
 
-  async create(createJobPosition: ICreate<CreateJobPositionDto>){
+  async create(createJobPosition: ICreate<CreateJobPositionDto>) {
     return await this.jobPositionRepository.create(createJobPosition);
   }
 
-  async createMany(createJobPositions: ICreateMany<CreateJobPositionDto>){
+  async createMany(createJobPositions: ICreateMany<CreateJobPositionDto>) {
     return await this.jobPositionRepository.createMany(createJobPositions);
   }
 }

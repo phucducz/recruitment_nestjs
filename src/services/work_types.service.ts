@@ -19,8 +19,8 @@ export class WorkTypesService {
     return await this.workTypeRepository.createMany(createManyWorkTypes);
   }
 
-  findAll() {
-    return `This action returns all workTypes`;
+  async findAll() {
+    return await this.workTypeRepository.findAll();
   }
 
   findOne(id: number) {

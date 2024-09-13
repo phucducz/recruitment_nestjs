@@ -13,6 +13,10 @@ export class JobPositionsRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
+  async findAll() {
+    return await this.jobPositionRepository.find();
+  }
+
   async findById(id: number): Promise<JobPosition> {
     return await this.jobPositionRepository.findOne({
       where: {
