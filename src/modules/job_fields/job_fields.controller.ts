@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -67,10 +69,17 @@ export class JobFieldsController {
   //   return this.jobFieldsService.create(createJobFieldDto);
   // }
 
-  // @Get()
-  // findAll() {
-  //   return this.jobFieldsService.findAll();
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
+  findAll() {
+    return this.jobFieldService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('?')
+  findById(@Query('id') id: number) {
+    return this.jobFieldService.findById(id);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

@@ -68,6 +68,13 @@ export class JobPositionsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
+  async findAll() {
+    return await this.jobPositionsService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('?')
   findById(@Query('id') id: number) {
     return this.jobPositionsService.findById(id);

@@ -13,6 +13,14 @@ export class JobCategoriesRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
+  async findAll() {
+    return await this.jobCategoryRepository.find();
+  }
+
+  async findById(id: number) {
+    return await this.jobCategoryRepository.findOne({ where: { id: id } });
+  }
+
   async create(
     createJobCategory: ICreate<CreateJobCategoryDto>,
   ): Promise<JobCategory | null> {

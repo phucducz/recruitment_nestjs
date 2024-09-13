@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -62,10 +64,17 @@ export class WorkTypesController {
     }
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.workTypesService.findAll();
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
+  findAll() {
+    return this.workTypesService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('?')
+  findById(@Query('id') id: number) {
+    return this.workTypesService.findById(id);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

@@ -13,6 +13,14 @@ export class WorkTypesRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
+  async findAll() {
+    return await this.workTypeRepository.find();
+  }
+
+  async findById(id: number) {
+    return await this.workTypeRepository.findOne({ where: { id: id } });
+  }
+
   async create(createWorkType: ICreate<CreateWorkTypeDto>): Promise<WorkType> {
     const { createBy, variable } = createWorkType;
 

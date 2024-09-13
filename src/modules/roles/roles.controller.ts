@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -67,15 +68,17 @@ export class RolesController {
     }
   }
 
-  @Get()
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
   findAll() {
     return this.rolesService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.rolesService.findOne(+id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get('?')
+  findOne(@Query('id') id: number) {
+    return this.rolesService.findById(id);
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {

@@ -10,6 +10,14 @@ export class JobCategoriesService {
     private readonly jobCategoryRepository: JobCategoriesRepository,
   ) {}
 
+  async findAll() {
+    return await this.jobCategoryRepository.findAll();
+  }
+
+  async findById(id: number) {
+    return await this.jobCategoryRepository.findById(id);
+  }
+
   async create(createJobCategory: ICreate<CreateJobCategoryDto>) {
     return await this.jobCategoryRepository.create(createJobCategory);
   }

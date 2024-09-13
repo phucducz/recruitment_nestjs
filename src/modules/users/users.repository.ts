@@ -53,8 +53,6 @@ export class UsersRepository {
       const role = await this.roleService.findById(roleId);
       if (!role) return null;
 
-      console.log(role);
-
       if (role.title === 'admin') {
         this.logger.log(`${this.save.name} register admin account`);
 
@@ -92,6 +90,8 @@ export class UsersRepository {
             const jobFields = await this.jobFieldService.findByIds(
               registerDto.jobFieldsIds,
             );
+
+            console.log(jobFields);
 
             await transactionalEntityManager.save(
               UsersJobField,
