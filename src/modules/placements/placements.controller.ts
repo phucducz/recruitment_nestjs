@@ -1,46 +1,76 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  Param,
-  Patch,
   Post,
+  Query,
+  Request,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
-import { UpdatePlacementDto } from 'src/dto/placements/update-placement.dto';
 import { PlacementsService } from '../../services/placements.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('placements')
 export class PlacementsController {
   constructor(private readonly placementsService: PlacementsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createPlacementDto: CreatePlacementDto) {
-    return this.placementsService.create(createPlacementDto);
+  async createMany(
+    @Body() createManyPlacementDto: CreatePlacementDto[],
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.placementsService.createMany({
+        createBy: request.user.userId,
+        variables: createManyPlacementDto,
+      });
+
+      if (result.length > 0)
+        return res
+          .status(200)
+          .json({ message: 'Tạo thành công!', records: result });
+
+      return res
+        .status(401)
+        .json({ message: 'Tạo không thành công!', records: [] });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
   }
 
-  @Get()
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
   findAll() {
     return this.placementsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.placementsService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
+  findById(@Query('id') id: number) {
+    return this.placementsService.findById(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePlacementDto: UpdatePlacementDto,
-  ) {
-    return this.placementsService.update(+id, updatePlacementDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.placementsService.findOne(+id);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.placementsService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updatePlacementDto: UpdatePlacementDto,
+  // ) {
+  //   return this.placementsService.update(+id, updatePlacementDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.placementsService.remove(+id);
+  // }
 }

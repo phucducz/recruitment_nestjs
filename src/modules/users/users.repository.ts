@@ -37,6 +37,13 @@ export class UsersRepository {
     });
   }
 
+  async findById(id: number): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { id: id },
+      relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
+    });
+  }
+
   async findAll(): Promise<Omit<User, 'password'>[]> {
     return this.userRepository.find();
   }
@@ -90,8 +97,6 @@ export class UsersRepository {
             const jobFields = await this.jobFieldService.findByIds(
               registerDto.jobFieldsIds,
             );
-
-            console.log(jobFields);
 
             await transactionalEntityManager.save(
               UsersJobField,
