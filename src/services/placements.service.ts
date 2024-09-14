@@ -15,6 +15,10 @@ export class PlacementsService {
     return 'This action adds a new placement';
   }
 
+  async createMany(createManyPlacement: ICreateMany<CreatePlacementDto>) {
+    return await this.placementsRepository.createMany(createManyPlacement);
+  }
+
   async findById(id: number) {
     return await this.placementsRepository.findById(id);
   }

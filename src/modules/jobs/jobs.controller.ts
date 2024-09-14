@@ -34,11 +34,14 @@ export class JobsController {
       if (result)
         return res
           .status(200)
-          .json({ message: 'Tạo tin tuyển dụng thành công!', ...result });
+          .json({ message: 'Tạo tin tuyển dụng thành công!', record: result });
 
       return res
         .status(401)
-        .json({ message: 'Tạo tin tuyển dụng không thành công!', ...result });
+        .json({
+          message: 'Tạo tin tuyển dụng không thành công!',
+          record: null,
+        });
     } catch (error) {
       return res.status(500).json({ message: error });
     }

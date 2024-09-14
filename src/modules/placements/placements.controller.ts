@@ -1,21 +1,56 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response } from 'express';
 
+import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
 import { PlacementsService } from '../../services/placements.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('placements')
 export class PlacementsController {
   constructor(private readonly placementsService: PlacementsService) {}
 
-  // @Post()
-  // create(@Body() createPlacementDto: CreatePlacementDto) {
-  //   return this.placementsService.create(createPlacementDto);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async createMany(
+    @Body() createManyPlacementDto: CreatePlacementDto[],
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.placementsService.createMany({
+        createBy: request.user.userId,
+        variables: createManyPlacementDto,
+      });
 
+      if (result.length > 0)
+        return res
+          .status(200)
+          .json({ message: 'Tạo thành công!', records: result });
+
+      return res
+        .status(401)
+        .json({ message: 'Tạo không thành công!', records: [] });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/all')
   findAll() {
     return this.placementsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('/all')
   findById(@Query('id') id: number) {
     return this.placementsService.findById(id);
