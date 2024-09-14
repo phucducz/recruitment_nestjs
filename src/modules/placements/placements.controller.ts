@@ -1,46 +1,41 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 
-import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
-import { UpdatePlacementDto } from 'src/dto/placements/update-placement.dto';
 import { PlacementsService } from '../../services/placements.service';
 
 @Controller('placements')
 export class PlacementsController {
   constructor(private readonly placementsService: PlacementsService) {}
 
-  @Post()
-  create(@Body() createPlacementDto: CreatePlacementDto) {
-    return this.placementsService.create(createPlacementDto);
-  }
+  // @Post()
+  // create(@Body() createPlacementDto: CreatePlacementDto) {
+  //   return this.placementsService.create(createPlacementDto);
+  // }
 
-  @Get()
+  @Get('/all')
   findAll() {
     return this.placementsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.placementsService.findOne(+id);
+  @Get('/all')
+  findById(@Query('id') id: number) {
+    return this.placementsService.findById(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePlacementDto: UpdatePlacementDto,
-  ) {
-    return this.placementsService.update(+id, updatePlacementDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.placementsService.findOne(+id);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.placementsService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updatePlacementDto: UpdatePlacementDto,
+  // ) {
+  //   return this.placementsService.update(+id, updatePlacementDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.placementsService.remove(+id);
+  // }
 }

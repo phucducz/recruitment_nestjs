@@ -43,7 +43,7 @@ export class Job extends BaseEntity {
   description: string;
 
   @Column({ type: 'text', nullable: true })
-  required: string;
+  requirement: string;
 
   @Column({ type: 'text', name: 'why_love_working_here', nullable: true })
   whyLove: string;

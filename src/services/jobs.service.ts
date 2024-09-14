@@ -10,8 +10,8 @@ export class JobsService {
     @Inject(JobsRepository) private readonly jobRepository: JobsRepository,
   ) {}
 
-  create(createJobDto: CreateJobDto) {
-    return 'This action adds a new job';
+  async create(createJob: ICreate<CreateJobDto>) {
+    return this.jobRepository.create(createJob);
   }
 
   async findAll() {

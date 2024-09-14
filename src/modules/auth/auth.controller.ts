@@ -31,8 +31,6 @@ export class AuthController {
 
   @Post('/register')
   async register(@Body() registerDto: RegisterDto): Promise<APIResponse> {
-    console.log(registerDto);
-
     if (await this.userService.isExist(registerDto.email))
       return {
         message: 'Email đã được sử dụng!',
