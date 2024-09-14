@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 
+import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesService } from 'src/services/roles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -32,11 +32,11 @@ export class RolesController {
       });
 
       if (result.id)
-        return res.status(200).json({ message: 'Thêm thành công!', ...result });
+        return res.status(200).json({ message: 'Thêm thành công!', record: result });
 
       return res
         .status(401)
-        .json({ message: 'Thêm mới không thành công!', ...result });
+        .json({ message: 'Thêm mới không thành công!', record: null });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
@@ -62,7 +62,7 @@ export class RolesController {
 
       return res
         .status(401)
-        .json({ message: 'Thêm mới không thành công!', records: result });
+        .json({ message: 'Thêm mới không thành công!', records: [] });
     } catch (error) {
       return res.status(500).json({ message: error });
     }

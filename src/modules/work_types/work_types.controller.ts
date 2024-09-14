@@ -32,9 +32,13 @@ export class WorkTypesController {
       });
 
       if (result.id)
-        return res.status(200).json({ message: 'Thêm thành công!', ...result });
+        return res
+          .status(200)
+          .json({ message: 'Thêm thành công!', record: result });
 
-      return res.status(401).json({ message: 'Thêm mới không thành công!' });
+      return res
+        .status(401)
+        .json({ message: 'Thêm mới không thành công!', record: null });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
@@ -56,9 +60,9 @@ export class WorkTypesController {
       if (result.length > 0)
         return res
           .status(200)
-          .json({ message: 'Thêm thành công!', record: result });
+          .json({ message: 'Thêm thành công!', records: result });
 
-      return res.status(401).json({ message: 'Thêm mới không thành công!' });
+      return res.status(401).json({ message: 'Thêm mới không thành công!', records: [] });
     } catch (error) {
       return res.status(500).json({ message: error });
     }

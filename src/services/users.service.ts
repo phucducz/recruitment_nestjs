@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RegisterDto } from 'src/dto/auth/register.dto';
-import { SignInDto } from 'src/dto/auth/sign-in.dto';
 
 import { User } from 'src/entities/user.entity';
 import { UsersRepository } from 'src/modules/users/users.repository';
@@ -11,6 +10,10 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return await this.userRepository.findByEmail(email);
+  }
+
+  async findById(id: number): Promise<User | null> {
+    return await this.userRepository.findById(id);
   }
 
   async findAll() {
