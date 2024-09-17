@@ -18,6 +18,10 @@ export class RefreshTokensRepository {
     @Inject(UsersService) private readonly userService: UsersService,
   ) {}
 
+  async findById(id: number) {
+    return await this.refreshTokenRepository.findOneBy({ id: id });
+  }
+
   async findByRefreshToken(refreshToken: string) {
     return await this.refreshTokenRepository.findOneBy({
       refreshToken: refreshToken,
@@ -25,34 +29,34 @@ export class RefreshTokensRepository {
   }
 
   async create({
-    refreshToken,
     userId,
+    refreshToken,
+    hashedRefreshToken,
   }: {
     userId: number;
     refreshToken: string;
+    hashedRefreshToken: string;
   }): Promise<RefreshToken> {
-    return await this.refreshTokenRepository.save({
+    const result = await this.refreshTokenRepository.save({
       createAt: new Date().toString(),
       createBy: userId,
       expiresAt: dayjs().add(7, 'day').toDate().toString(),
-      refreshToken: refreshToken,
+      refreshToken: hashedRefreshToken,
       status: REFRESH_TOKEN_STATUS.VALID,
       user: await this.userService.findById(userId),
     });
+
+    return { ...result, refreshToken };
   }
 
   async update(logoutDto: LogOutDto) {
-    const { refreshToken, userId } = logoutDto;
-    const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
-      refreshToken: refreshToken,
-      user: await this.userService.findById(userId),
-    });
+    const { usersId, refreshTokensId } = logoutDto;
     const result = await this.refreshTokenRepository.update(
-      { id: refreshTokenEntity.id },
+      { id: refreshTokensId },
       {
         status: REFRESH_TOKEN_STATUS.INVALID,
         updateAt: new Date().toString(),
-        updateBy: userId,
+        updateBy: usersId,
       },
     );
 

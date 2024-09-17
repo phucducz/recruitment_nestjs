@@ -4,11 +4,11 @@ import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
 export enum REFRESH_TOKEN_STATUS {
-  INVALID = 'in valid',
+  INVALID = 'invalid',
   VALID = 'valid',
 }
 
-@Entity({ name: 'refresh_token' })
+@Entity({ name: 'refresh_tokens' })
 export class RefreshToken extends BaseEntity {
   @Column({ type: 'varchar', length: 500, name: 'refresh_token' })
   refreshToken: string;
@@ -20,6 +20,6 @@ export class RefreshToken extends BaseEntity {
   status: REFRESH_TOKEN_STATUS;
 
   @ManyToOne(() => User, (user) => user.refreshTokens)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'users_id' })
   user: User;
 }

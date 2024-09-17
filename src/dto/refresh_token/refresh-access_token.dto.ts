@@ -7,5 +7,9 @@ export class RefreshAccessTokenDto {
 
   @IsNumber()
   @IsNotEmpty()
-  userId: number;
+  usersId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  refreshTokensId: number;
 }
