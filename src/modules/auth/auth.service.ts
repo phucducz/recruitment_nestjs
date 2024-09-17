@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
+import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { RolesService } from 'src/services/roles.service';
@@ -124,5 +125,9 @@ export class AuthService {
       ...others,
       password: password ? await this.hashPassword(password) : null,
     });
+  }
+
+  async logout(logoutDto: LogOutDto) {
+    return await this.refreshTokenService.remove(logoutDto);
   }
 }
