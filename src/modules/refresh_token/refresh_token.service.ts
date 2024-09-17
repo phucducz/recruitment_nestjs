@@ -37,7 +37,6 @@ export class RefreshTokenService {
       { userId: createRefreshTokenDto.userId },
       { expiresIn: '7d' },
     );
-    const refreshTokenHashed = await this.hashRefreshToken(refreshToken);
 
     return await this.refreshTokenRepository.create({
       refreshToken: refreshToken,
@@ -59,12 +58,7 @@ export class RefreshTokenService {
     const result =
       await this.refreshTokenRepository.findByRefreshToken(refreshToken);
 
-    if (
-      !result ||
-      (result &&
-        !(await this.compareRefreshToken(refreshToken, result.refreshToken)))
-    )
-      throw new Error('Invalid refresh token');
+    if (!result) throw new Error('Invalid refresh token');
 
     const isExpired = dayjs(result.expiresAt).isValid()
       ? dayjs(result.expiresAt).isSame(dayjs(new Date())) ||

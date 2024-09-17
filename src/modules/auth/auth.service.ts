@@ -64,8 +64,6 @@ export class AuthService {
         userId: currentUser.id,
       });
 
-      console.log(refreshToken);
-
       const userInfo = {
         ...this.userConverter.entityToBasicInfo(currentUser),
         accessToken: currentUser
