@@ -31,28 +31,29 @@ export class RefreshTokensRepository {
   async create({
     userId,
     refreshToken,
-    hashedRefreshToken,
   }: {
     userId: number;
     refreshToken: string;
-    hashedRefreshToken: string;
   }): Promise<RefreshToken> {
-    const result = await this.refreshTokenRepository.save({
+    return await this.refreshTokenRepository.save({
       createAt: new Date().toString(),
       createBy: userId,
       expiresAt: dayjs().add(7, 'day').toDate().toString(),
-      refreshToken: hashedRefreshToken,
+      refreshToken: refreshToken,
       status: REFRESH_TOKEN_STATUS.VALID,
       user: await this.userService.findById(userId),
     });
-
-    return { ...result, refreshToken };
   }
 
   async update(logoutDto: LogOutDto) {
-    const { usersId, refreshTokensId } = logoutDto;
+    const { refreshToken, usersId } = logoutDto;
+    const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
+      refreshToken: refreshToken,
+      user: await this.userService.findById(usersId),
+    });
+
     const result = await this.refreshTokenRepository.update(
-      { id: refreshTokensId },
+      { id: refreshTokenEntity.id },
       {
         status: REFRESH_TOKEN_STATUS.INVALID,
         updateAt: new Date().toString(),

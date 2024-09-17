@@ -8,8 +8,4 @@ export class RefreshAccessTokenDto {
   @IsNumber()
   @IsNotEmpty()
   usersId: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  refreshTokensId: number;
 }

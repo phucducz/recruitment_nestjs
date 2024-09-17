@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
 
 import { JwtService } from '@nestjs/jwt';
@@ -22,50 +21,33 @@ export class RefreshTokenService {
     private readonly refreshTokenRepository: RefreshTokensRepository,
   ) {}
 
-  async hashRefreshToken(refreshToken: string) {
-    return await bcrypt.hash(refreshToken, 10);
-  }
-
-  async compareRefreshToken(
-    refreshToken: string,
-    hashedRefreshToken: string,
-  ): Promise<boolean> {
-    return await bcrypt.compare(refreshToken, hashedRefreshToken);
-  }
-
   async create(createRefreshTokenDto: CreateRefreshTokenDto) {
     const refreshToken = await this.jwtService.signAsync(
       { userId: createRefreshTokenDto.userId },
       { expiresIn: '7d' },
     );
-    const hashedRefreshToken = await this.hashRefreshToken(refreshToken);
 
     return await this.refreshTokenRepository.create({
       refreshToken: refreshToken,
-      hashedRefreshToken: hashedRefreshToken,
       userId: createRefreshTokenDto.userId,
     });
   }
 
   async refresh(refreshAccessTokenDto: RefreshAccessTokenDto) {
-    const { refreshToken, usersId, refreshTokensId } = refreshAccessTokenDto;
+    const { refreshToken, usersId } = refreshAccessTokenDto;
 
-    await this.verifyRefreshToken({ id: refreshTokensId, refreshToken });
+    await this.verifyRefreshToken(refreshToken);
 
     const { id, email, fullName } = await this.userService.findById(usersId);
 
     return this.authService.generateToken(id, email, fullName);
   }
 
-  async verifyRefreshToken(params: { id: number; refreshToken: string }) {
-    const { id, refreshToken } = params;
-
-    const result = await this.refreshTokenRepository.findById(id);
+  async verifyRefreshToken(refreshToken: string) {
+    const result =
+      await this.refreshTokenRepository.findByRefreshToken(refreshToken);
 
     if (!result) throw new Error('Invalid refresh token');
-
-    if (!(await this.compareRefreshToken(refreshToken, result.refreshToken)))
-      throw new Error('Invalid refresh token');
 
     const isExpired = dayjs(result.expiresAt).isValid()
       ? dayjs(result.expiresAt).isSame(dayjs(new Date())) ||

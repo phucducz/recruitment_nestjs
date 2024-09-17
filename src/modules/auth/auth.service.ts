@@ -60,10 +60,9 @@ export class AuthService {
 
     try {
       const currentUser = await this.userService.findByEmail(signInDto.email);
-      const { refreshToken, id: refreshTokensId } =
-        await this.refreshTokenService.create({
-          userId: currentUser.id,
-        });
+      const { refreshToken } = await this.refreshTokenService.create({
+        userId: currentUser.id,
+      });
 
       const userInfo = {
         ...this.userConverter.entityToBasicInfo(currentUser),
@@ -75,7 +74,6 @@ export class AuthService {
             )
           : null,
         refreshToken: refreshToken,
-        refreshTokensId: refreshTokensId,
       };
 
       if (type === 'google') {

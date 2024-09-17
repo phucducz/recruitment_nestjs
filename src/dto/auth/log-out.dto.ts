@@ -6,10 +6,6 @@ export class LogOutDto {
   usersId: number;
 
   @IsNotEmpty()
-  @IsNumber()
-  refreshTokensId: number;
-
-  @IsNotEmpty()
   @IsString()
   refreshToken: string;
 }
