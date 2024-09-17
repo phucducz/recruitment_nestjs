@@ -28,8 +28,8 @@ export class RolesRepository {
     });
   }
 
-  async findAll() {
-    return await this.rolesRepository.find();
+  async findAll(pagination: IPagination) {
+    return await this.rolesRepository.find(pagination);
   }
 
   async create(createRole: ICreate<CreateRoleDto>) {

@@ -13,8 +13,8 @@ export class JobCategoriesRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
-  async findAll() {
-    return await this.jobCategoryRepository.find();
+  async findAll(pagination: IPagination) {
+    return await this.jobCategoryRepository.find(pagination);
   }
 
   async findById(id: number) {

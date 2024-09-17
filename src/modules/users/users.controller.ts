@@ -1,7 +1,8 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Query, UseGuards } from '@nestjs/common';
 
 import { UsersService } from '../../services/users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('users')
 export class UsersController {
@@ -19,12 +20,12 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Body() pagination: PaginationDto) {
+    return this.usersService.findAll(pagination);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/me?')
+  @Get('?')
   findMe(@Query('email') email: string) {
     return this.usersService.findByEmail(email);
   }

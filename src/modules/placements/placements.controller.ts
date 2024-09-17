@@ -13,6 +13,7 @@ import { Response } from 'express';
 import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
 import { PlacementsService } from '../../services/placements.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('placements')
 export class PlacementsController {
@@ -44,13 +45,11 @@ export class PlacementsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll() {
-    return this.placementsService.findAll();
+  findAll(@Body() pagination: PaginationDto) {
+    return this.placementsService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
   findById(@Query('id') id: number) {
     return this.placementsService.findById(id);

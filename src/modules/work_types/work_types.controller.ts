@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateWorkTypeDto } from 'src/dto/work_types/create-work_type.dto';
 import { WorkTypesService } from '../../services/work_types.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -62,19 +63,19 @@ export class WorkTypesController {
           .status(200)
           .json({ message: 'Thêm thành công!', records: result });
 
-      return res.status(401).json({ message: 'Thêm mới không thành công!', records: [] });
+      return res
+        .status(401)
+        .json({ message: 'Thêm mới không thành công!', records: [] });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll() {
-    return this.workTypesService.findAll();
+  findAll(@Body() pagination: PaginationDto) {
+    return this.workTypesService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('?')
   findById(@Query('id') id: number) {
     return this.workTypesService.findById(id);

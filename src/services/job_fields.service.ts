@@ -9,8 +9,8 @@ export class JobFieldsService {
     @Inject() private readonly jobFieldRepository: JobFieldsRepository,
   ) {}
 
-  async findAll() {
-    return await this.jobFieldRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return await this.jobFieldRepository.findAll(pagination);
   }
 
   async findById(id: number) {

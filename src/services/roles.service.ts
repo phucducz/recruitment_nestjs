@@ -18,8 +18,8 @@ export class RolesService {
     return this.roleRepository.findByTitle(title);
   }
 
-  async findAll() {
-    return this.roleRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return this.roleRepository.findAll(pagination);
   }
 
   async create(createRoleDto: ICreate<CreateRoleDto>) {

@@ -49,7 +49,7 @@ export class JobsRepository {
     'isActive',
   ];
 
-  async findAll() {
+  async findAll(pagination: IPagination) {
     return await this.jobRepository.find({
       relations: [
         'user',
@@ -69,6 +69,7 @@ export class JobsRepository {
           }, {}),
         },
       },
+      ...pagination,
     });
   }
 

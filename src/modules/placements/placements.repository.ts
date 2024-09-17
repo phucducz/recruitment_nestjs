@@ -43,7 +43,7 @@ export class PlacementsRepository {
     return await Promise.all(ids.map(async (id) => await this.findById(id)));
   }
 
-  async findAll() {
-    return await this.placementRepository.find();
+  async findAll(pagination: IPagination) {
+    return await this.placementRepository.find(pagination);
   }
 }

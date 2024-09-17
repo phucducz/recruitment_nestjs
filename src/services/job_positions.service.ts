@@ -10,8 +10,8 @@ export class JobPositionsService {
     private readonly jobPositionRepository: JobPositionsRepository,
   ) {}
 
-  async findAll() {
-    return await this.jobPositionRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return await this.jobPositionRepository.findAll(pagination);
   }
 
   async findById(id: number) {
