@@ -1,6 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
 
+import { JwtService } from '@nestjs/jwt';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { CreateRefreshTokenDto } from 'src/dto/refresh_token/create-refresh_token.dto';
 import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
@@ -11,17 +13,35 @@ import { RefreshTokensRepository } from './refresh_token.repository';
 @Injectable()
 export class RefreshTokenService {
   constructor(
-    @Inject(RefreshTokensRepository)
-    private readonly refreshTokenRepository: RefreshTokensRepository,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @Inject(UsersService) private userService: UsersService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject()
+    private readonly refreshTokenRepository: RefreshTokensRepository,
   ) {}
 
+  async hashRefreshToken(refreshToken: string) {
+    return await bcrypt.hash(refreshToken, 10);
+  }
+
+  async compareRefreshToken(
+    refreshToken: string,
+    hashedRefreshToken: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(refreshToken, hashedRefreshToken);
+  }
+
   async create(createRefreshTokenDto: CreateRefreshTokenDto) {
-    return await this.refreshTokenRepository.create(
-      createRefreshTokenDto.userId,
+    const refreshToken = await this.jwtService.signAsync(
+      { userId: createRefreshTokenDto.userId },
+      { expiresIn: '7d' },
     );
+
+    return await this.refreshTokenRepository.create({
+      refreshToken: refreshToken,
+      userId: createRefreshTokenDto.userId,
+    });
   }
 
   async refresh(refreshAccessTokenDto: RefreshAccessTokenDto) {
@@ -45,12 +65,13 @@ export class RefreshTokenService {
         dayjs(result.expiresAt).isBefore(dayjs(new Date()))
       : false;
 
-    if (isExpired) throw new Error('Expired refresh token');
+    if (result.status === 'in valid' || isExpired)
+      throw new Error('Expired refresh token');
 
     return true;
   }
 
-  async remove(logoutDto: LogOutDto) {
-    return await this.refreshTokenRepository.remove(logoutDto);
+  async update(logoutDto: LogOutDto) {
+    return await this.refreshTokenRepository.update(logoutDto);
   }
 }
