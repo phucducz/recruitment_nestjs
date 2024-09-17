@@ -10,6 +10,7 @@ import { UsersJob } from './users_job.entity';
 import { UsersJobField } from './users_job_field.entity';
 import { UsersSkill } from './users_skill.entity';
 import { WorkExperience } from './work_experience.entity';
+import { RefreshToken } from './refresh_token.entity';
 
 export enum GENDER_ENUM {
   MALE = 1,
@@ -79,4 +80,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UsersJob, (usersJob) => usersJob.user)
   usersJobs: UsersJob[];
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 }
