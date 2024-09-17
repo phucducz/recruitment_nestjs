@@ -1,6 +1,7 @@
 import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 
+import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
@@ -58,6 +59,22 @@ export class AuthController {
       return res.status(500).json({
         message: `Internal server error. ${error}`,
       });
+    }
+  }
+
+  @Post('/log-out')
+  async logout(@Body() logoutDto: LogOutDto, @Res() res: Response) {
+    try {
+      const result = await this.authService.logout(logoutDto);
+
+      if (result)
+        return res.status(200).json({ message: 'Đăng xuất thành công' });
+
+      return res.status(401).json({ message: 'Đăng xuất thất bại' });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: `Internal server error. ${error}` });
     }
   }
 

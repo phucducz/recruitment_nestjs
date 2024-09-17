@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
 
-import { RefreshToken } from 'src/entities/refresh_token.entity';
+import { LogOutDto } from 'src/dto/auth/log-out.dto';
+import {
+  REFRESH_TOKEN_STATUS,
+  RefreshToken,
+} from 'src/entities/refresh_token.entity';
 import { UsersService } from 'src/services/users.service';
 
 @Injectable()
@@ -13,7 +16,6 @@ export class RefreshTokensRepository {
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @Inject(UsersService) private readonly userService: UsersService,
-    @Inject(JwtService) private readonly jwtService: JwtService,
   ) {}
 
   async findByRefreshToken(refreshToken: string) {
@@ -22,16 +24,38 @@ export class RefreshTokensRepository {
     });
   }
 
-  async create(userId: number) {
+  async create({
+    refreshToken,
+    userId,
+  }: {
+    userId: number;
+    refreshToken: string;
+  }): Promise<RefreshToken> {
     return await this.refreshTokenRepository.save({
       createAt: new Date().toString(),
       createBy: userId,
       expiresAt: dayjs().add(7, 'day').toDate().toString(),
-      refreshToken: await this.jwtService.signAsync(
-        { userId: userId },
-        { expiresIn: '7d' },
-      ),
+      refreshToken: refreshToken,
+      status: REFRESH_TOKEN_STATUS.VALID,
       user: await this.userService.findById(userId),
     });
+  }
+
+  async update(logoutDto: LogOutDto) {
+    const { refreshToken, userId } = logoutDto;
+    const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
+      refreshToken: refreshToken,
+      user: await this.userService.findById(userId),
+    });
+    const result = await this.refreshTokenRepository.update(
+      { id: refreshTokenEntity.id },
+      {
+        status: REFRESH_TOKEN_STATUS.INVALID,
+        updateAt: new Date().toString(),
+        updateBy: userId,
+      },
+    );
+
+    return result.affected > 0;
   }
 }
