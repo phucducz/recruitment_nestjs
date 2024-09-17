@@ -27,8 +27,8 @@ export class PlacementsService {
     return await this.placementsRepository.findByIds(ids);
   }
 
-  async findAll() {
-    return await this.placementsRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return await this.placementsRepository.findAll(pagination);
   }
 
   findOne(id: number) {

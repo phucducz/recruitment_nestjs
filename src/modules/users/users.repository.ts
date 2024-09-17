@@ -31,6 +31,8 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
+    console.log(email);
+
     return this.userRepository.findOne({
       where: { email: email },
       relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
@@ -44,8 +46,8 @@ export class UsersRepository {
     });
   }
 
-  async findAll(): Promise<Omit<User, 'password'>[]> {
-    return this.userRepository.find();
+  async findAll(pagination: IPagination): Promise<Omit<User, 'password'>[]> {
+    return this.userRepository.find(pagination);
   }
 
   async isExist(email: string): Promise<boolean> {

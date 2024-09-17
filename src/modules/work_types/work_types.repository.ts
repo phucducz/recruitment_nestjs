@@ -13,8 +13,8 @@ export class WorkTypesRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
-  async findAll() {
-    return await this.workTypeRepository.find();
+  async findAll(pagination: IPagination) {
+    return await this.workTypeRepository.find(pagination);
   }
 
   async findById(id: number) {

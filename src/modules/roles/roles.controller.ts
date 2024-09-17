@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesService } from 'src/services/roles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -32,7 +33,9 @@ export class RolesController {
       });
 
       if (result.id)
-        return res.status(200).json({ message: 'Thêm thành công!', record: result });
+        return res
+          .status(200)
+          .json({ message: 'Thêm thành công!', record: result });
 
       return res
         .status(401)
@@ -68,13 +71,11 @@ export class RolesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll() {
-    return this.rolesService.findAll();
+  findAll(@Body() pagination: PaginationDto) {
+    return this.rolesService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('?')
   findOne(@Query('id') id: number) {
     return this.rolesService.findById(id);

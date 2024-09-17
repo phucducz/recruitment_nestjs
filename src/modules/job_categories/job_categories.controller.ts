@@ -13,18 +13,17 @@ import { Response } from 'express';
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
 import { JobCategoriesService } from '../../services/job_categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('job-categories')
 export class JobCategoriesController {
   constructor(private readonly jobCategoriesService: JobCategoriesService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  async findAll() {
-    return await this.jobCategoriesService.findAll();
+  async findAll(@Body() pagination: PaginationDto) {
+    return await this.jobCategoriesService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('?')
   async findById(@Query('id') id: number) {
     return await this.jobCategoriesService.findById(id);

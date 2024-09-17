@@ -13,6 +13,7 @@ import { Response } from 'express';
 import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('job-fields')
 export class JobFieldsController {
@@ -75,13 +76,11 @@ export class JobFieldsController {
   //   return this.jobFieldsService.create(createJobFieldDto);
   // }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll() {
-    return this.jobFieldService.findAll();
+  findAll(@Body() pagination: PaginationDto) {
+    return this.jobFieldService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('?')
   findById(@Query('id') id: number) {
     return this.jobFieldService.findById(id);

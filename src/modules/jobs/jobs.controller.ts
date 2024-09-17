@@ -11,6 +11,7 @@ import {
 import { Response } from 'express';
 
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobsService } from '../../services/jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -36,24 +37,20 @@ export class JobsController {
           .status(200)
           .json({ message: 'Tạo tin tuyển dụng thành công!', record: result });
 
-      return res
-        .status(401)
-        .json({
-          message: 'Tạo tin tuyển dụng không thành công!',
-          record: null,
-        });
+      return res.status(401).json({
+        message: 'Tạo tin tuyển dụng không thành công!',
+        record: null,
+      });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/all')
-  async findAll() {
-    return await this.jobsService.findAll();
+  async findAll(@Body() pagination: PaginationDto) {
+    return await this.jobsService.findAll(pagination);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('?')
   async findOne(@Query('id') id: string) {
     return await this.jobsService.findById(+id);
