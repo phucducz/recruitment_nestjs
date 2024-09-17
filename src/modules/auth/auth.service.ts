@@ -64,6 +64,8 @@ export class AuthService {
         userId: currentUser.id,
       });
 
+      console.log(refreshToken);
+
       const userInfo = {
         ...this.userConverter.entityToBasicInfo(currentUser),
         accessToken: currentUser
@@ -128,6 +130,6 @@ export class AuthService {
   }
 
   async logout(logoutDto: LogOutDto) {
-    return await this.refreshTokenService.remove(logoutDto);
+    return await this.refreshTokenService.update(logoutDto);
   }
 }
