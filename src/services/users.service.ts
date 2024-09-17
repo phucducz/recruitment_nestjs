@@ -16,8 +16,8 @@ export class UsersService {
     return await this.userRepository.findById(id);
   }
 
-  async findAll() {
-    return await this.userRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return await this.userRepository.findAll(pagination);
   }
 
   async isExist(email: string): Promise<boolean> {

@@ -10,8 +10,8 @@ export class JobCategoriesService {
     private readonly jobCategoryRepository: JobCategoriesRepository,
   ) {}
 
-  async findAll() {
-    return await this.jobCategoryRepository.findAll();
+  async findAll(pagination: IPagination) {
+    return await this.jobCategoryRepository.findAll(pagination);
   }
 
   async findById(id: number) {
