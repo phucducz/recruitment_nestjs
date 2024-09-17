@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
 
+import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RefreshToken } from 'src/entities/refresh_token.entity';
 import { UsersService } from 'src/services/users.service';
 
@@ -33,5 +34,20 @@ export class RefreshTokensRepository {
       ),
       user: await this.userService.findById(userId),
     });
+  }
+
+  async remove(logoutDto: LogOutDto) {
+    const { refreshToken, userId } = logoutDto;
+    const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
+      refreshToken: refreshToken,
+      user: await this.userService.findById(userId),
+    });
+    const result = await this.refreshTokenRepository.delete(
+      refreshTokenEntity.id,
+    );
+
+    console.log(result);
+
+    return result.affected > 0;
   }
 }

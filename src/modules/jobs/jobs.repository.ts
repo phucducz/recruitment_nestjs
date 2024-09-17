@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { userKeys } from 'src/constants';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
@@ -33,21 +34,6 @@ export class JobsRepository {
   ) {}
 
   private readonly logger = new Logger(JobsRepository.name);
-  private readonly userKeys = [
-    'id',
-    'createBy',
-    'createAt',
-    'updateBy',
-    'updateAt',
-    'fullName',
-    'phoneNumber',
-    'email',
-    'password',
-    'avatarUrl',
-    'companyName',
-    'companyUrl',
-    'isActive',
-  ];
 
   async findAll(pagination: IPagination) {
     return await this.jobRepository.find({
@@ -61,7 +47,7 @@ export class JobsRepository {
       ],
       select: {
         user: {
-          ...this.userKeys.reduce((acc, key) => {
+          ...userKeys.reduce((acc, key) => {
             if (key === 'password') acc[key] = false;
             else acc[key] = true;
 
@@ -86,7 +72,7 @@ export class JobsRepository {
       ],
       select: {
         user: {
-          ...this.userKeys.reduce((acc, key) => {
+          ...userKeys.reduce((acc, key) => {
             if (key === 'password') acc[key] = false;
             else acc[key] = true;
 

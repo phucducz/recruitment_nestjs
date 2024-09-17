@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { userKeys } from 'src/constants';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
@@ -31,11 +32,17 @@ export class UsersRepository {
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    console.log(email);
-
     return this.userRepository.findOne({
       where: { email: email },
       relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
+      select: {
+        ...userKeys.reduce((acc, key) => {
+          if (key === 'password') acc[key] = false;
+          else acc[key] = true;
+
+          return acc;
+        }, {}),
+      },
     });
   }
 
@@ -43,11 +50,29 @@ export class UsersRepository {
     return this.userRepository.findOne({
       where: { id: id },
       relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
+      select: {
+        ...userKeys.reduce((acc, key) => {
+          if (key === 'password') acc[key] = false;
+          else acc[key] = true;
+
+          return acc;
+        }, {}),
+      },
     });
   }
 
   async findAll(pagination: IPagination): Promise<Omit<User, 'password'>[]> {
-    return this.userRepository.find(pagination);
+    return this.userRepository.find({
+      ...pagination,
+      select: {
+        ...userKeys.reduce((acc, key) => {
+          if (key === 'password') acc[key] = false;
+          else acc[key] = true;
+
+          return acc;
+        }, {}),
+      },
+    });
   }
 
   async isExist(email: string): Promise<boolean> {
