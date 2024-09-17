@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
+import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
 import { UsersModule } from '../users/users.module';
@@ -13,13 +14,15 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     UsersModule,
     RolesModule,
+    forwardRef(() => RefreshTokenModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       global: true,
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: 3600 * 3 },
+        signOptions: {},
+        // signOptions: { expiresIn: 3600 * 3 },
       }),
     }),
   ],

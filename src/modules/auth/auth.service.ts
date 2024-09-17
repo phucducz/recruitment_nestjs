@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -6,6 +6,7 @@ import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { RolesService } from 'src/services/roles.service';
 import { UsersService } from 'src/services/users.service';
+import { RefreshTokenService } from '../refresh_token/refresh_token.service';
 import { UsersConverter } from '../users/users.converter';
 
 @Injectable()
@@ -17,6 +18,8 @@ export class AuthService {
     @Inject(UsersService) private readonly userService: UsersService,
     @Inject(UsersConverter) private readonly userConverter: UsersConverter,
     @Inject(RolesService) private readonly roleService: RolesService,
+    @Inject(forwardRef(() => RefreshTokenService))
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async comparePassword(password: string, storedPasswordHash: string) {
@@ -32,7 +35,10 @@ export class AuthService {
   }
 
   async generateToken(id: number, email: string, fullName: string) {
-    return await this.jwtService.signAsync({ id, email, fullName });
+    return await this.jwtService.signAsync(
+      { id, email, fullName },
+      { expiresIn: '30s' },
+    );
   }
 
   async validateUser(payload: any) {
@@ -45,23 +51,28 @@ export class AuthService {
 
   async signIn(
     signInDto: SignInDto,
-  ): Promise<(any & { accessToken: string | null }) | null> {
+  ): Promise<
+    (any & { accessToken: string | null; refreshToken: string | null }) | null
+  > {
     this.logger.log(this.signIn.name);
     const { type } = signInDto;
 
     try {
       const currentUser = await this.userService.findByEmail(signInDto.email);
-      const accessToken = currentUser
-        ? await this.generateToken(
-            currentUser.id,
-            currentUser.email,
-            currentUser.fullName,
-          )
-        : null;
+      const { refreshToken } = await this.refreshTokenService.create({
+        userId: currentUser.id,
+      });
 
       const userInfo = {
         ...this.userConverter.entityToBasicInfo(currentUser),
-        accessToken,
+        accessToken: currentUser
+          ? await this.generateToken(
+              currentUser.id,
+              currentUser.email,
+              currentUser.fullName,
+            )
+          : null,
+        refreshToken: refreshToken,
       };
 
       if (type === 'google') {
@@ -86,6 +97,7 @@ export class AuthService {
               result.email,
               result.fullName,
             ),
+            refreshToken: refreshToken,
           };
         }
 

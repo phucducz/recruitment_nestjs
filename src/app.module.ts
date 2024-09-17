@@ -21,6 +21,7 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
+import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { UsersModule } from './modules/users/users.module';
@@ -78,6 +79,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     UsersJobsModule,
     AuthModule,
     ProvincesModule,
+    RefreshTokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
