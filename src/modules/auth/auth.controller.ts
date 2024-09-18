@@ -19,20 +19,24 @@ export class AuthController {
   ) {}
 
   @Post('/sign-in')
-  async signIn(@Body() signInDto: SignInDto) {
+  async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
     const result = await this.authService.signIn(signInDto);
 
     if (!result?.id)
-      return {
+      return res.status(401).json({
         message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
-        statusCode: 401,
-      };
+      });
 
-    return {
-      ...result,
-      message: 'Đăng nhập thành công!',
-      statusCode: 200,
-    };
+    res.cookie('refreshToken', result?.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 7000,
+    });
+
+    return res
+      .status(200)
+      .json({ message: 'Đăng nhập thành công!', ...result });
   }
 
   @Post('/refresh')
@@ -64,6 +68,8 @@ export class AuthController {
   async logout(@Body() logoutDto: LogOutDto, @Res() res: Response) {
     try {
       const result = await this.authService.logout(logoutDto);
+
+      res.clearCookie('refreshToken');
 
       if (result)
         return res.status(200).json({ message: 'Đăng xuất thành công' });

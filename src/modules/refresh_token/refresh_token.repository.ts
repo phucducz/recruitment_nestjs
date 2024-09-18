@@ -49,7 +49,6 @@ export class RefreshTokensRepository {
     const { refreshToken, usersId } = logoutDto;
     const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
       refreshToken: refreshToken,
-      user: await this.userService.findById(usersId),
     });
 
     const result = await this.refreshTokenRepository.update(

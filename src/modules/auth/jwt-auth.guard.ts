@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+
+import { getCookieValue } from 'src/common/utils/cookie.utils';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
 
 @Injectable()
@@ -32,7 +34,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       const request = context.switchToHttp().getRequest();
       const token = this.extractTokenFromHeader(request);
-      const refreshToken = request.cookies['refreshToken'];
+      const refreshToken = getCookieValue(
+        request.headers['set-cookie'][0],
+        'refreshToken=',
+      );
 
       await this.refreshTokenService.verifyRefreshToken(refreshToken);
 
