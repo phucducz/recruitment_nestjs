@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -21,7 +22,7 @@ export class UsersRepository {
 
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(JobPositionsService)
+    @Inject(forwardRef(() => JobPositionsService))
     private readonly jobPositionService: JobPositionsService,
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(JobFieldsService)
