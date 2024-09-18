@@ -35,14 +35,6 @@ export class UsersRepository {
     return this.userRepository.findOne({
       where: { email: email },
       relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
-      select: {
-        ...userKeys.reduce((acc, key) => {
-          if (key === 'password') acc[key] = false;
-          else acc[key] = true;
-
-          return acc;
-        }, {}),
-      },
     });
   }
 
