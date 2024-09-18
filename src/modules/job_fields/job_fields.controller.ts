@@ -11,9 +11,9 @@ import {
 import { Response } from 'express';
 
 import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('job-fields')
 export class JobFieldsController {
@@ -33,15 +33,21 @@ export class JobFieldsController {
       });
 
       if (result.id)
-        return res
-          .status(200)
-          .json({ message: 'Thêm thành công!', record: result });
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Thêm thành công!',
+          record: result,
+        });
 
       return res
         .status(401)
-        .json({ message: 'Thêm mới không thành công!', record: null });
+        .json({
+          statusCode: 401,
+          message: 'Thêm mới không thành công!',
+          record: null,
+        });
     } catch (error) {
-      return res.status(500).json({ message: error });
+      return res.status(500).json({ stautsCode: 500, message: error });
     }
   }
 
@@ -59,15 +65,21 @@ export class JobFieldsController {
       });
 
       if (result.length > 0)
-        return res
-          .status(200)
-          .json({ message: 'Thêm thành công!', records: result });
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Thêm thành công!',
+          records: result,
+        });
 
       return res
         .status(401)
-        .json({ message: 'Thêm mới không thành công!', records: [] });
+        .json({
+          statusCode: 401,
+          message: 'Thêm mới không thành công!',
+          records: [],
+        });
     } catch (error) {
-      return res.status(500).json({ message: error });
+      return res.status(500).json({ stautsCode: 500, message: error });
     }
   }
 

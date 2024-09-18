@@ -35,13 +35,17 @@ export class JobPositionsController {
       if (result)
         return res
           .status(200)
-          .json({ message: 'Tạo thành công', record: result });
+          .json({ statusCode: 200, message: 'Tạo thành công', record: result });
 
       return res
         .status(401)
-        .json({ message: 'Tạo không thành công', record: null });
+        .json({
+          statusCode: 401,
+          message: 'Tạo không thành công',
+          record: null,
+        });
     } catch (error) {
-      return res.status(401).json({ message: error });
+      return res.status(401).json({ statusCode: 401, message: error });
     }
   }
 
@@ -59,15 +63,17 @@ export class JobPositionsController {
       });
 
       if (result.length > 0)
-        return res
-          .status(200)
-          .json({ message: 'Tạo thành công', records: result });
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Tạo thành công',
+          records: result,
+        });
 
       return res
         .status(401)
         .json({ message: 'Tạo không thành công', records: [] });
     } catch (error) {
-      return res.status(401).json({ message: error });
+      return res.status(401).json({ statusCode: 401, message: error });
     }
   }
 
