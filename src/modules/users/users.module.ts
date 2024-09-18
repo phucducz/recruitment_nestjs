@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
+import { AuthModule } from '../auth/auth.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
+import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersJobFieldsModule } from '../users_job_fields/users_job_fields.module';
 import { UsersController } from './users.controller';
@@ -15,10 +17,12 @@ import { UsersRepository } from './users.repository';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UsersJobField]),
-    JobPositionsModule,
+    forwardRef(() => JobPositionsModule),
     RolesModule,
     JobFieldsModule,
     UsersJobFieldsModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => RefreshTokenModule),
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, UsersConverter],

@@ -38,7 +38,7 @@ export class AuthService {
   async generateToken(id: number, email: string, fullName: string) {
     return await this.jwtService.signAsync(
       { id, email, fullName },
-      { expiresIn: '30s' },
+      { expiresIn: '1m' },
     );
   }
 
@@ -104,6 +104,9 @@ export class AuthService {
 
         return userInfo;
       }
+
+      console.log(currentUser);
+      console.log(signInDto);
 
       if (
         !currentUser ||

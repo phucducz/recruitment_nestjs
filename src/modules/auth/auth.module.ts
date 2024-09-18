@@ -2,16 +2,20 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Auth } from 'src/entities/auth.entity';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Auth]),
     UsersModule,
     RolesModule,
     forwardRef(() => RefreshTokenModule),
@@ -27,7 +31,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersConverter, JwtStrategy],
+  providers: [AuthService, UsersConverter, JwtStrategy, JwtAuthGuard],
   exports: [AuthService],
 })
 export class AuthModule {}
