@@ -105,9 +105,6 @@ export class AuthService {
         return userInfo;
       }
 
-      console.log(currentUser);
-      console.log(signInDto);
-
       if (
         !currentUser ||
         !(await this.comparePassword(signInDto.password, currentUser.password))

@@ -19,20 +19,25 @@ export class AuthController {
   ) {}
 
   @Post('/sign-in')
-  async signIn(@Body() signInDto: SignInDto) {
+  async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
     const result = await this.authService.signIn(signInDto);
 
     if (!result?.id)
-      return {
-        message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
+      return res.status(401).json({
         statusCode: 401,
-      };
+        message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
+      });
 
-    return {
-      ...result,
-      message: 'Đăng nhập thành công!',
-      statusCode: 200,
-    };
+    res.cookie('refreshToken', result?.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 7000,
+    });
+
+    return res
+      .status(200)
+      .json({ statusCode: 200, message: 'Đăng nhập thành công!', ...result });
   }
 
   @Post('/refresh')
@@ -47,16 +52,18 @@ export class AuthController {
 
       if (token)
         return res.status(200).json({
+          statusCode: 200,
           message: 'Làm mới access token thành công',
           accessToken: token,
         });
 
       return res.status(401).json({
+        statusCode: 401,
         message: 'Tạo mới access token không thành công',
         accessToken: token,
       });
     } catch (error) {
-      return res.status(500).json({ message: `${error}` });
+      return res.status(500).json({ stautsCode: 500, message: `${error}` });
     }
   }
 
@@ -65,14 +72,20 @@ export class AuthController {
     try {
       const result = await this.authService.logout(logoutDto);
 
-      if (result)
-        return res.status(200).json({ message: 'Đăng xuất thành công' });
+      res.clearCookie('refreshToken');
 
-      return res.status(401).json({ message: 'Đăng xuất thất bại' });
+      if (result)
+        return res
+          .status(200)
+          .json({ statusCode: 200, message: 'Đăng xuất thành công' });
+
+      return res
+        .status(401)
+        .json({ statusCode: 401, message: 'Đăng xuất thất bại' });
     } catch (error) {
       return res
         .status(500)
-        .json({ message: `Internal server error. ${error}` });
+        .json({ stautsCode: 500, message: `Internal server error. ${error}` });
     }
   }
 
