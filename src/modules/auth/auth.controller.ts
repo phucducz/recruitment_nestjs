@@ -24,6 +24,7 @@ export class AuthController {
 
     if (!result?.id)
       return res.status(401).json({
+        statusCode: 401,
         message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
       });
 
@@ -36,7 +37,7 @@ export class AuthController {
 
     return res
       .status(200)
-      .json({ message: 'Đăng nhập thành công!', ...result });
+      .json({ statusCode: 200, message: 'Đăng nhập thành công!', ...result });
   }
 
   @Post('/refresh')
@@ -51,16 +52,18 @@ export class AuthController {
 
       if (token)
         return res.status(200).json({
+          statusCode: 200,
           message: 'Làm mới access token thành công',
           accessToken: token,
         });
 
       return res.status(401).json({
+        statusCode: 401,
         message: 'Tạo mới access token không thành công',
         accessToken: token,
       });
     } catch (error) {
-      return res.status(500).json({ message: `${error}` });
+      return res.status(500).json({ stautsCode: 500, message: `${error}` });
     }
   }
 
@@ -72,13 +75,17 @@ export class AuthController {
       res.clearCookie('refreshToken');
 
       if (result)
-        return res.status(200).json({ message: 'Đăng xuất thành công' });
+        return res
+          .status(200)
+          .json({ statusCode: 200, message: 'Đăng xuất thành công' });
 
-      return res.status(401).json({ message: 'Đăng xuất thất bại' });
+      return res
+        .status(401)
+        .json({ statusCode: 401, message: 'Đăng xuất thất bại' });
     } catch (error) {
       return res
         .status(500)
-        .json({ message: `Internal server error. ${error}` });
+        .json({ stautsCode: 500, message: `Internal server error. ${error}` });
     }
   }
 
