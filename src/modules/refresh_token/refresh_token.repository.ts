@@ -18,6 +18,10 @@ export class RefreshTokensRepository {
     @Inject(UsersService) private readonly userService: UsersService,
   ) {}
 
+  async findById(id: number) {
+    return await this.refreshTokenRepository.findOneBy({ id: id });
+  }
+
   async findByRefreshToken(refreshToken: string) {
     return await this.refreshTokenRepository.findOneBy({
       refreshToken: refreshToken,
@@ -25,8 +29,8 @@ export class RefreshTokensRepository {
   }
 
   async create({
-    refreshToken,
     userId,
+    refreshToken,
   }: {
     userId: number;
     refreshToken: string;
@@ -42,17 +46,18 @@ export class RefreshTokensRepository {
   }
 
   async update(logoutDto: LogOutDto) {
-    const { refreshToken, userId } = logoutDto;
+    const { refreshToken, usersId } = logoutDto;
     const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
       refreshToken: refreshToken,
-      user: await this.userService.findById(userId),
+      user: await this.userService.findById(usersId),
     });
+
     const result = await this.refreshTokenRepository.update(
       { id: refreshTokenEntity.id },
       {
         status: REFRESH_TOKEN_STATUS.INVALID,
         updateAt: new Date().toString(),
-        updateBy: userId,
+        updateBy: usersId,
       },
     );
 
