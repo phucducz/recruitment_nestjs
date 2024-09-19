@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
 
-import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import {
   REFRESH_TOKEN_STATUS,
   RefreshToken,
@@ -45,8 +44,12 @@ export class RefreshTokensRepository {
     });
   }
 
-  async update(logoutDto: LogOutDto) {
-    const { refreshToken, usersId } = logoutDto;
+  async updateStatusByRefreshToken(params: {
+    refreshToken: string;
+    userId: number;
+  }) {
+    const { refreshToken, userId } = params;
+
     const refreshTokenEntity = await this.refreshTokenRepository.findOneBy({
       refreshToken: refreshToken,
     });
@@ -56,7 +59,7 @@ export class RefreshTokensRepository {
       {
         status: REFRESH_TOKEN_STATUS.INVALID,
         updateAt: new Date().toString(),
-        updateBy: usersId,
+        updateBy: userId,
       },
     );
 

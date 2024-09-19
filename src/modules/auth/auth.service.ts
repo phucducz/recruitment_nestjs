@@ -127,7 +127,7 @@ export class AuthService {
     });
   }
 
-  async logout(logoutDto: LogOutDto) {
-    return await this.refreshTokenService.update(logoutDto);
+  async logout(refreshToken: string) {
+    return await this.refreshTokenService.updateStatusByRefreshToken(refreshToken);
   }
 }
