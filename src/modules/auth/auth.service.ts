@@ -2,7 +2,6 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { RolesService } from 'src/services/roles.service';
@@ -35,9 +34,19 @@ export class AuthService {
     return await this.jwtService.decode(accessToken);
   }
 
+  async compareToken(accessToken: string, refreshToken: string) {
+    const access = await this.getByToken(accessToken);
+    const refresh = await this.getByToken(refreshToken);
+
+    if (access.userId !== refresh.userId)
+      throw new Error('Access token does not match refresh token');
+
+    return true;
+  }
+
   async generateToken(id: number, email: string, fullName: string) {
     return await this.jwtService.signAsync(
-      { id, email, fullName },
+      { userId: id, email, fullName },
       { expiresIn: '1m' },
     );
   }
@@ -128,6 +137,8 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    return await this.refreshTokenService.updateStatusByRefreshToken(refreshToken);
+    return await this.refreshTokenService.updateStatusByRefreshToken(
+      refreshToken,
+    );
   }
 }

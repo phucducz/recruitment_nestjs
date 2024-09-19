@@ -27,6 +27,8 @@ export class RolesController {
     @Res() res: Response,
   ) {
     try {
+      console.log(request.user);
+
       const result = await this.rolesService.create({
         createBy: request.user.userId,
         variable: createRoleDto,
@@ -39,13 +41,11 @@ export class RolesController {
           record: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          record: null,
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        record: null,
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
@@ -71,13 +71,11 @@ export class RolesController {
           records: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          records: [],
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        records: [],
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
