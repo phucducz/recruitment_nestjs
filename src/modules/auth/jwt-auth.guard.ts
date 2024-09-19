@@ -12,6 +12,7 @@ import { Request } from 'express';
 
 import { getCookieValue } from 'src/common/utils/cookie.utils';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -20,6 +21,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     private configService: ConfigService,
     @Inject(RefreshTokenService)
     private readonly refreshTokenService: RefreshTokenService,
+    @Inject(AuthService)
+    private readonly authService: AuthService,
   ) {
     super();
   }
@@ -39,6 +42,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         'refreshToken=',
       );
 
+      await this.authService.compareToken(token, refreshToken);
       await this.refreshTokenService.verifyRefreshToken(refreshToken);
 
       if (!token) throw new UnauthorizedException();
