@@ -1,6 +1,7 @@
-import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 
+import { getCookieValue } from 'src/common/utils/cookie.utils';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
@@ -42,13 +43,22 @@ export class AuthController {
 
   @Post('/refresh')
   async create(
-    @Body() refreshAccessTokenDto: RefreshAccessTokenDto,
+    @Body() _: RefreshAccessTokenDto,
     @Res() res: Response,
+    @Request() request: Request,
   ) {
     try {
-      const token = await this.refreshTokenService.refresh(
-        refreshAccessTokenDto,
+      const refreshToken = getCookieValue(
+        request.headers['set-cookie'][0],
+        'refreshToken=',
       );
+
+      if (!refreshToken)
+        return res
+          .status(401)
+          .json({ message: 'Unauthorized', statusCode: 401 });
+
+      const token = await this.refreshTokenService.refresh(refreshToken);
 
       if (token)
         return res.status(200).json({
@@ -68,9 +78,23 @@ export class AuthController {
   }
 
   @Post('/log-out')
-  async logout(@Body() logoutDto: LogOutDto, @Res() res: Response) {
+  async logout(
+    @Body() _: LogOutDto,
+    @Res() res: Response,
+    @Request() request: Request,
+  ) {
     try {
-      const result = await this.authService.logout(logoutDto);
+      const refreshToken = getCookieValue(
+        request.headers['set-cookie'][0],
+        'refreshToken=',
+      );
+
+      if (!refreshToken)
+        return res
+          .status(401)
+          .json({ message: 'Unauthorized', statusCode: 401 });
+
+      const result = await this.authService.logout(refreshToken);
 
       res.clearCookie('refreshToken');
 

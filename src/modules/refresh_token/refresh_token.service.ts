@@ -2,9 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 
 import { JwtService } from '@nestjs/jwt';
-import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { CreateRefreshTokenDto } from 'src/dto/refresh_token/create-refresh_token.dto';
-import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
 import { REFRESH_TOKEN_STATUS } from 'src/entities/refresh_token.entity';
 import { UsersService } from 'src/services/users.service';
 import { AuthService } from '../auth/auth.service';
@@ -33,12 +31,12 @@ export class RefreshTokenService {
     });
   }
 
-  async refresh(refreshAccessTokenDto: RefreshAccessTokenDto) {
-    const { refreshToken, usersId } = refreshAccessTokenDto;
+  async refresh(refreshToken: string) {
+    const { userId } = await this.authService.getByToken(refreshToken);
 
     await this.verifyRefreshToken(refreshToken);
 
-    const { id, email, fullName } = await this.userService.findById(usersId);
+    const { id, email, fullName } = await this.userService.findById(userId);
 
     return this.authService.generateToken(id, email, fullName);
   }
@@ -60,7 +58,12 @@ export class RefreshTokenService {
     return true;
   }
 
-  async update(logoutDto: LogOutDto) {
-    return await this.refreshTokenRepository.update(logoutDto);
+  async updateStatusByRefreshToken(refreshToken: string) {
+    const { userId } = await this.authService.getByToken(refreshToken);
+
+    return await this.refreshTokenRepository.updateStatusByRefreshToken({
+      refreshToken,
+      userId,
+    });
   }
 }
