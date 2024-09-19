@@ -20,6 +20,17 @@ import { RolesService } from 'src/services/roles.service';
 export class UsersRepository {
   private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
 
+  private readonly notShowFields = [
+    'createAt',
+    'createBy',
+    'updateAt',
+    'updateBy',
+  ].reduce((acc, key) => {
+    acc[key] = false;
+
+    return acc;
+  }, {});
+
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
     @Inject(forwardRef(() => JobPositionsService))
@@ -36,6 +47,23 @@ export class UsersRepository {
     return this.userRepository.findOne({
       where: { email: email },
       relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
+      select: {
+        role: {
+          id: true,
+          title: true,
+          ...this.notShowFields,
+        },
+        jobPosition: {
+          id: true,
+          title: true,
+          ...this.notShowFields,
+        },
+        achivements: {
+          id: true,
+          description: true,
+          ...this.notShowFields,
+        },
+      },
     });
   }
 
