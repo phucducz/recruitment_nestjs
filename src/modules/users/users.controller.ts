@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { UsersService } from '../../services/users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('users')
 export class UsersController {
@@ -17,6 +18,23 @@ export class UsersController {
   // findByEmail(@Query('email') email: string) {
   //   return this.usersService.findByEmail(email);
   // }
+
+  @Get('/check-exist-email')
+  async checkExistEmail(@Query('email') email: string, @Res() res: Response) {
+    const result = await this.usersService.findByEmail(email);
+
+    if (!result)
+      return res
+        .status(404)
+        .json({ message: 'Email không tồn tại!', statusCode: 404 });
+
+    return res.status(200).json({
+      message: 'Email tồn tại',
+      isHavePassword: result.password !== null,
+      signInWith: result.password !== null ? 'system' : 'other',
+      statusCode: 200,
+    });
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('/all')
