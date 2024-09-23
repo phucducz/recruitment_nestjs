@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { getPaginationParams } from 'src/common/utils/function';
 import { CreateWorkTypeDto } from 'src/dto/work_types/create-work_type.dto';
 import { WorkType } from 'src/entities/work_type.entity';
 
@@ -14,7 +15,9 @@ export class WorkTypesRepository {
   ) {}
 
   async findAll(pagination: IPagination) {
-    return await this.workTypeRepository.find(pagination);
+    const paginationParams = getPaginationParams(pagination);
+
+    return await this.workTypeRepository.findAndCount(paginationParams);
   }
 
   async findById(id: number) {

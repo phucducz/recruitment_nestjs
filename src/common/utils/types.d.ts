@@ -14,6 +14,6 @@ interface ICreateMany<T> {
 }
 
 interface IPagination {
-  take?: number;
-  skip?: number;
+  page?: number;
+  pageSize?: number;
 }

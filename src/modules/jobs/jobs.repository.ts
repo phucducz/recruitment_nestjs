@@ -2,7 +2,8 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { userKeys } from 'src/constants';
+import { ENTITIES } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
@@ -35,51 +36,53 @@ export class JobsRepository {
 
   private readonly logger = new Logger(JobsRepository.name);
 
-  async findAll(pagination: IPagination) {
-    return await this.jobRepository.find({
-      relations: [
-        'user',
-        'jobPosition',
-        'jobField',
-        'jobsPlacements',
-        'workType',
-        'jobCategory',
-      ],
-      select: {
-        user: {
-          ...userKeys.reduce((acc, key) => {
-            if (key === 'password') acc[key] = false;
-            else acc[key] = true;
+  private readonly removeColumns = [
+    'updateBy',
+    'updateAt',
+    'createBy',
+    'createAt',
+  ];
+  private readonly jobRelations = {
+    entites: [
+      'user',
+      'jobPosition',
+      'jobField',
+      'jobsPlacements',
+      'workType',
+      'jobCategory',
+    ],
+    fields: [
+      filterColumns(ENTITIES.FIELDS.USER, ['password', ...this.removeColumns]),
+      filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_FIELD, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.WORK_TYPE, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, this.removeColumns),
+    ],
+  };
+  private readonly jobSelectColumns = this.jobRelations.entites.reduce(
+    (acc, entity, index) => {
+      acc[entity] = this.jobRelations.fields[index];
+      return acc;
+    },
+    {},
+  );
 
-            return acc;
-          }, {}),
-        },
-      },
-      ...pagination,
+  async findAll(pagination: IPagination) {
+    const paginationParams = getPaginationParams(pagination);
+
+    return await this.jobRepository.findAndCount({
+      relations: this.jobRelations.entites,
+      select: this.jobSelectColumns,
+      ...paginationParams,
     });
   }
 
   async findById(id: number) {
     return await this.jobRepository.find({
       where: { id: id },
-      relations: [
-        'user',
-        'jobPosition',
-        'jobField',
-        'jobsPlacements',
-        'workType',
-        'jobCategory',
-      ],
-      select: {
-        user: {
-          ...userKeys.reduce((acc, key) => {
-            if (key === 'password') acc[key] = false;
-            else acc[key] = true;
-
-            return acc;
-          }, {}),
-        },
-      },
+      relations: this.jobRelations.entites,
+      select: this.jobSelectColumns,
     });
   }
 

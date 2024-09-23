@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobsService } from '../../services/jobs.service';
@@ -33,13 +34,11 @@ export class JobsController {
       });
 
       if (result)
-        return res
-          .status(200)
-          .json({
-            statusCode: 200,
-            message: 'Tạo tin tuyển dụng thành công!',
-            record: result,
-          });
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Tạo tin tuyển dụng thành công!',
+          record: result,
+        });
 
       return res.status(401).json({
         statusCode: 401,
@@ -52,8 +51,10 @@ export class JobsController {
   }
 
   @Get('/all')
-  async findAll(@Body() pagination: PaginationDto) {
-    return await this.jobsService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const result = await this.jobsService.findAll(pagination);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
   }
 
   @Get('?')

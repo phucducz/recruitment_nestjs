@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesService } from 'src/services/roles.service';
@@ -82,8 +83,10 @@ export class RolesController {
   }
 
   @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.rolesService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const result = await this.rolesService.findAll(pagination);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
   }
 
   @Get('?')

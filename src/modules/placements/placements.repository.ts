@@ -44,6 +44,7 @@ export class PlacementsRepository {
   }
 
   async findAll(pagination: IPagination) {
-    return await this.placementRepository.find(pagination);
+    return await this.placementRepository.find();
+    // return await this.placementRepository.find(pagination);
   }
 }

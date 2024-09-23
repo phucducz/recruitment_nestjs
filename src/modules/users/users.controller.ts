@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { UsersService } from '../../services/users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -36,10 +37,12 @@ export class UsersController {
     });
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.usersService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const result = await this.usersService.findAll(pagination);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
   }
 
   @UseGuards(JwtAuthGuard)
