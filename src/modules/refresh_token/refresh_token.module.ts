@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { RefreshToken } from 'src/entities/refresh_token.entity';
@@ -12,8 +11,8 @@ import { RefreshTokenService } from './refresh_token.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
-    UsersModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => UsersModule),
   ],
   controllers: [RefreshTokenController],
   providers: [RefreshTokenService, RefreshTokensRepository],
