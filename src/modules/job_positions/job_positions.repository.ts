@@ -14,9 +14,11 @@ export class JobPositionsRepository {
   ) {}
 
   async findAll(pagination: IPagination) {
-    return await this.jobPositionRepository.find(pagination);
+    return await this.jobPositionRepository.find();
+    // return await this.jobPositionRepository.find(pagination);
   }
 
+  //
   async findById(id: number): Promise<JobPosition> {
     return await this.jobPositionRepository.findOne({
       where: {

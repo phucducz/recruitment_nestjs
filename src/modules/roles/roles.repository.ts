@@ -29,7 +29,8 @@ export class RolesRepository {
   }
 
   async findAll(pagination: IPagination) {
-    return await this.rolesRepository.find(pagination);
+    return await this.rolesRepository.find();
+    // return await this.rolesRepository.find(pagination);
   }
 
   async create(createRole: ICreate<CreateRoleDto>) {

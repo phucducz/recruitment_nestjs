@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { getPaginationParams } from 'src/common/function';
 import { userKeys } from 'src/constants';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
@@ -82,9 +83,13 @@ export class UsersRepository {
     });
   }
 
-  async findAll(pagination: IPagination): Promise<Omit<User, 'password'>[]> {
-    return this.userRepository.find({
-      ...pagination,
+  async findAll(
+    pagination: IPagination,
+  ): Promise<[Omit<User, 'password'>[], number]> {
+    const paginationParams = getPaginationParams(pagination);
+
+    return this.userRepository.findAndCount({
+      ...paginationParams,
       select: {
         ...userKeys.reduce((acc, key) => {
           if (key === 'password') acc[key] = false;

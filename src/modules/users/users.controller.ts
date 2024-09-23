@@ -36,10 +36,22 @@ export class UsersController {
     });
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.usersService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const [items, totalItems] = await this.usersService.findAll(pagination);
+
+    return res.status(200).json({
+      items: items,
+      pageInfo: {
+        currentPage: pagination.page,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        itemsPerPage: pagination.pageSize,
+        totalItems,
+        totalPages: 4,
+      },
+    });
   }
 
   @UseGuards(JwtAuthGuard)

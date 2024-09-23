@@ -14,7 +14,8 @@ export class JobFieldsRepository {
   ) {}
 
   async findAll(pagination: IPagination) {
-    return await this.jobFieldRepository.find(pagination);
+    return await this.jobFieldRepository.find();
+    // return await this.jobFieldRepository.find(pagination);
   }
 
   async findById(id: number) {
