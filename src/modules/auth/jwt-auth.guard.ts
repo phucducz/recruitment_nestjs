@@ -31,10 +31,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
-      const canActivateResult = (await super.canActivate(context)) as boolean;
-
-      if (!canActivateResult) throw new UnauthorizedException();
-
       const request = context.switchToHttp().getRequest();
       const token = this.extractTokenFromHeader(request);
       const refreshToken = getCookieValue(
@@ -44,6 +40,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       await this.authService.compareToken(token, refreshToken);
       await this.refreshTokenService.verifyRefreshToken(refreshToken);
+
+      const canActivateResult = (await super.canActivate(context)) as boolean;
+      if (!canActivateResult) throw new UnauthorizedException();
 
       if (!token) throw new UnauthorizedException();
 
