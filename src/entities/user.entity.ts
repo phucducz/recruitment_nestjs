@@ -1,16 +1,17 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
+import { Field } from 'src/common/decorators/field.decorator';
 import { Achivement } from 'src/entities/achivement.entity';
 import { Job } from 'src/entities/job.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { Role } from 'src/entities/role.entity';
 import { BaseEntity } from './base.entity';
+import { RefreshToken } from './refresh_token.entity';
 import { UsersForeignLanguage } from './users_foreign_language.entity';
 import { UsersJob } from './users_job.entity';
 import { UsersJobField } from './users_job_field.entity';
 import { UsersSkill } from './users_skill.entity';
 import { WorkExperience } from './work_experience.entity';
-import { RefreshToken } from './refresh_token.entity';
 
 export enum GENDER_ENUM {
   MALE = 1,
@@ -20,21 +21,27 @@ export enum GENDER_ENUM {
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
+  @Field()
   @Column({ type: 'varchar', name: 'full_name', length: 100 })
   fullName: string;
 
+  @Field()
   @Column({ type: 'varchar', name: 'phone_number', length: 11, nullable: true })
   phoneNumber: string;
 
+  @Field()
   @Column({ type: 'varchar', length: 45 })
   email: string;
 
+  @Field()
   @Column({ type: 'varchar', length: 200, nullable: true })
   password: string;
 
+  @Field()
   @Column({ type: 'varchar', name: 'avatar_url', length: 45, nullable: true })
   avatarUrl: string;
 
+  @Field()
   @Column({
     type: 'varchar',
     name: 'company_name',
@@ -43,9 +50,11 @@ export class User extends BaseEntity {
   })
   companyName: string;
 
+  @Field()
   @Column({ type: 'varchar', name: 'company_url', length: 45, nullable: true })
   companyUrl: string;
 
+  @Field()
   @Column({ type: 'boolean', name: 'is_active', default: true, nullable: true })
   isActive: boolean;
 

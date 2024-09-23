@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobFieldDto } from 'src/dto/job_fields/create-job_field.dto';
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobFieldsService } from 'src/services/job_fields.service';
@@ -39,13 +40,11 @@ export class JobFieldsController {
           record: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          record: null,
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        record: null,
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
@@ -71,13 +70,11 @@ export class JobFieldsController {
           records: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          records: [],
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        records: [],
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
@@ -89,8 +86,10 @@ export class JobFieldsController {
   // }
 
   @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.jobFieldService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const result = await this.jobFieldService.findAll(pagination);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
   }
 
   @Get('?')

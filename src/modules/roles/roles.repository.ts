@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { getPaginationParams } from 'src/common/utils/function';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { Role } from 'src/entities/role.entity';
 
@@ -29,8 +30,9 @@ export class RolesRepository {
   }
 
   async findAll(pagination: IPagination) {
-    return await this.rolesRepository.find();
-    // return await this.rolesRepository.find(pagination);
+    const paginationParams = getPaginationParams(pagination);
+
+    return await this.rolesRepository.findAndCount(paginationParams);
   }
 
   async create(createRole: ICreate<CreateRoleDto>) {

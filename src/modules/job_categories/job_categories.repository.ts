@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
 import { JobCategory } from 'src/entities/job_category.entity';
+import { getPaginationParams } from 'src/common/utils/function';
 
 @Injectable()
 export class JobCategoriesRepository {
@@ -14,8 +15,9 @@ export class JobCategoriesRepository {
   ) {}
 
   async findAll(pagination: IPagination) {
-    return await this.jobCategoryRepository.find();
-    // return await this.jobCategoryRepository.find(pagination);
+    const paginationParams = getPaginationParams(pagination);
+
+    return await this.jobCategoryRepository.findAndCount(paginationParams);
   }
 
   async findById(id: number) {

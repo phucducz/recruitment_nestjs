@@ -10,10 +10,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
+import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateWorkTypeDto } from 'src/dto/work_types/create-work_type.dto';
 import { JobPositionsService } from 'src/services/job_positions.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('job-positions')
 export class JobPositionsController {
@@ -37,14 +38,14 @@ export class JobPositionsController {
           .status(200)
           .json({ statusCode: 200, message: 'Tạo thành công', record: result });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Tạo không thành công',
-          record: null,
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Tạo không thành công',
+        record: null,
+      });
     } catch (error) {
+      console.log(error);
+
       return res.status(401).json({ statusCode: 401, message: error });
     }
   }
@@ -78,8 +79,10 @@ export class JobPositionsController {
   }
 
   @Get('/all')
-  async findAll(@Body() pagination: PaginationDto) {
-    return await this.jobPositionsService.findAll(pagination);
+  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
+    const result = await this.jobPositionsService.findAll(pagination);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
   }
 
   @Get('?')

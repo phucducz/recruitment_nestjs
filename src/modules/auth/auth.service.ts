@@ -47,7 +47,7 @@ export class AuthService {
   async generateToken(id: number, email: string, fullName: string) {
     return await this.jwtService.signAsync(
       { userId: id, email, fullName },
-      { expiresIn: '2m' },
+      { expiresIn: '15m' },
     );
   }
 
