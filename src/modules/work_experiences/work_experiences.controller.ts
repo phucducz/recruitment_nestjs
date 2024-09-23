@@ -8,12 +8,14 @@ import {
   Post,
   Request,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperiencesService } from '../../services/work_experiences.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('work-experiences')
 export class WorkExperiencesController {
@@ -21,6 +23,7 @@ export class WorkExperiencesController {
     private readonly workExperiencesService: WorkExperiencesService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
@@ -34,10 +37,9 @@ export class WorkExperiencesController {
       });
 
       if (!result?.id)
-        return res.status(200).json({
+        return res.status(401).json({
           message: 'Thêm kinh nghiệm việc không thành công!',
           statusCode: 401,
-          ...result,
         });
 
       return res.status(200).json({
@@ -47,7 +49,7 @@ export class WorkExperiencesController {
       });
     } catch (error) {
       console.log(error);
-      return res.status(200).json({
+      return res.status(500).json({
         message: error,
         statusCode: 500,
       });

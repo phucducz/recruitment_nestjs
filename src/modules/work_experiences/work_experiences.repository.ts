@@ -30,13 +30,13 @@ export class WorkExperiencesRepository {
     return (await this.workExperienceRepository.save({
       companyName: variable.companyName,
       createAt: new Date().toString(),
-      createBy: createBy,
+      createBy,
       description: variable.description,
       endDate: variable.endDate,
       isWorking: typeof variable.endDate === null,
       startDate: variable.startDate,
       jobCategory: await this.jobCategoryService.findById(
-        variable.jobCategoriessId,
+        variable.jobCategoriesId,
       ),
       jobPosition: await this.jobPositionService.findById(variable.positionId),
       placement: await this.placementService.findById(variable.placementsId),

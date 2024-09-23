@@ -11,7 +11,7 @@ export class CreateWorkExperienceDto {
 
     @IsNumber()
     @IsNotEmpty()
-    jobCategoriessId: number;
+    jobCategoriesId: number;
 
     @IsString()
     @IsNotEmpty()

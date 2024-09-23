@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
+import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
 
 @Injectable()
 export class AchivementsService {
-  create(createAchivementDto: CreateAchivementDto) {
-    return 'This action adds a new achivement';
+  constructor(
+    @Inject(AchivementsRepository)
+    private readonly achivementRepository: AchivementsRepository,
+  ) {}
+
+  async create(createAchivementDto: ICreate<CreateAchivementDto>) {
+    return await this.achivementRepository.create(createAchivementDto);
   }
 
   findAll() {
