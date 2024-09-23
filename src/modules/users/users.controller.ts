@@ -31,7 +31,7 @@ export class UsersController {
 
     return res.status(200).json({
       message: 'Email tồn tại',
-      isHavePassword: result.password !== null,
+      hasPassword: result.password !== null,
       signInWith: result.password !== null ? 'system' : 'other',
       statusCode: 200,
     });
