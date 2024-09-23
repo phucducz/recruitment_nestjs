@@ -11,9 +11,6 @@ export class WorkType extends BaseEntity {
   @Column({ type: 'varchar', length: 45 })
   title: string;
 
-  @OneToMany(() => WorkExperience, (workExperience) => workExperience.workType)
-  workExperiences: WorkExperience[];
-
   @OneToMany(() => Job, (job) => job.workType)
   jobs: Job[];
 }

@@ -59,11 +59,11 @@ export class User extends BaseEntity {
   isActive: boolean;
 
   @ManyToOne(() => Role, (role) => role.users)
-  @JoinColumn({ name: 'roles_id' })
+  @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
   role: Role;
 
   @ManyToOne(() => JobPosition, (jobPosition) => jobPosition.users)
-  @JoinColumn({ name: 'job_positions_id' })
+  @JoinColumn({ name: 'job_positions_id', referencedColumnName: 'id' })
   jobPosition?: JobPosition;
 
   @OneToMany(() => UsersSkill, (usersSkills) => usersSkills.user)

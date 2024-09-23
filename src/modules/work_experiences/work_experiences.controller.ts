@@ -6,7 +6,10 @@ import {
   Param,
   Patch,
   Post,
+  Request,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
@@ -19,8 +22,36 @@ export class WorkExperiencesController {
   ) {}
 
   @Post()
-  create(@Body() createWorkExperienceDto: CreateWorkExperienceDto) {
-    return this.workExperiencesService.create(createWorkExperienceDto);
+  async create(
+    @Body() createWorkExperienceDto: CreateWorkExperienceDto,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.workExperiencesService.create({
+        variable: createWorkExperienceDto,
+        createBy: request.user.userId,
+      });
+
+      if (!result?.id)
+        return res.status(200).json({
+          message: 'Thêm kinh nghiệm việc không thành công!',
+          statusCode: 401,
+          ...result,
+        });
+
+      return res.status(200).json({
+        message: 'Thêm kinh nghiệm việc làm thành công!',
+        statusCode: 200,
+        ...result,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(200).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
   @Get()

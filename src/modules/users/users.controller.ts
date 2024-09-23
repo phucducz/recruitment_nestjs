@@ -22,19 +22,27 @@ export class UsersController {
 
   @Get('/check-exist-email')
   async checkExistEmail(@Query('email') email: string, @Res() res: Response) {
-    const result = await this.usersService.findByEmail(email);
+    try {
+      const result = await this.usersService.findByEmail(email);
 
-    if (!result)
-      return res
-        .status(404)
-        .json({ message: 'Email không tồn tại!', statusCode: 404 });
+      if (!result)
+        return res
+          .status(404)
+          .json({ message: 'Email không tồn tại!', statusCode: 404 });
 
-    return res.status(200).json({
-      message: 'Email tồn tại',
-      hasPassword: result.password !== null,
-      signInWith: result.password !== null ? 'system' : 'other',
-      statusCode: 200,
-    });
+      return res.status(200).json({
+        message: 'Email tồn tại',
+        hasPassword: result.password !== null,
+        signInWith: result.password !== null ? 'system' : 'other',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(200).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
   // @UseGuards(JwtAuthGuard)

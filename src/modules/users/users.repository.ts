@@ -19,19 +19,6 @@ import { RolesService } from 'src/services/roles.service';
 
 @Injectable()
 export class UsersRepository {
-  private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
-
-  private readonly notShowFields = [
-    'createAt',
-    'createBy',
-    'updateAt',
-    'updateBy',
-  ].reduce((acc, key) => {
-    acc[key] = false;
-
-    return acc;
-  }, {});
-
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
     @Inject(forwardRef(() => JobPositionsService))
@@ -43,6 +30,18 @@ export class UsersRepository {
     @InjectRepository(UsersJobField)
     private readonly usersJobFieldRepository: Repository<UsersJobField>,
   ) {}
+
+  private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
+
+  private readonly notShowFields = [
+    'createAt',
+    'createBy',
+    'updateAt',
+    'updateBy',
+  ].reduce((acc, key) => {
+    acc[key] = false;
+    return acc;
+  }, {});
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({

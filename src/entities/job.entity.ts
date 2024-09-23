@@ -49,28 +49,28 @@ export class Job extends BaseEntity {
   whyLove: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
-  @JoinColumn({ name: 'job_categories_id' })
+  @JoinColumn({ name: 'job_categories_id', referencedColumnName: 'id' })
   jobCategory: JobCategory;
 
   @ManyToOne(() => JobPosition, (jobPosition) => jobPosition.jobs)
-  @JoinColumn({ name: 'job_positions_id' })
+  @JoinColumn({ name: 'job_positions_id', referencedColumnName: 'id' })
   jobPosition: JobPosition;
 
   @ManyToOne(() => JobField, (jobField) => jobField.jobs)
-  @JoinColumn({ name: 'job_fields_id' })
+  @JoinColumn({ name: 'job_fields_id', referencedColumnName: 'id' })
   jobField: JobField;
 
   @OneToMany(() => JobsPlacement, (jobsPlacement) => jobsPlacement.job)
   jobsPlacements: JobsPlacement[];
 
   @ManyToOne(() => User, (user) => user.jobs)
-  @JoinColumn({ name: 'users_id' })
+  @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   user: User;
 
   @OneToMany(() => UsersJob, (usersJob) => usersJob.job)
   usersJobs: UsersJob[];
 
   @ManyToOne(() => WorkType, (workType) => workType.jobs)
-  @JoinColumn({ name: 'work_types_id' })
+  @JoinColumn({ name: 'work_types_id', referencedColumnName: 'id' })
   workType: WorkType;
 }

@@ -3,6 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
 import { Job } from './job.entity';
+import { WorkExperience } from './work_experience.entity';
 
 @Entity({ name: 'job_categories' })
 export class JobCategory extends BaseEntity {
@@ -16,4 +17,10 @@ export class JobCategory extends BaseEntity {
 
   @OneToMany(() => Job, (job) => job.jobCategory)
   jobs: Job[];
+
+  @OneToMany(
+    () => WorkExperience,
+    (workExperience) => workExperience.jobCategory,
+  )
+  workExperience: WorkExperience[];
 }

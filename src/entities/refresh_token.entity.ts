@@ -20,6 +20,6 @@ export class RefreshToken extends BaseEntity {
   status: REFRESH_TOKEN_STATUS;
 
   @ManyToOne(() => User, (user) => user.refreshTokens)
-  @JoinColumn({ name: 'users_id' })
+  @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   user: User;
 }
