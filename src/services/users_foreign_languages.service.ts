@@ -28,16 +28,17 @@ export class UsersForeignLanguagesService {
   }
 
   async update(
-    id: number,
-    updateUsersForeignLanguageDto: IUpdate<UpdateUsersForeignLanguageDto>,
+    updateUsersForeignLanguageDto: IUpdateMTM<
+      UpdateUsersForeignLanguageDto,
+      { foreignLanguagesId: number; usersId: number }
+    >,
   ) {
     return await this.usersForeignLanguagesRepository.update(
-      id,
       updateUsersForeignLanguageDto,
     );
   }
 
-  async remove(id: number) {
-    return await this.usersForeignLanguagesRepository.remove(id);
+  async remove(params: { foreignLanguagesId: number; usersId: number }) {
+    return await this.usersForeignLanguagesRepository.remove(params);
   }
 }

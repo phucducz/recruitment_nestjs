@@ -18,8 +18,11 @@ export class UsersForeignLanguagesRepository {
     @Inject(UsersService) private readonly usersService: UsersService,
   ) {}
 
-  async findById(id: number) {
-    return await this.usersForeignLanguageRepository.findOneBy({ id });
+  async findByCompositePrKey(params: {
+    usersId: number;
+    foreignLanguagesId: number;
+  }) {
+    return await this.usersForeignLanguageRepository.findOneBy(params);
   }
 
   async create(
@@ -43,38 +46,24 @@ export class UsersForeignLanguagesRepository {
   }
 
   async update(
-    id: number,
-    updateUsersForeignLanguageDto: IUpdate<UpdateUsersForeignLanguageDto>,
+    updateUsersForeignLanguageDto: IUpdateMTM<
+      UpdateUsersForeignLanguageDto,
+      { foreignLanguagesId: number; usersId: number }
+    >,
   ) {
-    const { updateBy, variable } = updateUsersForeignLanguageDto;
-    const currentForeignLanguage = await this.findById(id);
-    const result = await this.usersForeignLanguageRepository.update(
-      {
-        id,
-        foreignLanguagesId: currentForeignLanguage.foreignLanguagesId,
-        usersId: currentForeignLanguage.usersId,
-      },
-      {
-        level: variable.level,
-        updateAt: new Date().toString(),
-        updateBy,
-      },
-    );
+    const { updateBy, variable, queries } = updateUsersForeignLanguageDto;
+
+    const result = await this.usersForeignLanguageRepository.update(queries, {
+      level: variable.level,
+      updateAt: new Date().toString(),
+      updateBy,
+    });
 
     return result.affected > 0;
   }
 
-  async remove(id: number) {
-    const currentForeignLanguage = await this.findById(id);
-
-    const result = await this.usersForeignLanguageRepository.delete({
-      id,
-      usersId: currentForeignLanguage.usersId,
-      foreignLanguagesId: currentForeignLanguage.foreignLanguagesId,
-    });
-
-    console.log(result);
-    console.log(new Date().toISOString(), currentForeignLanguage);
+  async remove(params: { foreignLanguagesId: number; usersId: number }) {
+    const result = await this.usersForeignLanguageRepository.delete(params);
 
     return result.affected > 0;
   }

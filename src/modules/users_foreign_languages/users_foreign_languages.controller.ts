@@ -63,17 +63,18 @@ export class UsersForeignLanguagesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':foreignLanguagesId')
   async update(
-    @Param('id') id: string,
+    @Param('foreignLanguagesId') foreignLanguagesId: number,
     @Body() updateUsersForeignLanguageDto: UpdateUsersForeignLanguageDto,
     @Request() request: any,
     @Res() res: Response,
   ) {
     try {
-      const result = await this.usersForeignLanguagesService.update(+id, {
+      const result = await this.usersForeignLanguagesService.update({
         updateBy: request.user.userId,
         variable: updateUsersForeignLanguageDto,
+        queries: { foreignLanguagesId, usersId: request.user.userId },
       });
 
       if (!result)
@@ -96,11 +97,17 @@ export class UsersForeignLanguagesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
+  @Delete(':foreignLanguagesId')
+  async remove(
+    @Param('foreignLanguagesId') foreignLanguagesId: number,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
     try {
-      console.log(`Delete request received at ${new Date().toISOString()} for ID: ${id}`);
-      const result = await this.usersForeignLanguagesService.remove(+id);
+      const result = await this.usersForeignLanguagesService.remove({
+        foreignLanguagesId,
+        usersId: request.user.userId,
+      });
 
       if (!result)
         return res.status(401).json({
