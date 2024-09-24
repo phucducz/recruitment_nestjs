@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Query,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
@@ -55,8 +63,26 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('?')
-  findMe(@Query('email') email: string) {
+  findByEmail(@Query('email') email: string) {
     return this.usersService.findByEmail(email);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/me')
+  async findMe(@Res() res: Response, @Request() request: any) {
+    try {
+      const result = await this.usersService.findById(request.user.userId);
+
+      if (!result?.id)
+        return res
+          .status(404)
+          .json({ message: 'Không thể tìm thấy user', statusCode: 404 });
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: error, statusCode: 500 });
+    }
   }
 
   // @Patch(':id')

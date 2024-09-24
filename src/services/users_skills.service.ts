@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
 import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
+import { UsersSkillsRepository } from 'src/modules/users_skills/users_skills.repository';
 
 @Injectable()
 export class UsersSkillsService {
-  create(createUsersSkillDto: CreateUsersSkillDto) {
-    return 'This action adds a new usersSkill';
+  constructor(
+    @Inject(UsersSkillsRepository)
+    private readonly usersSkillRepository: UsersSkillsRepository,
+  ) {}
+
+  async create(createUsersSkillDto: ICreate<CreateUsersSkillDto>) {
+    return await this.usersSkillRepository.create(createUsersSkillDto);
   }
 
   findAll() {
