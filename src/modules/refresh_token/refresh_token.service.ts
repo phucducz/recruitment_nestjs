@@ -34,9 +34,15 @@ export class RefreshTokenService {
   async refresh(refreshToken: string) {
     const { userId } = await this.authService.getByToken(refreshToken);
 
+    console.log('userId', userId);
+
     await this.verifyRefreshToken(refreshToken);
 
+    console.log(await this.verifyRefreshToken(refreshToken));
+
     const { id, email, fullName } = await this.userService.findById(userId);
+
+    console.log({ id, email, fullName });
 
     return this.authService.generateToken(id, email, fullName);
   }
@@ -45,21 +51,12 @@ export class RefreshTokenService {
     const result =
       await this.refreshTokenRepository.findByRefreshToken(refreshToken);
 
-    console.log('result', result);
-    console.log('refreshToken', refreshToken);
-
     if (!result) throw new Error('Invalid refresh token');
 
     const isExpired = dayjs(result.expiresAt).isValid()
       ? dayjs(result.expiresAt).isSame(dayjs(new Date())) ||
         dayjs(result.expiresAt).isBefore(dayjs(new Date()))
       : false;
-
-    console.log('isExpired var', isExpired);
-    console.log(
-      'isExpired',
-      result.status === REFRESH_TOKEN_STATUS.INVALID || isExpired,
-    );
 
     if (result.status === REFRESH_TOKEN_STATUS.INVALID || isExpired)
       throw new Error('Expired refresh token');

@@ -2,14 +2,16 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { Skill } from 'src/entities/skill.entity';
+import { BaseEntityNotId } from './base.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_skills' })
-export class UsersSkill {
+export class UsersSkill extends BaseEntityNotId {
   @Field()
   @Column({ type: 'int' })
   level: number;
 
+  @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
 
@@ -17,6 +19,7 @@ export class UsersSkill {
   @JoinColumn([{ name: 'users_id', referencedColumnName: 'id' }])
   user: User;
 
+  @Field()
   @PrimaryColumn({ name: 'skills_id', type: 'int' })
   skillsId: number;
 

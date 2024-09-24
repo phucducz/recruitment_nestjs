@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { Achivement } from 'src/entities/achivement.entity';
@@ -75,10 +82,13 @@ export class User extends BaseEntity {
   )
   userLanguages: UsersForeignLanguage[];
 
-  @OneToMany(() => Achivement, (achivement) => achivement.user)
-  achivements: Achivement[];
+  // @OneToMany(() => Achivement, (achivement) => achivement.user)
+  // achivements: Achivement[];
+  @OneToOne(() => Achivement, (achivement) => achivement.user)
+  @JoinColumn({ name: 'achivements_id' })
+  achivement: Achivement;
 
-  @OneToMany(() => WorkExperience, (workExperience) => workExperience)
+  @OneToMany(() => WorkExperience, (workExperience) => workExperience.user)
   workExperiences: WorkExperience[];
 
   @OneToMany(() => UsersJobField, (usersJobField) => usersJobField.user)

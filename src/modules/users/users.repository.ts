@@ -11,7 +11,11 @@ import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { ENTITIES } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { RegisterDto } from 'src/dto/auth/register.dto';
+import { JobCategory } from 'src/entities/job_category.entity';
+import { JobPosition } from 'src/entities/job_position.entity';
+import { Placement } from 'src/entities/placement.entity';
 import { User } from 'src/entities/user.entity';
+import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
@@ -39,38 +43,81 @@ export class UsersRepository {
     'updateAt',
     'updateBy',
   ];
+
   private userRelations = {
     entities: [
       'role',
       'jobPosition',
       'userSkills',
-      'achivements',
+      'achivement',
+      'userLanguages',
+      'workExperiences',
       'userSkills.skill',
+      'userLanguages.foreignLanguage',
+      'workExperiences.placement',
+      'workExperiences.jobPosition',
+      'workExperiences.jobCategory',
     ],
     fields: [
       filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USER_SKILLS, [...this.removeColumns, 'id']),
+      filterColumns(ENTITIES.FIELDS.USER_SKILLS, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, this.removeColumns),
     ],
   };
+
   private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
     ...this.removeColumns,
     'password',
   ]) as FindOptionsSelect<User>;
-  private userSelectFields = this.userRelations.entities.reduce(
+  private foreignLanguageSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
+  private readonly placementFields = filterColumns(
+    ENTITIES.FIELDS.PLACEMENT,
+    this.removeColumns,
+  ) as FindOptionsSelect<Placement>;
+  private readonly positionFields = filterColumns(
+    ENTITIES.FIELDS.JOB_POSITION,
+    this.removeColumns,
+  ) as FindOptionsSelect<JobPosition>;
+  private readonly jobCategoryFields = filterColumns(
+    ENTITIES.FIELDS.JOB_CATEGORY,
+    this.removeColumns,
+  ) as FindOptionsSelect<JobCategory>;
+
+  private userSelectedFields = this.userRelations.entities.reduce(
     (acc, entity, index) => {
       acc[entity] = this.userRelations.fields[index];
       return acc;
     },
     {},
   ) as any;
-  private userSelectColumns = {
-    ...this.userSelectFields,
+
+  private skillSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
+
+  private readonly userSelectColumns = {
+    ...this.userSelectedFields,
     ...this.userFields,
     userSkills: {
-      ...this.userSelectFields.userSkills,
-      skill: { id: true, title: true },
+      ...this.userSelectedFields.userSkills,
+      skill: this.skillSelectedFields,
+    },
+    userLanguages: {
+      ...this.userSelectedFields.userLanguages,
+      foreignLanguage: this.foreignLanguageSelectedFields,
+    },
+    workExperiences: {
+      ...this.userSelectedFields.workExperiences,
+      placement: this.placementFields,
+      jobPosition: this.positionFields,
+      jobCategory: this.jobCategoryFields,
     },
   };
 
@@ -83,6 +130,8 @@ export class UsersRepository {
   }
 
   async findById(id: number): Promise<User | null> {
+    console.log(this.userSelectColumns);
+
     return this.userRepository.findOne({
       where: { id: id },
       relations: this.userRelations.entities,
@@ -95,10 +144,12 @@ export class UsersRepository {
   ): Promise<[Omit<User, 'password'>[], number]> {
     const paginationParams = getPaginationParams(pagination);
 
+    console.log(this.userSelectColumns);
+
     return this.userRepository.findAndCount({
       ...paginationParams,
       relations: this.userRelations.entities,
-      select: this.userSelectColumns,
+      // select: this.userSelectColumns,
     });
   }
 

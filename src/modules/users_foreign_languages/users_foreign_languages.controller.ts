@@ -41,9 +41,11 @@ export class UsersForeignLanguagesController {
           .status(401)
           .json({ message: 'Thêm ngoại ngữ thất bại', statusCode: 401 });
 
-      return res
-        .status(200)
-        .json({ message: 'Thêm ngoại ngữ thành công', statusCode: 200 });
+      return res.status(200).json({
+        message: 'Thêm ngoại ngữ thành công',
+        statusCode: 200,
+        ...result,
+      });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: error, statusCode: 500 });
@@ -60,19 +62,69 @@ export class UsersForeignLanguagesController {
     return this.usersForeignLanguagesService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @UseGuards(JwtAuthGuard)
+  @Patch(':foreignLanguagesId')
+  async update(
+    @Param('foreignLanguagesId') foreignLanguagesId: number,
     @Body() updateUsersForeignLanguageDto: UpdateUsersForeignLanguageDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.usersForeignLanguagesService.update(
-      +id,
-      updateUsersForeignLanguageDto,
-    );
+    try {
+      const result = await this.usersForeignLanguagesService.update({
+        updateBy: request.user.userId,
+        variable: updateUsersForeignLanguageDto,
+        queries: { foreignLanguagesId, usersId: request.user.userId },
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật trình độ ngoại ngữ không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật trình độ ngoại ngữ thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersForeignLanguagesService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Delete(':foreignLanguagesId')
+  async remove(
+    @Param('foreignLanguagesId') foreignLanguagesId: number,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.usersForeignLanguagesService.remove({
+        foreignLanguagesId,
+        usersId: request.user.userId,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xóa trình độ ngoại ngữ không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Xóa trình độ ngoại ngữ thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 }

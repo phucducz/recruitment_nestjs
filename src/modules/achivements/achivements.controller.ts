@@ -64,12 +64,34 @@ export class AchivementsController {
     return this.achivementsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateAchivementDto: UpdateAchivementDto,
+    @Res() res: Response,
+    @Request() request: any,
   ) {
-    return this.achivementsService.update(+id, updateAchivementDto);
+    try {
+      const result = await this.achivementsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateAchivementDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật thành tích không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật thành tích thành công!',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: error, statusCode: 500 });
+    }
   }
 
   @Delete(':id')

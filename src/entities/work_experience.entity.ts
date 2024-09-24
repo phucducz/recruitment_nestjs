@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, Timestamp } from 'typeorm';
 
+import { Field } from 'src/common/decorators/field.decorator';
 import { Placement } from 'src/entities/placement.entity';
 import { BaseEntity } from './base.entity';
 import { JobCategory } from './job_category.entity';
@@ -8,15 +9,19 @@ import { User } from './user.entity';
 
 @Entity({ name: 'work_experiences' })
 export class WorkExperience extends BaseEntity {
+  @Field()
   @Column({ type: 'varchar', length: 100, name: 'company_name' })
   companyName: string;
 
+  @Field()
   @Column({ type: 'boolean', default: false, name: 'is_working' })
   isWorking: boolean;
 
+  @Field()
   @Column({ type: 'timestamp without time zone', name: 'start_date' })
   startDate: Timestamp;
 
+  @Field()
   @Column({
     type: 'timestamp without time zone',
     nullable: true,
@@ -24,6 +29,7 @@ export class WorkExperience extends BaseEntity {
   })
   endDate: Timestamp;
 
+  @Field()
   @Column({ type: 'varchar', length: 1000, nullable: true })
   description: string;
 
