@@ -27,14 +27,17 @@ export class UsersForeignLanguagesService {
     return `This action returns a #${id} usersForeignLanguage`;
   }
 
-  update(
+  async update(
     id: number,
-    updateUsersForeignLanguageDto: UpdateUsersForeignLanguageDto,
+    updateUsersForeignLanguageDto: IUpdate<UpdateUsersForeignLanguageDto>,
   ) {
-    return `This action updates a #${id} usersForeignLanguage`;
+    return await this.usersForeignLanguagesRepository.update(
+      id,
+      updateUsersForeignLanguageDto,
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usersForeignLanguage`;
+  async remove(id: number) {
+    return await this.usersForeignLanguagesRepository.remove(id);
   }
 }

@@ -41,13 +41,11 @@ export class UsersForeignLanguagesController {
           .status(401)
           .json({ message: 'Thêm ngoại ngữ thất bại', statusCode: 401 });
 
-      return res
-        .status(200)
-        .json({
-          message: 'Thêm ngoại ngữ thành công',
-          statusCode: 200,
-          ...result,
-        });
+      return res.status(200).json({
+        message: 'Thêm ngoại ngữ thành công',
+        statusCode: 200,
+        ...result,
+      });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: error, statusCode: 500 });
@@ -64,19 +62,62 @@ export class UsersForeignLanguagesController {
     return this.usersForeignLanguagesService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateUsersForeignLanguageDto: UpdateUsersForeignLanguageDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.usersForeignLanguagesService.update(
-      +id,
-      updateUsersForeignLanguageDto,
-    );
+    try {
+      const result = await this.usersForeignLanguagesService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateUsersForeignLanguageDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật trình độ ngoại ngữ không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật trình độ ngoại ngữ thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersForeignLanguagesService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      console.log(`Delete request received at ${new Date().toISOString()} for ID: ${id}`);
+      const result = await this.usersForeignLanguagesService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xóa trình độ ngoại ngữ không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Xóa trình độ ngoại ngữ thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 }

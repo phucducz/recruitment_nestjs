@@ -63,10 +63,7 @@ export class UsersRepository {
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.USER_SKILLS, [...this.removeColumns, 'id']),
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, [
-        ...this.removeColumns,
-        'id',
-      ]),
+      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, this.removeColumns),
     ],
   };
@@ -133,8 +130,6 @@ export class UsersRepository {
   }
 
   async findById(id: number): Promise<User | null> {
-    console.log(this.userSelectColumns);
-
     return this.userRepository.findOne({
       where: { id: id },
       relations: this.userRelations.entities,

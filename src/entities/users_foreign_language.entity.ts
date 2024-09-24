@@ -2,10 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
+import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_foreign_languages' })
-export class UsersForeignLanguage {
+export class UsersForeignLanguage extends BaseEntity {
   @Field()
   @Column({ type: 'int' })
   level: number;
