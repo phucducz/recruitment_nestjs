@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -60,8 +61,9 @@ export class UsersSkillsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch()
+  @Patch('?')
   async update(
+    @Query('skillsId') skillsId: number,
     @Body() updateUsersSkillDto: UpdateUsersSkillDto,
     @Request() request: any,
     @Res() res: Response,
@@ -70,6 +72,7 @@ export class UsersSkillsController {
       const result = await this.usersSkillsService.update({
         updateBy: request.user.userId,
         variable: updateUsersSkillDto,
+        queries: { skillsId, usersId: request.user.userId },
       });
 
       if (!result)
@@ -91,8 +94,11 @@ export class UsersSkillsController {
     }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersSkillsService.remove(+id);
+  @Delete('?')
+  remove(
+    @Query('skillsId') skillsId: number,
+    @Query('usersId') usersId: number,
+  ) {
+    return this.usersSkillsService.remove({ skillsId, usersId });
   }
 }

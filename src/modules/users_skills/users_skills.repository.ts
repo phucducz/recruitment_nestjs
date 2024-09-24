@@ -38,17 +38,23 @@ export class UsersSkillsRepository {
     })) as UsersSkill;
   }
 
-  async update(updateUsersSkillDto: IUpdate<UpdateUsersSkillDto>) {
-    const { updateBy, variable } = updateUsersSkillDto;
-    
-    const usersSkill = await this.findByCompositePrKey({
-      skillsId: variable.skillsId,
-      usersId: updateBy,
-    });
+  async update(
+    updateUsersSkillDto: IUpdateMTM<
+      UpdateUsersSkillDto,
+      { skillsId: number; usersId: number }
+    >,
+  ) {
+    const { variable, queries } = updateUsersSkillDto;
     const result = await this.usersSkillRepository.update(
-      { usersId: usersSkill.usersId, skillsId: usersSkill.skillsId },
+      { usersId: queries.usersId, skillsId: queries.skillsId },
       { level: variable.level },
     );
+
+    return result.affected > 0;
+  }
+
+  async remove(params: { skillsId: number; usersId: number }) {
+    const result = await this.usersSkillRepository.delete(params);
 
     return result.affected > 0;
   }

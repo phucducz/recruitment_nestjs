@@ -23,11 +23,16 @@ export class UsersSkillsService {
     return `This action returns a #${id} usersSkill`;
   }
 
-  async update(updateUsersSkillDto: IUpdate<UpdateUsersSkillDto>) {
+  async update(
+    updateUsersSkillDto: IUpdateMTM<
+      UpdateUsersSkillDto,
+      { skillsId: number; usersId: number }
+    >,
+  ) {
     return await this.usersSkillRepository.update(updateUsersSkillDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usersSkill`;
+  remove(params: { skillsId: number; usersId: number }) {
+    return `This action removes a # usersSkill`;
   }
 }
