@@ -44,10 +44,14 @@ export class UsersSkillsRepository {
       { skillsId: number; usersId: number }
     >,
   ) {
-    const { variable, queries } = updateUsersSkillDto;
+    const { updateBy, variable, queries } = updateUsersSkillDto;
     const result = await this.usersSkillRepository.update(
       { usersId: queries.usersId, skillsId: queries.skillsId },
-      { level: variable.level },
+      {
+        level: variable.level,
+        updateAt: new Date().toString(),
+        updateBy: updateBy,
+      },
     );
 
     return result.affected > 0;

@@ -32,7 +32,7 @@ export class UsersSkillsService {
     return await this.usersSkillRepository.update(updateUsersSkillDto);
   }
 
-  remove(params: { skillsId: number; usersId: number }) {
-    return `This action removes a # usersSkill`;
+  async remove(params: { skillsId: number; usersId: number }) {
+    return await this.usersSkillRepository.remove(params);
   }
 }

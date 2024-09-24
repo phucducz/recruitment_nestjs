@@ -61,9 +61,9 @@ export class UsersSkillsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('?')
+  @Patch(':skillsId')
   async update(
-    @Query('skillsId') skillsId: number,
+    @Param('skillsId') skillsId: number,
     @Body() updateUsersSkillDto: UpdateUsersSkillDto,
     @Request() request: any,
     @Res() res: Response,
@@ -94,11 +94,35 @@ export class UsersSkillsController {
     }
   }
 
-  @Delete('?')
-  remove(
-    @Query('skillsId') skillsId: number,
-    @Query('usersId') usersId: number,
+  @UseGuards(JwtAuthGuard)
+  @Delete(':skillsId')
+  async remove(
+    @Param('skillsId') skillsId: number,
+    @Res() res: Response,
+    @Request() request: any,
   ) {
-    return this.usersSkillsService.remove({ skillsId, usersId });
+    try {
+      const result = await this.usersSkillsService.remove({
+        skillsId,
+        usersId: request.user.userId,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xóa kỹ năng không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Xóa kỹ năng thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 }
