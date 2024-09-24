@@ -27,7 +27,7 @@ export class WorkExperiencesService {
     return `This action updates a #${id} workExperience`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workExperience`;
+  async remove(id: number) {
+    return await this.workExperiencesRepository.remove(id);
   }
 }

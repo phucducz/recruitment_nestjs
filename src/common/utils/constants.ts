@@ -11,6 +11,8 @@ import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkType } from 'src/entities/work_type.entity';
 import { getEntityFields } from './function';
+import { WorkExperience } from 'src/entities/work_experience.entity';
+import { Placement } from 'src/entities/placement.entity';
 
 export const ENTITIES = {
   FIELDS: {
@@ -26,5 +28,7 @@ export const ENTITIES = {
     SKILLS: getEntityFields(Skill),
     USERS_FOREIGN_LANGUAGE: getEntityFields(UsersForeignLanguage),
     FOREIGN_LANGUAGE: getEntityFields(ForeignLanguage),
+    WORK_EXPERIENCE: getEntityFields(WorkExperience),
+    PLACEMENT: getEntityFields(Placement),
   },
 };

@@ -88,7 +88,7 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'achivements_id' })
   achivement: Achivement;
 
-  @OneToMany(() => WorkExperience, (workExperience) => workExperience)
+  @OneToMany(() => WorkExperience, (workExperience) => workExperience.user)
   workExperiences: WorkExperience[];
 
   @OneToMany(() => UsersJobField, (usersJobField) => usersJobField.user)

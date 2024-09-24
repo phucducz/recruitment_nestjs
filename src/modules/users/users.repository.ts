@@ -11,6 +11,9 @@ import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { ENTITIES } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { RegisterDto } from 'src/dto/auth/register.dto';
+import { JobCategory } from 'src/entities/job_category.entity';
+import { JobPosition } from 'src/entities/job_position.entity';
+import { Placement } from 'src/entities/placement.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
@@ -48,8 +51,12 @@ export class UsersRepository {
       'userSkills',
       'achivement',
       'userLanguages',
+      'workExperiences',
       'userSkills.skill',
       'userLanguages.foreignLanguage',
+      'workExperiences.placement',
+      'workExperiences.jobPosition',
+      'workExperiences.jobCategory',
     ],
     fields: [
       filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
@@ -60,6 +67,7 @@ export class UsersRepository {
         ...this.removeColumns,
         'id',
       ]),
+      filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, this.removeColumns),
     ],
   };
 
@@ -67,6 +75,22 @@ export class UsersRepository {
     ...this.removeColumns,
     'password',
   ]) as FindOptionsSelect<User>;
+  private foreignLanguageSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
+  private readonly placementFields = filterColumns(
+    ENTITIES.FIELDS.PLACEMENT,
+    this.removeColumns,
+  ) as FindOptionsSelect<Placement>;
+  private readonly positionFields = filterColumns(
+    ENTITIES.FIELDS.JOB_POSITION,
+    this.removeColumns,
+  ) as FindOptionsSelect<JobPosition>;
+  private readonly jobCategoryFields = filterColumns(
+    ENTITIES.FIELDS.JOB_CATEGORY,
+    this.removeColumns,
+  ) as FindOptionsSelect<JobCategory>;
 
   private userSelectedFields = this.userRelations.entities.reduce(
     (acc, entity, index) => {
@@ -75,11 +99,6 @@ export class UsersRepository {
     },
     {},
   ) as any;
-
-  private foreignLanguageSelectedFields = filterColumns(
-    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
-    this.removeColumns,
-  ) as FindOptionsSelect<UsersForeignLanguage>;
 
   private skillSelectedFields = filterColumns(
     ENTITIES.FIELDS.FOREIGN_LANGUAGE,
@@ -97,6 +116,12 @@ export class UsersRepository {
       ...this.userSelectedFields.userLanguages,
       foreignLanguage: this.foreignLanguageSelectedFields,
     },
+    workExperiences: {
+      ...this.userSelectedFields.workExperiences,
+      placement: this.placementFields,
+      jobPosition: this.positionFields,
+      jobCategory: this.jobCategoryFields,
+    },
   };
 
   async findByEmail(email: string): Promise<User | null> {
@@ -108,6 +133,8 @@ export class UsersRepository {
   }
 
   async findById(id: number): Promise<User | null> {
+    console.log(this.userSelectColumns);
+
     return this.userRepository.findOne({
       where: { id: id },
       relations: this.userRelations.entities,

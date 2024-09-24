@@ -75,7 +75,26 @@ export class WorkExperiencesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.workExperiencesService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.workExperiencesService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xóa kinh nghiệm làm việc không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Xóa kinh nghiệm làm việc thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 }

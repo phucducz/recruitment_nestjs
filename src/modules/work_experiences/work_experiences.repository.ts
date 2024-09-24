@@ -43,4 +43,10 @@ export class WorkExperiencesRepository {
       user: await this.userService.findById(createBy),
     })) as WorkExperience;
   }
+
+  async remove(id: number) {
+    const result = await this.workExperienceRepository.delete(id);
+
+    return result.affected > 0;
+  }
 }

@@ -34,9 +34,15 @@ export class RefreshTokenService {
   async refresh(refreshToken: string) {
     const { userId } = await this.authService.getByToken(refreshToken);
 
+    console.log('userId', userId);
+
     await this.verifyRefreshToken(refreshToken);
 
+    console.log(await this.verifyRefreshToken(refreshToken));
+
     const { id, email, fullName } = await this.userService.findById(userId);
+
+    console.log({ id, email, fullName });
 
     return this.authService.generateToken(id, email, fullName);
   }
