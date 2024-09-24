@@ -6,10 +6,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 
-import { userKeys } from 'src/common/utils/constants';
-import { getPaginationParams } from 'src/common/utils/function';
+import { ENTITIES } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
@@ -33,52 +33,46 @@ export class UsersRepository {
 
   private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
 
-  private readonly notShowFields = [
+  private readonly removeColumns = [
     'createAt',
     'createBy',
     'updateAt',
     'updateBy',
-  ].reduce((acc, key) => {
-    acc[key] = false;
-    return acc;
-  }, {});
+  ];
+  private userRelations = {
+    entities: ['role', 'jobPosition', 'userSkills', 'achivements'],
+    fields: [
+      filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.USER_SKILLS, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
+    ],
+  };
+  private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
+    ...this.removeColumns,
+    'password',
+  ]) as FindOptionsSelect<User>;
+  private userSelectColumns = {
+    ...this.userRelations.entities.reduce((acc, entity, index) => {
+      acc[entity] = this.userRelations.fields[index];
+      return acc;
+    }, {}),
+    ...this.userFields,
+  };
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: email },
-      relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
-      select: {
-        role: {
-          id: true,
-          title: true,
-          ...this.notShowFields,
-        },
-        jobPosition: {
-          id: true,
-          title: true,
-          ...this.notShowFields,
-        },
-        achivements: {
-          id: true,
-          description: true,
-          ...this.notShowFields,
-        },
-      },
+      relations: this.userRelations.entities,
+      select: this.userSelectColumns,
     });
   }
 
   async findById(id: number): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id: id },
-      relations: ['role', 'jobPosition', 'userSkills', 'achivements'],
-      select: {
-        ...userKeys.reduce((acc, key) => {
-          if (key === 'password') acc[key] = false;
-          else acc[key] = true;
-
-          return acc;
-        }, {}),
-      },
+      relations: this.userRelations.entities,
+      select: this.userSelectColumns,
     });
   }
 
@@ -89,14 +83,8 @@ export class UsersRepository {
 
     return this.userRepository.findAndCount({
       ...paginationParams,
-      select: {
-        ...userKeys.reduce((acc, key) => {
-          if (key === 'password') acc[key] = false;
-          else acc[key] = true;
-
-          return acc;
-        }, {}),
-      },
+      relations: this.userRelations.entities,
+      select: this.userSelectColumns,
     });
   }
 
