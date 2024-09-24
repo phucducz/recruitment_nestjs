@@ -1,5 +1,6 @@
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { BaseEntity } from 'src/entities/base.entity';
+import { MANY_TO_MANY_ENTITIES } from './constants';
 
 export const getPaginationParams = (
   params: IPagination,
@@ -54,10 +55,14 @@ export const snakeToCamelCase = (fieldName: string) => {
 };
 
 export const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
-  const baseFields =
-    Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
   const entityFields =
     Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
+
+  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
+
+  const baseFields =
+    Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
+
   return [...new Set([...baseFields, ...entityFields])];
 };
 

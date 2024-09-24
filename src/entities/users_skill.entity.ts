@@ -10,6 +10,7 @@ export class UsersSkill {
   @Column({ type: 'int' })
   level: number;
 
+  @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
 
@@ -17,6 +18,7 @@ export class UsersSkill {
   @JoinColumn([{ name: 'users_id', referencedColumnName: 'id' }])
   user: User;
 
+  @Field()
   @PrimaryColumn({ name: 'skills_id', type: 'int' })
   skillsId: number;
 

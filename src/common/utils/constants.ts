@@ -14,6 +14,8 @@ import { getEntityFields } from './function';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { Placement } from 'src/entities/placement.entity';
 
+export const MANY_TO_MANY_ENTITIES = ['UsersForeignLanguage', 'UsersSkill',]
+
 export const ENTITIES = {
   FIELDS: {
     USER: getEntityFields(User),

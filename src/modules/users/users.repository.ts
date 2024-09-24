@@ -61,7 +61,7 @@ export class UsersRepository {
     fields: [
       filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USER_SKILLS, [...this.removeColumns, 'id']),
+      filterColumns(ENTITIES.FIELDS.USER_SKILLS, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, this.removeColumns),
@@ -130,6 +130,8 @@ export class UsersRepository {
   }
 
   async findById(id: number): Promise<User | null> {
+    console.log(this.userSelectColumns);
+
     return this.userRepository.findOne({
       where: { id: id },
       relations: this.userRelations.entities,
@@ -142,10 +144,12 @@ export class UsersRepository {
   ): Promise<[Omit<User, 'password'>[], number]> {
     const paginationParams = getPaginationParams(pagination);
 
+    console.log(this.userSelectColumns);
+
     return this.userRepository.findAndCount({
       ...paginationParams,
       relations: this.userRelations.entities,
-      select: this.userSelectColumns,
+      // select: this.userSelectColumns,
     });
   }
 

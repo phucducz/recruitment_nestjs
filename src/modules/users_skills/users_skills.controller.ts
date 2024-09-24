@@ -59,12 +59,36 @@ export class UsersSkillsController {
     return this.usersSkillsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async update(
     @Body() updateUsersSkillDto: UpdateUsersSkillDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.usersSkillsService.update(+id, updateUsersSkillDto);
+    try {
+      const result = await this.usersSkillsService.update({
+        updateBy: request.user.userId,
+        variable: updateUsersSkillDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật kỹ năng không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật kỹ năng thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
   @Delete(':id')

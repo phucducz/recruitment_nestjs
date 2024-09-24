@@ -23,8 +23,8 @@ export class UsersSkillsService {
     return `This action returns a #${id} usersSkill`;
   }
 
-  update(id: number, updateUsersSkillDto: UpdateUsersSkillDto) {
-    return `This action updates a #${id} usersSkill`;
+  async update(updateUsersSkillDto: IUpdate<UpdateUsersSkillDto>) {
+    return await this.usersSkillRepository.update(updateUsersSkillDto);
   }
 
   remove(id: number) {
