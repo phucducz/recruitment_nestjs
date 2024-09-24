@@ -1,7 +1,6 @@
 import { Body, Controller, Inject, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 
-import { getCookieValue } from 'src/common/utils/cookie.utils';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
@@ -45,13 +44,10 @@ export class AuthController {
   async create(
     @Body() _: RefreshAccessTokenDto,
     @Res() res: Response,
-    @Request() request: Request,
+    @Request() request: any,
   ) {
     try {
-      const refreshToken = getCookieValue(
-        request.headers['set-cookie'][0],
-        'refreshToken=',
-      );
+      const refreshToken = request.headers.cookies;
 
       if (!refreshToken)
         return res
@@ -81,13 +77,10 @@ export class AuthController {
   async logout(
     @Body() _: LogOutDto,
     @Res() res: Response,
-    @Request() request: Request,
+    @Request() request: any,
   ) {
     try {
-      const refreshToken = getCookieValue(
-        request.headers['set-cookie'][0],
-        'refreshToken=',
-      );
+      const refreshToken = request.headers.cookies;
 
       if (!refreshToken)
         return res

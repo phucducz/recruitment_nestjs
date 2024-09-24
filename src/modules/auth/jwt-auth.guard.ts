@@ -36,9 +36,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const token = this.extractTokenFromRequest(request);
       const refreshToken = this.extractRefreshTokenFromCookie(request);
 
-      console.log(token);
-      console.log(refreshToken);
-
       if (!token) throw new UnauthorizedException('No token provided');
 
       await this.authService.compareToken(token, refreshToken);
@@ -48,6 +45,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const payload = await this.jwtService.verifyAsync(token, {
           secret: this.configService.get<string>('JWT_SECRET'),
         });
+
         request['user'] = payload;
       } catch {
         throw new UnauthorizedException('Invalid token');

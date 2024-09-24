@@ -45,21 +45,12 @@ export class RefreshTokenService {
     const result =
       await this.refreshTokenRepository.findByRefreshToken(refreshToken);
 
-    console.log('result', result);
-    console.log('refreshToken', refreshToken);
-
     if (!result) throw new Error('Invalid refresh token');
 
     const isExpired = dayjs(result.expiresAt).isValid()
       ? dayjs(result.expiresAt).isSame(dayjs(new Date())) ||
         dayjs(result.expiresAt).isBefore(dayjs(new Date()))
       : false;
-
-    console.log('isExpired var', isExpired);
-    console.log(
-      'isExpired',
-      result.status === REFRESH_TOKEN_STATUS.INVALID || isExpired,
-    );
 
     if (result.status === REFRESH_TOKEN_STATUS.INVALID || isExpired)
       throw new Error('Expired refresh token');

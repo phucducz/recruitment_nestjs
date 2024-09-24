@@ -43,7 +43,11 @@ export class UsersForeignLanguagesController {
 
       return res
         .status(200)
-        .json({ message: 'Thêm ngoại ngữ thành công', statusCode: 200 });
+        .json({
+          message: 'Thêm ngoại ngữ thành công',
+          statusCode: 200,
+          ...result,
+        });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: error, statusCode: 500 });

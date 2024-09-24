@@ -12,6 +12,7 @@ import { ENTITIES } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { User } from 'src/entities/user.entity';
+import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
@@ -39,38 +40,62 @@ export class UsersRepository {
     'updateAt',
     'updateBy',
   ];
+
   private userRelations = {
     entities: [
       'role',
       'jobPosition',
       'userSkills',
-      'achivements',
+      'achivement',
+      'userLanguages',
       'userSkills.skill',
+      'userLanguages.foreignLanguage',
     ],
     fields: [
       filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.USER_SKILLS, [...this.removeColumns, 'id']),
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, [
+        ...this.removeColumns,
+        'id',
+      ]),
     ],
   };
+
   private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
     ...this.removeColumns,
     'password',
   ]) as FindOptionsSelect<User>;
-  private userSelectFields = this.userRelations.entities.reduce(
+
+  private userSelectedFields = this.userRelations.entities.reduce(
     (acc, entity, index) => {
       acc[entity] = this.userRelations.fields[index];
       return acc;
     },
     {},
   ) as any;
-  private userSelectColumns = {
-    ...this.userSelectFields,
+
+  private foreignLanguageSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
+
+  private skillSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
+
+  private readonly userSelectColumns = {
+    ...this.userSelectedFields,
     ...this.userFields,
     userSkills: {
-      ...this.userSelectFields.userSkills,
-      skill: { id: true, title: true },
+      ...this.userSelectedFields.userSkills,
+      skill: this.skillSelectedFields,
+    },
+    userLanguages: {
+      ...this.userSelectedFields.userLanguages,
+      foreignLanguage: this.foreignLanguageSelectedFields,
     },
   };
 
