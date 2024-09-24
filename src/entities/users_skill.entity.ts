@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Skill } from 'src/entities/skill.entity';
 import { BaseEntity } from './base.entity';
@@ -6,6 +6,9 @@ import { User } from './user.entity';
 
 @Entity({ name: 'users_skills' })
 export class UsersSkill extends BaseEntity {
+  @Column({ type: 'int' })
+  level: number;
+
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   users_id: number;
 

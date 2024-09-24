@@ -9,22 +9,6 @@ import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkType } from 'src/entities/work_type.entity';
 import { getEntityFields } from './function';
 
-export const userKeys = [
-  'id',
-  'createBy',
-  'createAt',
-  'updateBy',
-  'updateAt',
-  'fullName',
-  'phoneNumber',
-  'email',
-  'password',
-  'avatarUrl',
-  'companyName',
-  'companyUrl',
-  'isActive',
-];
-
 export const ENTITIES = {
   FIELDS: {
     USER: getEntityFields(User),
