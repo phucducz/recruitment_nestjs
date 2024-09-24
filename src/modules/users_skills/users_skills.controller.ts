@@ -34,7 +34,7 @@ export class UsersSkillsController {
         variable: createUsersSkillDto,
       });
 
-      if (!result?.id)
+      if (!result)
         return res
           .status(401)
           .json({ message: 'Thêm kỹ năng không thành công', statusCode: 401 });

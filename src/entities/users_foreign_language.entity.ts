@@ -9,14 +9,14 @@ export class UsersForeignLanguage {
   level: number;
 
   @PrimaryColumn({ name: 'users_id', type: 'int' })
-  users_id: number;
+  usersId: number;
 
   @ManyToOne(() => User, (user) => user.userLanguages)
   @JoinColumn([{ name: 'users_id', referencedColumnName: 'id' }])
   user: User;
 
   @PrimaryColumn({ name: 'foreign_languages_id', type: 'int' })
-  foreign_languages_id: number;
+  foreignLanguagesId: number;
 
   @ManyToOne(() => ForeignLanguage, (foreignLanguage) => foreignLanguage)
   @JoinColumn([{ name: 'foreign_languages_id', referencedColumnName: 'id' }])

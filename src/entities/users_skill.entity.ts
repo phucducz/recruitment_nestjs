@@ -1,11 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Skill } from 'src/entities/skill.entity';
-import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_skills' })
-export class UsersSkill extends BaseEntity {
+export class UsersSkill {
   @Column({ type: 'int' })
   level: number;
 
