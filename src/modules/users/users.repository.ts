@@ -40,11 +40,17 @@ export class UsersRepository {
     'updateBy',
   ];
   private userRelations = {
-    entities: ['role', 'jobPosition', 'userSkills', 'achivements'],
+    entities: [
+      'role',
+      'jobPosition',
+      'userSkills',
+      'achivements',
+      'userSkills.skill',
+    ],
     fields: [
       filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USER_SKILLS, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.USER_SKILLS, [...this.removeColumns, 'id']),
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
     ],
   };
@@ -52,12 +58,20 @@ export class UsersRepository {
     ...this.removeColumns,
     'password',
   ]) as FindOptionsSelect<User>;
-  private userSelectColumns = {
-    ...this.userRelations.entities.reduce((acc, entity, index) => {
+  private userSelectFields = this.userRelations.entities.reduce(
+    (acc, entity, index) => {
       acc[entity] = this.userRelations.fields[index];
       return acc;
-    }, {}),
+    },
+    {},
+  ) as any;
+  private userSelectColumns = {
+    ...this.userSelectFields,
     ...this.userFields,
+    userSkills: {
+      ...this.userSelectFields.userSkills,
+      skill: { id: true, title: true },
+    },
   };
 
   async findByEmail(email: string): Promise<User | null> {
