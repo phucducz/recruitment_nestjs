@@ -4,6 +4,7 @@ import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { Role } from 'src/entities/role.entity';
+import { Skill } from 'src/entities/skill.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkType } from 'src/entities/work_type.entity';
@@ -20,5 +21,6 @@ export const ENTITIES = {
     ROLE: getEntityFields(Role),
     USER_SKILLS: getEntityFields(UsersSkill),
     ACHIVEMENT: getEntityFields(Achivement),
+    SKILLS: getEntityFields(Skill),
   },
 };

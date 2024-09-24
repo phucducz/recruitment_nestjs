@@ -10,7 +10,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -23,6 +23,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3005);
+  await app.listen(3002);
 }
 bootstrap();

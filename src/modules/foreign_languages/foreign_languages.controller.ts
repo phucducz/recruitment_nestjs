@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { CreateForeignLanguageDto } from 'src/dto/foreign_languages/create-foreign_language.dto';
@@ -28,9 +29,9 @@ export class ForeignLanguagesController {
     return this.foreignLanguagesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.foreignLanguagesService.findOne(+id);
+  @Get('?')
+  findOne(@Query('id') id: number) {
+    return this.foreignLanguagesService.findById(id);
   }
 
   @Patch(':id')

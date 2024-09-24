@@ -53,7 +53,7 @@ export const snakeToCamelCase = (fieldName: string) => {
   return fieldName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 };
 
-export const getEntityFields = (entity: typeof BaseEntity): string[] => {
+export const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
   const baseFields =
     Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
   const entityFields =

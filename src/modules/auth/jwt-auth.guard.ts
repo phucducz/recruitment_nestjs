@@ -31,14 +31,19 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
       const request = context.switchToHttp().getRequest();
+      console.log(request);
+
       const token = this.extractTokenFromRequest(request);
       const refreshToken = this.extractRefreshTokenFromCookie(request);
+
+      console.log(token);
+      console.log(refreshToken);
 
       if (!token) throw new UnauthorizedException('No token provided');
 
       await this.authService.compareToken(token, refreshToken);
       await this.refreshTokenService.verifyRefreshToken(refreshToken);
-      
+
       try {
         const payload = await this.jwtService.verifyAsync(token, {
           secret: this.configService.get<string>('JWT_SECRET'),
@@ -61,13 +66,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (cookieToken) return cookieToken;
 
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    console.log('token', token);
     return type === 'Bearer' ? token : undefined;
   }
 
   private extractRefreshTokenFromCookie(request: any): string | undefined {
-    console.log('refresh token', request.headers.cookies);
-
     // return getCookieValue(request.headers.cookies, 'refreshToken');
     return request.headers.cookies;
   }
