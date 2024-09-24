@@ -23,8 +23,8 @@ export class AchivementsService {
     return `This action returns a #${id} achivement`;
   }
 
-  update(id: number, updateAchivementDto: UpdateAchivementDto) {
-    return `This action updates a #${id} achivement`;
+  async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {
+    return await this.achivementRepository.update(id, updateAchivementDto);
   }
 
   remove(id: number) {

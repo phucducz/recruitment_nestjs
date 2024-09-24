@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
+import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { Achivement } from 'src/entities/achivement.entity';
 import { UsersService } from 'src/services/users.service';
 
@@ -23,5 +24,17 @@ export class AchivementsRepository {
       description: variable.description,
       user: await this.userService.findById(createBy),
     });
+  }
+
+  async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {
+    const { updateBy, variable } = updateAchivementDto;
+
+    const { affected } = await this.achivementRepository.update(id, {
+      description: variable.description,
+      updateAt: new Date().toString(),
+      updateBy,
+    });
+
+    return affected > 0;
   }
 }

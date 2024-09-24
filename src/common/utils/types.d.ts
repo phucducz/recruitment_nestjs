@@ -13,6 +13,16 @@ interface ICreateMany<T> {
   createBy: number;
 }
 
+interface IUpdate<T> {
+  variable: T;
+  updateBy: number;
+}
+
+interface IUpdateMany<T> {
+  variables: T[];
+  updateBy: number;
+}
+
 interface IPagination {
   page?: number;
   pageSize?: number;
