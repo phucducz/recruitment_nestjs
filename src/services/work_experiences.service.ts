@@ -23,8 +23,14 @@ export class WorkExperiencesService {
     return `This action returns a #${id} workExperience`;
   }
 
-  update(id: number, updateWorkExperienceDto: UpdateWorkExperienceDto) {
-    return `This action updates a #${id} workExperience`;
+  async update(
+    id: number,
+    updateWorkExperienceDto: IUpdate<UpdateWorkExperienceDto>,
+  ) {
+    return await this.workExperiencesRepository.update(
+      id,
+      updateWorkExperienceDto,
+    );
   }
 
   async remove(id: number) {

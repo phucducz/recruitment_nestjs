@@ -66,12 +66,37 @@ export class WorkExperiencesController {
     return this.workExperiencesService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateWorkExperienceDto: UpdateWorkExperienceDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.workExperiencesService.update(+id, updateWorkExperienceDto);
+    try {
+      const result = await this.workExperiencesService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateWorkExperienceDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật kinh nghiệm làm việc không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật kinh nghiệm làm việc thành công',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: error,
+        statusCode: 500,
+      });
+    }
   }
 
   @Delete(':id')

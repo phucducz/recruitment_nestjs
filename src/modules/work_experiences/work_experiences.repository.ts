@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
+import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { JobCategoriesService } from 'src/services/job_categories.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
@@ -33,7 +34,7 @@ export class WorkExperiencesRepository {
       createBy,
       description: variable.description,
       endDate: variable.endDate,
-      isWorking: typeof variable.endDate === null,
+      isWorking: variable.endDate === null,
       startDate: variable.startDate,
       jobCategory: await this.jobCategoryService.findById(
         variable.jobCategoriesId,
@@ -46,6 +47,30 @@ export class WorkExperiencesRepository {
 
   async remove(id: number) {
     const result = await this.workExperienceRepository.delete(id);
+
+    return result.affected > 0;
+  }
+
+  async update(
+    id: number,
+    updateWorkExperienceDto: IUpdate<UpdateWorkExperienceDto>,
+  ) {
+    const { updateBy, variable } = updateWorkExperienceDto;
+
+    const result = await this.workExperienceRepository.update(id, {
+      companyName: variable.companyName,
+      description: variable.description,
+      endDate: variable.endDate,
+      isWorking: variable.endDate === null,
+      jobCategory: await this.jobCategoryService.findById(
+        variable.jobCategoriesId,
+      ),
+      jobPosition: await this.jobPositionService.findById(variable.positionId),
+      placement: await this.placementService.findById(variable.placementsId),
+      updateAt: new Date().toString(),
+      updateBy,
+      startDate: variable.startDate,
+    });
 
     return result.affected > 0;
   }
