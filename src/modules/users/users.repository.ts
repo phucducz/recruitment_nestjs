@@ -121,17 +121,21 @@ export class UsersRepository {
     },
   };
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(
+    email: string,
+    hasPassword?: boolean,
+  ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: email },
       relations: this.userRelations.entities,
-      select: this.userSelectColumns,
+      select: {
+        ...this.userSelectColumns,
+        password: typeof hasPassword !== 'undefined' ? hasPassword : false,
+      },
     });
   }
 
   async findById(id: number): Promise<User | null> {
-    console.log(this.userSelectColumns);
-
     return this.userRepository.findOne({
       where: { id: id },
       relations: this.userRelations.entities,
