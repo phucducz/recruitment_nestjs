@@ -42,6 +42,7 @@ export class JobsRepository {
     'createBy',
     'createAt',
   ];
+
   private readonly jobRelations = {
     entites: [
       'user',
@@ -60,6 +61,7 @@ export class JobsRepository {
       filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, this.removeColumns),
     ],
   };
+
   private readonly jobSelectColumns = this.jobRelations.entites.reduce(
     (acc, entity, index) => {
       acc[entity] = this.jobRelations.fields[index];
@@ -100,14 +102,16 @@ export class JobsRepository {
               createAt: new Date().toString(),
               createBy,
               description: variable.description,
-              endExpYearRequired: variable.endExpYearRequired,
-              endPrice: variable.endPrice,
+              minExpYearRequired: variable.minExpYearRequired,
+              salaryMax: variable.salaryMax,
               requirement: variable.requirement,
-              startExpYearRequired: variable.startExpYearRequired,
-              startPrice: variable.startPrice,
+              maxExpYearRequired: variable.maxExpYearRequired,
+              salaryMin: variable.salaryMin,
               title: variable.title,
-              whyLove: variable.whyLoveWorkingHere,
+              benefit: variable.benefit,
               workTime: variable.workTime,
+              salaryCurrency: variable.salaryCurrency,
+              quantity: variable.quantity,
               jobCategory: await this.jobCategoryService.findById(
                 variable.categoriesId,
               ),
@@ -124,30 +128,21 @@ export class JobsRepository {
 
           const placements = await Promise.all(
             variable.placements.map(async (placement) => {
-              const { amount, detailAddress, id } = placement;
-              const placementEntity = await this.placementService.findById(id);
-
-              return {
-                ...placementEntity,
-                amount: amount,
-                detailAddress: detailAddress,
-              };
+              return await this.placementService.findById(placement);
             }),
           );
 
           await Promise.all(
             placements.map(async (placement) => {
-              const { amount, detailAddress, ...others } = placement;
-
               await transactionalEntityManager.save(
                 JobsPlacement,
                 this.jobPlacementRepository.create({
-                  amount: amount,
-                  detailAddress: detailAddress,
                   job: newJobRecord,
                   jobsId: newJobRecord.id,
-                  placement: others,
-                  placementsId: others.id,
+                  placement: placement,
+                  placementsId: placement.id,
+                  createAt: new Date().toString(),
+                  createBy,
                 }),
               );
             }),

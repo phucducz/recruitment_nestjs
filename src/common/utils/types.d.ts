@@ -38,3 +38,5 @@ interface IGenerateRelationshipOptional {
   hasPassword?: boolean;
   hasRelations?: boolean;
 }
+
+type TSalaryCurrency = 'vnd' | 'usd';
