@@ -123,15 +123,19 @@ export class UsersRepository {
 
   async findByEmail(
     email: string,
-    hasPassword?: boolean,
+    options: {
+      hasPassword?: boolean;
+      hasRelations?: boolean;
+    } = {},
   ): Promise<User | null> {
+    const { hasPassword = false, hasRelations = true } = options;
+
     return this.userRepository.findOne({
       where: { email: email },
-      relations: this.userRelations.entities,
-      select: {
-        ...this.userSelectColumns,
-        password: typeof hasPassword !== 'undefined' ? hasPassword : false,
-      },
+      ...(hasRelations && { relations: this.userRelations.entities }),
+      ...(hasRelations && {
+        select: { ...this.userSelectColumns, password: hasPassword },
+      }),
     });
   }
 
@@ -148,12 +152,10 @@ export class UsersRepository {
   ): Promise<[Omit<User, 'password'>[], number]> {
     const paginationParams = getPaginationParams(pagination);
 
-    console.log(this.userSelectColumns);
-
     return this.userRepository.findAndCount({
       ...paginationParams,
       relations: this.userRelations.entities,
-      // select: this.userSelectColumns,
+      select: this.userSelectColumns,
     });
   }
 
