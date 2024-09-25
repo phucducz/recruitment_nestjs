@@ -53,7 +53,7 @@ export class UsersController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/all')
   async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
     const result = await this.usersService.findAll(pagination);
