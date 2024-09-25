@@ -71,7 +71,29 @@ export class UsersController {
   @Get('/me')
   async findMe(@Res() res: Response, @Request() request: any) {
     try {
-      const result = await this.usersService.findById(request.user.userId);
+      const result = await this.usersService.findById(request.user.userId, {
+        hasRelations: false,
+      });
+
+      if (!result?.id)
+        return res
+          .status(404)
+          .json({ message: 'Không thể tìm thấy user', statusCode: 404 });
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/profile')
+  async findProfile(@Res() res: Response, @Request() request: any) {
+    try {
+      const result = await this.usersService.findById(request.user.userId, {
+        hasRelations: true,
+      });
 
       if (!result?.id)
         return res

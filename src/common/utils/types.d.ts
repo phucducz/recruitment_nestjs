@@ -1,8 +1,3 @@
-interface APIResponse {
-  message: string;
-  statusCode: 200 | 401 | 400;
-}
-
 interface ICreate<T> {
   variable: T;
   createBy: number;
@@ -32,4 +27,14 @@ interface IUpdateMany<T> {
 interface IPagination {
   page?: number;
   pageSize?: number;
+}
+
+interface APIResponse {
+  message: string;
+  statusCode: 200 | 401 | 400;
+}
+
+interface IGenerateRelationshipOptional {
+  hasPassword?: boolean;
+  hasRelations?: boolean;
 }
