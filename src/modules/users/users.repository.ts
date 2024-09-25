@@ -88,6 +88,10 @@ export class UsersRepository {
     ENTITIES.FIELDS.JOB_CATEGORY,
     this.removeColumns,
   ) as FindOptionsSelect<JobCategory>;
+  private skillSelectedFields = filterColumns(
+    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    this.removeColumns,
+  ) as FindOptionsSelect<UsersForeignLanguage>;
 
   private userSelectedRelations = this.userRelations.entities.reduce(
     (acc, entity, index) => {
@@ -96,11 +100,6 @@ export class UsersRepository {
     },
     {},
   ) as any;
-
-  private skillSelectedFields = filterColumns(
-    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
-    this.removeColumns,
-  ) as FindOptionsSelect<UsersForeignLanguage>;
 
   private readonly userSelectColumns = {
     ...this.userSelectedRelations,
@@ -172,8 +171,9 @@ export class UsersRepository {
 
     return this.userRepository.findAndCount({
       ...paginationParams,
-      relations: this.userRelations.entities,
-      select: this.userSelectColumns,
+      ...this.generateRelationshipOptionals(),
+      // relations: this.userRelations.entities,
+      // select: this.userSelectColumns,
     });
   }
 
