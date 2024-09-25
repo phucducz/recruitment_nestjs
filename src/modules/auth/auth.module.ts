@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/entities/auth.entity';
+import { MailService } from 'src/services/mail.service';
+import { OTPService } from 'src/services/otp.service';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
@@ -31,7 +33,14 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersConverter, JwtStrategy, JwtAuthGuard],
+  providers: [
+    AuthService,
+    UsersConverter,
+    JwtStrategy,
+    JwtAuthGuard,
+    OTPService,
+    MailService,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
