@@ -21,20 +21,29 @@ export class Job extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'float', nullable: true, name: 'start_price' })
-  startPrice: number;
+  @Column({ type: 'float', nullable: true, name: 'salary_min' })
+  salaryMin: number;
 
-  @Column({ type: 'float', nullable: true, name: 'end_price' })
-  endPrice: number;
+  @Column({ type: 'float', nullable: true, name: 'salary_max' })
+  salaryMax: number;
 
-  @Column({ type: 'int', nullable: true, name: 'start_exp_year_required' })
-  startExpYearRequired: number;
+  @Column({ type: 'int', nullable: true, name: 'min_exp_year_required' })
+  maxExpYearRequired: number;
 
-  @Column({ type: 'int', nullable: true, name: 'end_exp_year_required' })
-  endExpYearRequired: number;
+  @Column({ type: 'int', nullable: true, name: 'max_exp_year_required' })
+  minExpYearRequired: number;
 
   @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
   applicationDeadline: Timestamp;
+
+  @Column({
+    type: 'varchar',
+    length: 3,
+    name: 'salary_currency',
+    default: 'vnd',
+    nullable: true,
+  })
+  salaryCurrency: TSalaryCurrency;
 
   @Column({ type: 'varchar', length: 1000, name: 'work_time' })
   workTime: string;
@@ -45,8 +54,11 @@ export class Job extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   requirement: string;
 
-  @Column({ type: 'text', name: 'why_love_working_here', nullable: true })
-  whyLove: string;
+  @Column({ type: 'text', name: 'benefit', nullable: true })
+  benefit: string;
+
+  @Column({ type: 'int', name: 'quantity', default: 1, nullable: true })
+  quantity: number;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
   @JoinColumn({ name: 'job_categories_id', referencedColumnName: 'id' })

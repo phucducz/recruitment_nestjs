@@ -29,27 +29,36 @@ export class CreateJobDto {
 
   @IsArray()
   @IsNotEmpty()
-  placements: {
-    id: number;
-    amount: number;
-    detailAddress: string;
-  }[];
+  placements: number[];
+  // placements: {
+  //   id: number;
+  //   amount: number;
+  //   detailAddress: string;
+  // }[];
+
+  @IsNumber()
+  @IsNotEmpty()
+  quantity: number;
 
   @IsNumber()
   @IsOptional()
-  endPrice: number;
+  salaryMin: number;
 
   @IsNumber()
   @IsOptional()
-  startPrice: number;
+  salaryMax: number;
+
+  @IsString()
+  @IsNotEmpty()
+  salaryCurrency: TSalaryCurrency;
 
   @IsNumber()
   @IsOptional()
-  endExpYearRequired: number;
+  minExpYearRequired: number;
 
   @IsNumber()
   @IsOptional()
-  startExpYearRequired: number;
+  maxExpYearRequired: number;
 
   @IsString()
   @IsNotEmpty()
@@ -61,7 +70,7 @@ export class CreateJobDto {
 
   @IsString()
   @IsNotEmpty()
-  whyLoveWorkingHere: string;
+  benefit: string;
 
   @IsString()
   @IsNotEmpty()
