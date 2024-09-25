@@ -8,12 +8,18 @@ import { UsersRepository } from 'src/modules/users/users.repository';
 export class UsersService {
   constructor(@Inject() private readonly userRepository: UsersRepository) {}
 
-  async findByEmail(email: string, hasPassword?: boolean): Promise<User | null> {
-    return await this.userRepository.findByEmail(email, hasPassword);
+  async findByEmail(
+    email: string,
+    options?: IGenerateRelationshipOptional,
+  ): Promise<User | null> {
+    return await this.userRepository.findByEmail(email, options);
   }
 
-  async findById(id: number): Promise<User | null> {
-    return await this.userRepository.findById(id);
+  async findById(
+    id: number,
+    options?: IGenerateRelationshipOptional,
+  ): Promise<User | null> {
+    return await this.userRepository.findById(id, options);
   }
 
   async findAll(pagination: IPagination) {

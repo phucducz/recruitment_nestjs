@@ -89,7 +89,7 @@ export class UsersRepository {
     this.removeColumns,
   ) as FindOptionsSelect<JobCategory>;
 
-  private userSelectedFields = this.userRelations.entities.reduce(
+  private userSelectedRelations = this.userRelations.entities.reduce(
     (acc, entity, index) => {
       acc[entity] = this.userRelations.fields[index];
       return acc;
@@ -103,43 +103,65 @@ export class UsersRepository {
   ) as FindOptionsSelect<UsersForeignLanguage>;
 
   private readonly userSelectColumns = {
-    ...this.userSelectedFields,
+    ...this.userSelectedRelations,
     ...this.userFields,
     userSkills: {
-      ...this.userSelectedFields.userSkills,
+      ...this.userSelectedRelations.userSkills,
       skill: this.skillSelectedFields,
     },
     userLanguages: {
-      ...this.userSelectedFields.userLanguages,
+      ...this.userSelectedRelations.userLanguages,
       foreignLanguage: this.foreignLanguageSelectedFields,
     },
     workExperiences: {
-      ...this.userSelectedFields.workExperiences,
+      ...this.userSelectedRelations.workExperiences,
       placement: this.placementFields,
       jobPosition: this.positionFields,
       jobCategory: this.jobCategoryFields,
     },
   };
 
+  private generateRelationshipOptionals(
+    options: IGenerateRelationshipOptional = {},
+  ) {
+    const { hasPassword = false, hasRelations = true } = options;
+
+    return {
+      relations: hasRelations
+        ? this.userRelations.entities
+        : ['role', 'jobPosition'],
+      ...(hasRelations
+        ? {
+            select: { ...this.userSelectColumns, password: hasPassword },
+          }
+        : {
+            select: {
+              role: this.userSelectColumns.role,
+              jobPosition: this.userSelectColumns.jobPosition,
+              ...this.userFields,
+              password: hasPassword,
+            },
+          }),
+    };
+  }
+
   async findByEmail(
     email: string,
-    hasPassword?: boolean,
+    options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: email },
-      relations: this.userRelations.entities,
-      select: {
-        ...this.userSelectColumns,
-        password: typeof hasPassword !== 'undefined' ? hasPassword : false,
-      },
+      ...this.generateRelationshipOptionals(options),
     });
   }
 
-  async findById(id: number): Promise<User | null> {
+  async findById(
+    id: number,
+    options?: IGenerateRelationshipOptional,
+  ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id: id },
-      relations: this.userRelations.entities,
-      select: this.userSelectColumns,
+      ...this.generateRelationshipOptionals(options),
     });
   }
 
@@ -148,12 +170,10 @@ export class UsersRepository {
   ): Promise<[Omit<User, 'password'>[], number]> {
     const paginationParams = getPaginationParams(pagination);
 
-    console.log(this.userSelectColumns);
-
     return this.userRepository.findAndCount({
       ...paginationParams,
       relations: this.userRelations.entities,
-      // select: this.userSelectColumns,
+      select: this.userSelectColumns,
     });
   }
 

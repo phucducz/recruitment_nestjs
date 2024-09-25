@@ -68,10 +68,10 @@ export class AuthService {
     const { type } = signInDto;
 
     try {
-      const currentUser = await this.userService.findByEmail(
-        signInDto.email,
-        true,
-      );
+      const currentUser = await this.userService.findByEmail(signInDto.email, {
+        hasPassword: true,
+        hasRelations: false,
+      });
       const { refreshToken } = await this.refreshTokenService.create({
         userId: currentUser.id,
       });
