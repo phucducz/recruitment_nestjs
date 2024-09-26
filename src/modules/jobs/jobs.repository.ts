@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, Repository } from 'typeorm';
 
 import { ENTITIES } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
@@ -51,6 +51,7 @@ export class JobsRepository {
       'jobsPlacements',
       'workType',
       'jobCategory',
+      'jobsPlacements.placement',
     ],
     fields: [
       filterColumns(ENTITIES.FIELDS.USER, ['password', ...this.removeColumns]),
@@ -62,29 +63,49 @@ export class JobsRepository {
     ],
   };
 
+  private readonly placementSelectColumns = filterColumns(
+    ENTITIES.FIELDS.PLACEMENT,
+    this.removeColumns,
+  );
+
   private readonly jobSelectColumns = this.jobRelations.entites.reduce(
     (acc, entity, index) => {
       acc[entity] = this.jobRelations.fields[index];
       return acc;
     },
     {},
-  );
+  ) as any;
+
+  generateJobRelationships(): Pick<
+    FindManyOptions<Job>,
+    'select' | 'relations'
+  > {
+    return {
+      relations: this.jobRelations.entites,
+      select: {
+        ...this.jobSelectColumns,
+        jobsPlacements: {
+          ...this.jobSelectColumns.jobsPlacements,
+          placement: this.placementSelectColumns,
+        },
+      },
+    };
+  }
 
   async findAll(pagination: IPagination) {
     const paginationParams = getPaginationParams(pagination);
 
     return await this.jobRepository.findAndCount({
-      relations: this.jobRelations.entites,
-      select: this.jobSelectColumns,
+      order: { createAt: 'DESC' },
       ...paginationParams,
+      ...this.generateJobRelationships(),
     });
   }
 
   async findById(id: number) {
     return await this.jobRepository.find({
       where: { id: id },
-      relations: this.jobRelations.entites,
-      select: this.jobSelectColumns,
+      ...this.generateJobRelationships(),
     });
   }
 

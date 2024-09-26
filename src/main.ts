@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
+import { UnauthorizedExceptionFilter } from './common/filter/UnauthorizedExceptionFilter.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.useGlobalFilters(new UnauthorizedExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
