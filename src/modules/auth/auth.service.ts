@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -8,6 +8,7 @@ import { RolesService } from 'src/services/roles.service';
 import { UsersService } from 'src/services/users.service';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
 import { UsersConverter } from '../users/users.converter';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
     const refresh = await this.getByToken(refreshToken);
 
     if (access.userId !== refresh.userId)
-      throw new Error('Access token does not match refresh token');
+      throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN);
 
     return true;
   }

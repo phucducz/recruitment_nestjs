@@ -12,6 +12,7 @@ import { Request } from 'express';
 
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
 import { AuthService } from './auth.service';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -34,10 +35,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const token = this.extractTokenFromRequest(request);
       const refreshToken = this.extractRefreshTokenFromCookie(request);
 
-      if (!token) throw new UnauthorizedException('No token provided');
-
-      await this.authService.compareToken(token, refreshToken);
-      await this.refreshTokenService.verifyRefreshToken(refreshToken);
+      if (!token)
+        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.NO_PROVIDED_TOKEN);
 
       try {
         const payload = await this.jwtService.verifyAsync(token, {
@@ -46,13 +45,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         request['user'] = payload;
       } catch {
-        throw new UnauthorizedException('Invalid token');
+        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.TOKEN_EXPIRED);
       }
+
+      await this.authService.compareToken(token, refreshToken);
+      await this.refreshTokenService.verifyRefreshToken(refreshToken);
 
       return true;
     } catch (error) {
       this.logger.error(error);
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(error);
     }
   }
 
@@ -66,7 +68,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   private extractRefreshTokenFromCookie(request: any): string | undefined {
-    // return getCookieValue(request.headers.cookies, 'refreshToken');
     return request.headers.cookies;
   }
 }
