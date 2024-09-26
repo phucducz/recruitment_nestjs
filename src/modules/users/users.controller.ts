@@ -39,6 +39,7 @@ export class UsersController {
           .json({ message: 'Email không tồn tại!', statusCode: 404 });
 
       return res.status(200).json({
+        email,
         message: 'Email tồn tại',
         hasPassword: result.password !== null,
         signInWith: result.password !== null ? 'system' : 'other',
