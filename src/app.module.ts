@@ -19,6 +19,7 @@ import { JobFieldsModule } from './modules/job_fields/job_fields.module';
 import { JobPositionsModule } from './modules/job_positions/job_positions.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
+import { MailModule } from './modules/mail/mail.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
@@ -80,6 +81,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     AuthModule,
     ProvincesModule,
     RefreshTokenModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

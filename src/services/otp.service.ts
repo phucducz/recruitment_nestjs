@@ -16,9 +16,6 @@ export class OTPService {
   verifyOTP(userId: number, otp: number) {
     const storedOTP = this.otp.get(userId);
 
-    console.log('otp obj', this.otp);
-    console.log('user otp', this.otp.get(userId));
-
     if (storedOTP === otp) {
       this.otp.delete(userId);
       return true;
