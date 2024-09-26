@@ -49,8 +49,8 @@ export class CreateJobDto {
   salaryMax: number;
 
   @IsString()
-  @IsNotEmpty()
-  salaryCurrency: TSalaryCurrency;
+  @IsOptional()
+  salaryCurrency?: TSalaryCurrency;
 
   @IsNumber()
   @IsOptional()
@@ -75,8 +75,4 @@ export class CreateJobDto {
   @IsString()
   @IsNotEmpty()
   deadline: string;
-
-  @IsString()
-  @IsNotEmpty()
-  workTime: string;
 }

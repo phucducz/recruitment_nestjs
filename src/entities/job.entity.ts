@@ -45,9 +45,6 @@ export class Job extends BaseEntity {
   })
   salaryCurrency: TSalaryCurrency;
 
-  @Column({ type: 'varchar', length: 1000, name: 'work_time' })
-  workTime: string;
-
   @Column({ type: 'text', nullable: true })
   description: string;
 
