@@ -114,10 +114,10 @@ export class JobsRepository {
       where: {
         ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
         ...(salaryMin && {
-          salaryMin: Raw((value) => `${value} >= ${salaryMin}`),
+          salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),
         }),
         ...(salaryMax && {
-          salaryMax: Raw((value) => `${value} <= ${salaryMax}`),
+          salaryMax: Raw((value) => `${value} <= ${+salaryMax}`),
         }),
         ...(categoriesId && { jobCategory: { id: +categoriesId } }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
