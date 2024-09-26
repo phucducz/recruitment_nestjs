@@ -49,12 +49,12 @@ export class Job extends BaseEntity {
   description: string;
 
   @Column({ type: 'text', nullable: true })
-  requirement: string;
+  requirements: string;
 
-  @Column({ type: 'text', name: 'benefit', nullable: true })
-  benefit: string;
+  @Column({ type: 'text', nullable: true })
+  benefits: string;
 
-  @Column({ type: 'int', name: 'quantity', default: 1, nullable: true })
+  @Column({ type: 'int', default: 1, nullable: true })
   quantity: number;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)

@@ -104,11 +104,11 @@ export class JobsRepository {
               description: variable.description,
               minExpYearRequired: variable.minExpYearRequired,
               salaryMax: variable.salaryMax,
-              requirement: variable.requirement,
+              requirements: variable.requirements,
               maxExpYearRequired: variable.maxExpYearRequired,
               salaryMin: variable.salaryMin,
               title: variable.title,
-              benefit: variable.benefit,
+              benefits: variable.benefits,
               salaryCurrency: variable.salaryCurrency,
               quantity: variable.quantity,
               jobCategory: await this.jobCategoryService.findById(

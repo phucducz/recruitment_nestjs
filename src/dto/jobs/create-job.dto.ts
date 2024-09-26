@@ -66,11 +66,11 @@ export class CreateJobDto {
 
   @IsString()
   @IsNotEmpty()
-  requirement: string;
+  requirements: string;
 
   @IsString()
   @IsNotEmpty()
-  benefit: string;
+  benefits: string;
 
   @IsString()
   @IsNotEmpty()
