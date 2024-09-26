@@ -4,8 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/entities/auth.entity';
-import { MailService } from 'src/services/mail.service';
 import { OTPService } from 'src/services/otp.service';
+import { MailModule } from '../mail/mail.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
@@ -19,6 +19,7 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     TypeOrmModule.forFeature([Auth]),
     RolesModule,
+    MailModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),
     JwtModule.registerAsync({
@@ -39,7 +40,6 @@ import { JwtStrategy } from './jwt.strategy';
     JwtStrategy,
     JwtAuthGuard,
     OTPService,
-    MailService,
   ],
   exports: [AuthService],
 })
