@@ -169,41 +169,33 @@ export class AuthController {
         hasRelations: false,
       });
 
-      console.log('currentUser', currentUser);
-      
       if (!currentUser)
         return res
           .status(404)
           .json({ message: `Không tìm thấy người dùng ${email}` });
 
-      if (this.otpService.verifyOTP(currentUser.id, otp)) {
-        const result = await this.authService.signIn({ email, type: 'google' });
+      this.otpService.verifyOTP(currentUser.id, otp);
 
-        if (!result?.id)
-          return res.status(401).json({
-            statusCode: 401,
-            message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
-          });
+      const result = await this.authService.signIn({ email, type: 'google' });
 
-        res.cookie('refreshToken', result?.refreshToken, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: 24 * 60 * 60 * 7000,
+      if (!result?.id)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
         });
 
-        return res
-          .status(200)
-          .json({
-            statusCode: 200,
-            message: 'Đăng nhập thành công!',
-            ...result,
-          });
-      }
+      res.cookie('refreshToken', result?.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 7000,
+      });
 
-      return res
-        .status(401)
-        .json({ message: 'OTP không khớp', statusCode: 401 });
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Đăng nhập thành công!',
+        ...result,
+      });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: error, statusCode: 500 });

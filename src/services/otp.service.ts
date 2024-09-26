@@ -4,23 +4,23 @@ import { Injectable } from '@nestjs/common';
 export class OTPService {
   constructor() {}
 
-  private otp = new Map<number, number>();
+  private otp = new Map<number, { otp: number; expiresAt: number }>();
 
   generateOTP(userId: number) {
     const otp = Math.floor(100000 + Math.random() * 900000);
-    this.otp.set(userId, otp);
+    this.otp.set(userId, { otp: otp, expiresAt: Date.now() + 5 * 60 * 1000 });
 
     return otp;
   }
 
   verifyOTP(userId: number, otp: number) {
-    const storedOTP = this.otp.get(userId);
+    const { expiresAt, otp: storedOTP } = this.otp.get(userId);
 
-    if (storedOTP === otp) {
-      this.otp.delete(userId);
-      return true;
-    }
+    if (storedOTP !== otp) throw new Error('OTP không tồn tại');
+    if (Date.now() > expiresAt) throw new Error('OTP đã hết hạn');
 
-    return false;
+    this.otp.delete(userId);
+    
+    return true;
   }
 }
