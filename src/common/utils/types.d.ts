@@ -24,11 +24,6 @@ interface IUpdateMany<T> {
   updateBy: number;
 }
 
-interface IPagination {
-  page?: number;
-  pageSize?: number;
-}
-
 interface APIResponse {
   message: string;
   statusCode: 200 | 401 | 400;
@@ -40,3 +35,13 @@ interface IGenerateRelationshipOptional {
 }
 
 type TSalaryCurrency = 'vnd' | 'usd';
+
+interface IPagination {
+  page?: number;
+  pageSize?: number;
+}
+
+interface IPaginationQuery {
+  page?: string;
+  pageSize?: string;
+}
