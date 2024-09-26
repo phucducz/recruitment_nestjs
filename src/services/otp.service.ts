@@ -14,13 +14,18 @@ export class OTPService {
   }
 
   verifyOTP(userId: number, otp: number) {
-    const { expiresAt, otp: storedOTP } = this.otp.get(userId);
+    try {
+      const { expiresAt, otp: storedOTP } = this.otp.get(userId);
 
-    if (storedOTP !== otp) throw new Error('OTP không tồn tại');
-    if (Date.now() > expiresAt) throw new Error('OTP đã hết hạn');
+      if (storedOTP !== otp) throw new Error('OTP không tồn tại');
+      if (Date.now() > expiresAt) throw new Error('OTP đã hết hạn');
 
-    this.otp.delete(userId);
-    
-    return true;
+      this.otp.delete(userId);
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new Error('OTP không hợp lệ');
+    }
   }
 }
