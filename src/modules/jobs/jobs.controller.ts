@@ -50,11 +50,15 @@ export class JobsController {
     }
   }
 
-  @Get('/all')
-  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
-    const result = await this.jobsService.findAll(pagination);
+  @Get('/all?')
+  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+    const paginationParams = {
+      page: +pagination.page,
+      pageSize: +pagination.pageSize,
+    };
+    const result = await this.jobsService.findAll(paginationParams);
 
-    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
+    return res.status(200).json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @Get('?')

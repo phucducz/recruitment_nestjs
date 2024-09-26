@@ -12,7 +12,6 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobCategoriesService } from '../../services/job_categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -20,11 +19,17 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class JobCategoriesController {
   constructor(private readonly jobCategoriesService: JobCategoriesService) {}
 
-  @Get('/all')
-  async findAll(@Body() pagination: PaginationDto, @Res() res: Response) {
-    const result = await this.jobCategoriesService.findAll(pagination);
+  @Get('/all?')
+  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+    const paginationParams = {
+      page: +pagination.page,
+      pageSize: +pagination.pageSize,
+    };
+    const result = await this.jobCategoriesService.findAll(paginationParams);
 
-    return res.status(200).json({ ...rtPageInfoAndItems(pagination, result) });
+    return res
+      .status(200)
+      .json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @Get('?')
