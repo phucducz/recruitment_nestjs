@@ -14,8 +14,8 @@ export class JobsService {
     return this.jobRepository.create(createJob);
   }
 
-  async findAll(pagination: IPagination) {
-    return await this.jobRepository.findAll(pagination);
+  async findAll(jobsQueries: IJobsQueries) {
+    return await this.jobRepository.findAll(jobsQueries);
   }
 
   async findById(id: number) {

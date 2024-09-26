@@ -45,3 +45,18 @@ interface IPaginationQuery {
   page?: string;
   pageSize?: string;
 }
+
+interface BaseQueries {
+  page?: string;
+  pageSize?: string;
+}
+
+interface IJobsQueries extends BaseQueries {
+  title?: string;
+  placementsId?: string;
+  salaryMin?: string;
+  salaryMax?: string;
+  workTypesId?: string;
+  categoriesId?: string;
+  jobFieldsId?: string;
+}

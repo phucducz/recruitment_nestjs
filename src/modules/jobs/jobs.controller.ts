@@ -12,7 +12,6 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { JobsService } from '../../services/jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -51,14 +50,18 @@ export class JobsController {
   }
 
   @Get('/all?')
-  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
-    const paginationParams = {
-      page: +pagination.page,
-      pageSize: +pagination.pageSize,
-    };
-    const result = await this.jobsService.findAll(paginationParams);
+  async findAll(@Query() jobQueries: IJobsQueries, @Res() res: Response) {
+    const result = await this.jobsService.findAll(jobQueries);
 
-    return res.status(200).json({ ...rtPageInfoAndItems(paginationParams, result) });
+    return res.status(200).json({
+      ...rtPageInfoAndItems(
+        {
+          page: +jobQueries.page,
+          pageSize: +jobQueries.pageSize,
+        },
+        result,
+      ),
+    });
   }
 
   @Get('?')

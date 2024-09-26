@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindManyOptions, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
 import { ENTITIES } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
@@ -92,13 +92,42 @@ export class JobsRepository {
     };
   }
 
-  async findAll(pagination: IPagination) {
-    const paginationParams = getPaginationParams(pagination);
+  async findAll(jobsQueries: IJobsQueries) {
+    const {
+      categoriesId,
+      jobFieldsId,
+      page,
+      pageSize,
+      placementsId,
+      salaryMax,
+      salaryMin,
+      title,
+      workTypesId,
+    } = jobsQueries;
+    const paginationParams = getPaginationParams({
+      page: +page,
+      pageSize: +pageSize,
+    });
 
     return await this.jobRepository.findAndCount({
-      order: { createAt: 'DESC' },
       ...paginationParams,
+      where: {
+        ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
+        ...(salaryMin && {
+          salaryMin: Raw((value) => `${value} >= ${salaryMin}`),
+        }),
+        ...(salaryMax && {
+          salaryMax: Raw((value) => `${value} <= ${salaryMax}`),
+        }),
+        ...(categoriesId && { jobCategory: { id: +categoriesId } }),
+        ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
+        ...(placementsId && {
+          jobsPlacements: { placementsId: +placementsId },
+        }),
+        ...(workTypesId && { workType: { id: +workTypesId } }),
+      },
       ...this.generateJobRelationships(),
+      order: { createAt: 'DESC' },
     });
   }
 
