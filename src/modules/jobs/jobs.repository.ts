@@ -109,7 +109,6 @@ export class JobsRepository {
               salaryMin: variable.salaryMin,
               title: variable.title,
               benefit: variable.benefit,
-              workTime: variable.workTime,
               salaryCurrency: variable.salaryCurrency,
               quantity: variable.quantity,
               jobCategory: await this.jobCategoryService.findById(
