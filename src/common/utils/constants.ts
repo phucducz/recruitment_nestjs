@@ -1,4 +1,5 @@
 import { Achivement } from 'src/entities/achivement.entity';
+import { BaseEntity } from 'src/entities/base.entity';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -12,13 +13,24 @@ import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
-import { getEntityFields } from './function';
 
 export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
   'UsersSkill',
   'JobsPlacement',
 ];
+
+const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
+  const entityFields =
+    Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
+
+  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
+
+  const baseFields =
+    Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
+
+  return [...new Set([...baseFields, ...entityFields])];
+};
 
 export const ENTITIES = {
   FIELDS: {

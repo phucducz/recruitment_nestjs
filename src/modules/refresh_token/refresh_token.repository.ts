@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
@@ -14,7 +14,8 @@ export class RefreshTokensRepository {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-    @Inject(UsersService) private readonly userService: UsersService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
   ) {}
 
   async findById(id: number) {

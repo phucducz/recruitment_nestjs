@@ -1,20 +1,25 @@
-import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import dayjs from 'dayjs';
 
 import { JwtService } from '@nestjs/jwt';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { CreateRefreshTokenDto } from 'src/dto/refresh_token/create-refresh_token.dto';
 import { REFRESH_TOKEN_STATUS } from 'src/entities/refresh_token.entity';
 import { UsersService } from 'src/services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { RefreshTokensRepository } from './refresh_token.repository';
-import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 
 @Injectable()
 export class RefreshTokenService {
   constructor(
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
-    @Inject(UsersService) private userService: UsersService,
+    @Inject(forwardRef(() => UsersService)) private userService: UsersService,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject()
     private readonly refreshTokenRepository: RefreshTokensRepository,
@@ -52,7 +57,10 @@ export class RefreshTokenService {
     const result =
       await this.refreshTokenRepository.findByRefreshToken(refreshToken);
 
-    if (!result) throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_REFRESH_TOKEN);
+    if (!result)
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_REFRESH_TOKEN,
+      );
 
     const isExpired = dayjs(result.expiresAt).isValid()
       ? dayjs(result.expiresAt).isSame(dayjs(new Date())) ||
@@ -60,7 +68,9 @@ export class RefreshTokenService {
       : false;
 
     if (result.status === REFRESH_TOKEN_STATUS.INVALID || isExpired)
-      throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.REFRESH_TOKEN_EXPIRED);
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.REFRESH_TOKEN_EXPIRED,
+      );
 
     return true;
   }
