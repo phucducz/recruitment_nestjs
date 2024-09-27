@@ -258,4 +258,19 @@ export class UsersRepository {
       throw new InternalServerErrorException('Failed to register account');
     }
   }
+
+  async changePassword(params: { id: number; password: string }) {
+    const { id, password } = params;
+
+    const result = await this.userRepository.update(
+      { id },
+      {
+        password,
+        updateAt: new Date().toString(),
+        updateBy: id,
+      },
+    );
+
+    return result.affected > 0;
+  }
 }

@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -16,7 +22,8 @@ export class AuthService {
 
   constructor(
     @Inject(JwtService) private jwtService: JwtService,
-    @Inject(UsersService) private readonly userService: UsersService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     @Inject(UsersConverter) private readonly userConverter: UsersConverter,
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(forwardRef(() => RefreshTokenService))
@@ -40,7 +47,9 @@ export class AuthService {
     const refresh = await this.getByToken(refreshToken);
 
     if (access.userId !== refresh.userId)
-      throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN);
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
 
     return true;
   }

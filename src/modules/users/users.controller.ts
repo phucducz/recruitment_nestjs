@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Query,
   Request,
   Res,
@@ -10,7 +11,7 @@ import {
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
+import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { UsersService } from '../../services/users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -54,7 +55,7 @@ export class UsersController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/all?')
   async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
     const paginationParams = {
@@ -63,7 +64,9 @@ export class UsersController {
     };
     const result = await this.usersService.findAll(paginationParams);
 
-    return res.status(200).json({ ...rtPageInfoAndItems(paginationParams, result) });
+    return res
+      .status(200)
+      .json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -109,6 +112,34 @@ export class UsersController {
     } catch (error) {
       console.log(error);
       return res.status(500).json({ message: error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/change-password')
+  async changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.usersService.changePassword({
+        updateBy: request.user.userId,
+        variable: changePasswordDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Thay đổi mật khẩu người dùng không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Thay đổi mật khẩu người dùng thành công',
+      });
+    } catch (error) {
+      throw error;
     }
   }
 

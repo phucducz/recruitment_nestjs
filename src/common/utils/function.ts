@@ -54,17 +54,17 @@ export const snakeToCamelCase = (fieldName: string) => {
   return fieldName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 };
 
-export const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
-  const entityFields =
-    Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
+// export const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
+//   const entityFields =
+//     Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
 
-  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
+//   if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
 
-  const baseFields =
-    Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
+//   const baseFields =
+//     Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
 
-  return [...new Set([...baseFields, ...entityFields])];
-};
+//   return [...new Set([...baseFields, ...entityFields])];
+// };
 
 export const filterColumns = (
   columns: string[],
