@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  forwardRef,
   Get,
+  Inject,
   Patch,
   Query,
   Request,
@@ -12,12 +14,21 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
+import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
+import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
+import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
+    @Inject(ForgotPasswordService)
+    private readonly forgotPasswordService: ForgotPasswordService,
+  ) {}
 
   // @Post()
   // create(@Body() createUserDto: CreateUserDto) {
@@ -143,13 +154,32 @@ export class UsersController {
     }
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  @Patch('/reset-password')
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const { token } = resetPasswordDto;
+      const userId = await this.authService.verifyForgotPasswordToken(token);
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(+id);
-  // }
+      if (
+        !(await this.usersService.updatePassword(
+          userId,
+          await this.authService.hashPassword(resetPasswordDto.password),
+        ))
+      )
+        return res
+          .status(401)
+          .json({ message: 'Đặt lại mật khẩu thất bại', statusCode: 401 });
+
+      this.authService.deleteForgotPasswordToken(token);
+
+      return res
+        .status(200)
+        .json({ message: 'Đặt lại mật khẩu thành công', statusCode: 200 });
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -8,13 +8,14 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
+import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { RolesService } from 'src/services/roles.service';
 import { UsersService } from 'src/services/users.service';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
 import { UsersConverter } from '../users/users.converter';
-import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,8 @@ export class AuthService {
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(forwardRef(() => RefreshTokenService))
     private readonly refreshTokenService: RefreshTokenService,
+    @Inject(ForgotPasswordService)
+    private readonly forgotPasswordService: ForgotPasswordService,
   ) {}
 
   async comparePassword(password: string, storedPasswordHash: string) {
@@ -153,5 +156,18 @@ export class AuthService {
     return await this.refreshTokenService.updateStatusByRefreshToken(
       refreshToken,
     );
+  }
+
+  async verifyForgotPasswordToken(token: string) {
+    if (!this.forgotPasswordService.verifyStatus(token))
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
+
+    return await this.forgotPasswordService.verifyAsync(token);
+  }
+
+  async deleteForgotPasswordToken(token: string) {
+    this.forgotPasswordService.delete(token);
   }
 }
