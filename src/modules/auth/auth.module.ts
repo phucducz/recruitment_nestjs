@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/entities/auth.entity';
+import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { OTPService } from 'src/services/otp.service';
 import { MailModule } from '../mail/mail.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
@@ -40,6 +41,7 @@ import { JwtStrategy } from './jwt.strategy';
     JwtStrategy,
     JwtAuthGuard,
     OTPService,
+    ForgotPasswordService,
   ],
   exports: [AuthService],
 })

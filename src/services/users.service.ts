@@ -59,9 +59,16 @@ export class UsersService {
     )
       throw new BadRequestException('Mật khẩu cũ không chính xác');
 
+    return await this.updatePassword(
+      updateBy,
+      await this.authService.hashPassword(variable.newPassword),
+    );
+  }
+
+  async updatePassword(id: number, newPassword: string) {
     return await this.userRepository.changePassword({
-      id: updateBy,
-      password: await this.authService.hashPassword(variable.newPassword),
+      id,
+      password: newPassword,
     });
   }
 }

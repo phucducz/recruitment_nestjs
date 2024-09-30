@@ -1,12 +1,23 @@
-import { Body, Controller, Inject, Post, Request, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  NotFoundException,
+  Post,
+  Request,
+  Res,
+} from '@nestjs/common';
 import { Response } from 'express';
 
+import { ForgotPasswordDto } from 'src/dto/auth/forgot-password.dto';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SendOTPDto } from 'src/dto/auth/send-otp.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { VerifyOTPDto } from 'src/dto/auth/verify-otp.dto';
 import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
+import { VerifyForgotPasswordTokenDto } from 'src/dto/users/verify-forgot-password-token.dto';
+import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { MailService } from 'src/services/mail.service';
 import { OTPService } from 'src/services/otp.service';
 import { UsersService } from 'src/services/users.service';
@@ -22,6 +33,8 @@ export class AuthController {
     private readonly refreshTokenService: RefreshTokenService,
     @Inject(OTPService) private readonly otpService: OTPService,
     @Inject(MailService) private readonly mailService: MailService,
+    @Inject(ForgotPasswordService)
+    private readonly forgotPasswordService: ForgotPasswordService,
   ) {}
 
   @Post('/sign-in')
@@ -198,7 +211,59 @@ export class AuthController {
       });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: error, statusCode: 500 });
+      return res.status(500).json({
+        message: error?.message ?? 'Có lỗi xảy ra khi xác thực OTP',
+        statusCode: 500,
+      });
+    }
+  }
+
+  @Post('/forgot-password')
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const { email } = forgotPasswordDto;
+      const currentUser = await this.userService.findByEmail(email, {
+        hasRelations: false,
+      });
+
+      if (!currentUser)
+        throw new NotFoundException(
+          `Không tìm thấy người dùng ${email} trên hệ thống`,
+        );
+
+      const token = await this.forgotPasswordService.generate(currentUser.id);
+
+      await this.mailService.sendForgotPasswordURL(email, {
+        token,
+        fullName: currentUser.fullName,
+      });
+
+      res.status(200).json({
+        message:
+          'Link khôi phục mật khẩu đã được gửi vào mail của bạn. Vui lòng kiểm tra mail.',
+        statusCode: 200,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('/verify-forgot-password-token')
+  async verifyForgotPasswordToken(
+    @Body() verifyForgotPasswordTokenDto: VerifyForgotPasswordTokenDto,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.authService.verifyForgotPasswordToken(
+        verifyForgotPasswordTokenDto.token,
+      );
+
+      return res.status(200).json({ message: 'Token hợp lệ', statusCode: 200 });
+    } catch (error) {
+      throw error;
     }
   }
 }
