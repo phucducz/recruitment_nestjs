@@ -12,15 +12,21 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
+import { OTPService } from 'src/services/otp.service';
 import { JobCategoriesService } from '../../services/job_categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('job-categories')
 export class JobCategoriesController {
-  constructor(private readonly jobCategoriesService: JobCategoriesService) {}
+  constructor(
+    private readonly jobCategoriesService: JobCategoriesService,
+    private readonly otpService: OTPService,
+  ) {}
 
   @Get('/all?')
   async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+    this.otpService.log();
+
     const paginationParams = {
       page: +pagination.page,
       pageSize: +pagination.pageSize,

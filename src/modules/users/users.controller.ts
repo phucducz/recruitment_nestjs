@@ -66,7 +66,6 @@ export class UsersController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Get('/all?')
   async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
     const paginationParams = {
@@ -161,7 +160,8 @@ export class UsersController {
   ) {
     try {
       const { token } = resetPasswordDto;
-      const userId = await this.authService.verifyForgotPasswordToken(token);
+      this.forgotPasswordService.log();
+      const userId = await this.forgotPasswordService.verify(token);
 
       if (
         !(await this.usersService.updatePassword(
@@ -173,7 +173,7 @@ export class UsersController {
           .status(401)
           .json({ message: 'Đặt lại mật khẩu thất bại', statusCode: 401 });
 
-      this.authService.deleteForgotPasswordToken(token);
+      this.forgotPasswordService.delete(token);
 
       return res
         .status(200)

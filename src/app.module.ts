@@ -14,12 +14,14 @@ import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
+import { ForgotPasswordModule } from './modules/forgot_password/forgot_password.module';
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
 import { JobPositionsModule } from './modules/job_positions/job_positions.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
 import { MailModule } from './modules/mail/mail.module';
+import { OTPModule } from './modules/otp/otp.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
@@ -82,6 +84,8 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     ProvincesModule,
     RefreshTokenModule,
     MailModule,
+    OTPModule,
+    ForgotPasswordModule,
   ],
   controllers: [AppController],
   providers: [AppService],
