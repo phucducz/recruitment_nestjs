@@ -10,7 +10,13 @@ export class OTPService {
     const otp = Math.floor(100000 + Math.random() * 900000);
     this.otp.set(userId, { otp: otp, expiresAt: Date.now() + 5 * 60 * 1000 });
 
+    this.log();
+
     return otp;
+  }
+
+  log() {
+    console.log(this.otp);
   }
 
   verifyOTP(userId: number, otp: number) {

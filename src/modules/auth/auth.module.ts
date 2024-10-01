@@ -4,9 +4,9 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/entities/auth.entity';
-import { ForgotPasswordService } from 'src/services/forgot_password.service';
-import { OTPService } from 'src/services/otp.service';
+import { ForgotPasswordModule } from '../forgot_password/forgot_password.module';
 import { MailModule } from '../mail/mail.module';
+import { OTPModule } from '../otp/otp.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
@@ -21,6 +21,8 @@ import { JwtStrategy } from './jwt.strategy';
     TypeOrmModule.forFeature([Auth]),
     RolesModule,
     MailModule,
+    OTPModule,
+    ForgotPasswordModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),
     JwtModule.registerAsync({
@@ -35,14 +37,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UsersConverter,
-    JwtStrategy,
-    JwtAuthGuard,
-    OTPService,
-    ForgotPasswordService,
-  ],
+  providers: [AuthService, UsersConverter, JwtStrategy, JwtAuthGuard],
   exports: [AuthService],
 })
 export class AuthModule {}

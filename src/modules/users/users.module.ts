@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
-import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthModule } from '../auth/auth.module';
+import { ForgotPasswordModule } from '../forgot_password/forgot_password.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
@@ -24,16 +24,12 @@ import { UsersRepository } from './users.repository';
     JobFieldsModule,
     UsersJobFieldsModule,
     MailModule,
+    ForgotPasswordModule,
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
   ],
   controllers: [UsersController],
-  providers: [
-    UsersService,
-    UsersRepository,
-    UsersConverter,
-    ForgotPasswordService,
-  ],
+  providers: [UsersService, UsersRepository, UsersConverter],
   exports: [UsersService],
 })
 export class UsersModule {}

@@ -241,6 +241,8 @@ export class AuthController {
         fullName: currentUser.fullName,
       });
 
+      this.forgotPasswordService.log();
+
       res.status(200).json({
         message:
           'Link khôi phục mật khẩu đã được gửi vào mail của bạn. Vui lòng kiểm tra mail.',
@@ -257,7 +259,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     try {
-      await this.authService.verifyForgotPasswordToken(
+      await this.forgotPasswordService.verify(
         verifyForgotPasswordTokenDto.token,
       );
 

@@ -35,15 +35,14 @@ export class ForgotPasswordService {
     return token;
   }
 
-  verifyStatus(token: string) {
+  async verify(token: string) {
     const status = this.forgotPasswordToken.get(token);
 
     if (!status || (status && status === FORGOT_PASSWORD_TOKEN_STATUS.INVALID))
-      return false;
-    return true;
-  }
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
 
-  async verifyAsync(token: string) {
     const tokenDecoded = this.jwtService.decode(token);
 
     try {
@@ -66,9 +65,11 @@ export class ForgotPasswordService {
   }
 
   delete(token: string) {
-    console.log(this.forgotPasswordToken);
     this.forgotPasswordToken.delete(token);
-    console.log(this.forgotPasswordToken);
     return true;
+  }
+
+  log() {
+    console.log(this.forgotPasswordToken);
   }
 }
