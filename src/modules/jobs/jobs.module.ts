@@ -2,7 +2,13 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Job } from 'src/entities/job.entity';
 
+import { JobConverter } from 'src/common/converters/job.converter';
+import { JobCategory } from 'src/entities/job_category.entity';
+import { JobField } from 'src/entities/job_field.entity';
+import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
+import { User } from 'src/entities/user.entity';
+import { WorkType } from 'src/entities/work_type.entity';
 import { JobsService } from '../../services/jobs.service';
 import { AuthModule } from '../auth/auth.module';
 import { JobCategoriesModule } from '../job_categories/job_categories.module';
@@ -18,7 +24,15 @@ import { JobsRepository } from './jobs.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Job, JobsPlacement]),
+    TypeOrmModule.forFeature([
+      Job,
+      JobsPlacement,
+      JobField,
+      JobPosition,
+      JobCategory,
+      User,
+      WorkType,
+    ]),
     JobCategoriesModule,
     JobPositionsModule,
     JobFieldsModule,
@@ -30,7 +44,7 @@ import { JobsRepository } from './jobs.repository';
     forwardRef(() => RefreshTokenModule),
   ],
   controllers: [JobsController],
-  providers: [JobsService, JobsRepository],
+  providers: [JobsService, JobsRepository, JobConverter],
   exports: [JobsService],
 })
 export class JobsModule {}

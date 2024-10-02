@@ -50,3 +50,5 @@ export const ENTITIES = {
     PLACEMENT: getEntityFields(Placement),
   },
 };
+
+export const removeColumns = ['updateBy', 'updateAt', 'createBy', 'createAt'];
