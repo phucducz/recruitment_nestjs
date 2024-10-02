@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindManyOptions, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
 import { JobConverter } from 'src/common/converters/job.converter';
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
@@ -107,52 +107,26 @@ export class JobsRepository {
       pageSize: +pageSize,
     });
 
-    const queryBuilder = this.jobRepository
-      .createQueryBuilder('j')
-      .select()
-      .leftJoinAndSelect('job_fields', 'jf', 'jf.id = j.job_fields_id')
-      .leftJoinAndSelect('work_types', 'wt', 'wt.id = j.work_types_id')
-      .leftJoinAndSelect('job_categories', 'jc', 'jc.id = j.job_categories_id')
-      .leftJoinAndSelect('users', 'u', 'u.id = j.users_id')
-      .leftJoinAndSelect('job_positions', 'jp', 'jp.id = j.job_positions_id')
-      .leftJoin('jobs_placements', 'jpl', 'jpl.jobs_id = j.id')
-      .leftJoin('placements', 'p', 'p.id = jpl.placements_id')
-      .andWhere(title ? 'j.title ILIKE :title' : '1=1', { title: `%${title}%` })
-      .andWhere(categoriesId ? 'jc.id = :categoriesId' : '1=1', {
-        categoriesId: +categoriesId,
-      })
-      .andWhere(jobFieldsId ? 'jf.id = :jobFieldsId' : '1=1', {
-        jobFieldsId: +jobFieldsId,
-      })
-      .andWhere(workTypesId ? 'wt.id = :workTypesId' : '1=1', {
-        workTypesId: +workTypesId,
-      })
-      .andWhere(placementsId ? 'p.id = :placementsId' : '1=1', {
-        placementsId: +placementsId,
-      })
-      .andWhere(salaryMin ? 'j.salary_min >= :salaryMin' : '1=1', {
-        salaryMin: +salaryMin,
-      })
-      .andWhere(salaryMax ? 'j.salary_max <= :salaryMax' : '1=1', {
-        salaryMax: +salaryMax,
-      })
-      .limit(paginationParams.take)
-      .offset(paginationParams.skip)
-      .orderBy('j.create_at', 'DESC');
-
-    const result = await Promise.all(
-      (await queryBuilder.getRawMany()).map(
-        async (item) =>
-          ({
-            ...this.jobConverter.convert(item),
-            jobsPlacements: await this.jobsPlacementsService.findByJobsId(
-              item.j_id,
-            ),
-          }) as Job,
-      ),
-    );
-
-    return [result, await queryBuilder.getCount()] as [any[], number];
+    return await this.jobRepository.findAndCount({
+      ...paginationParams,
+      where: {
+        ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
+        ...(salaryMin && {
+          salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),
+        }),
+        ...(salaryMax && {
+          salaryMax: Raw((value) => `${value} <= ${+salaryMax}`),
+        }),
+        ...(categoriesId && { jobCategory: { id: +categoriesId } }),
+        ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
+        ...(placementsId && {
+          jobsPlacements: { placementsId: +placementsId },
+        }),
+        ...(workTypesId && { workType: { id: +workTypesId } }),
+      },
+      ...this.generateJobRelationships(),
+      order: { createAt: 'DESC' },
+    });
   }
 
   async findById(id: number) {
