@@ -51,7 +51,6 @@ export class JobsRepository {
       'jobsPlacements',
       'workType',
       'jobCategory',
-      'placement',
       'jobsPlacements.placement',
     ],
     fields: [
@@ -61,7 +60,6 @@ export class JobsRepository {
       filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.WORK_TYPE, this.removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.PLACEMENT, this.removeColumns),
     ],
   };
 
