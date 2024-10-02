@@ -164,7 +164,10 @@ export class JobsRepository {
         ...(categoriesId && { jobCategory: { id: +categoriesId } }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
         ...(placementsId && {
-          jobsPlacements: { placementsId: +placementsId },
+          jobsPlacements: {
+            placementsId: +placementsId,
+            placement: await this.placementService.findById(+placementsId),
+          },
         }),
         // ...(placementsId && {
         //   jobsPlacements: { placementsId: +placementsId },
