@@ -109,6 +109,48 @@ export class JobsRepository {
       pageSize: +pageSize,
     });
 
+    console.log(jobsQueries);
+
+    // const queryBuilder = this.jobRepository
+    //   .createQueryBuilder('j')
+    //   .select(['j.*'])
+    //   .leftJoinAndSelect('job_fields', 'jf', 'jf.id = j.job_fields_id')
+    //   .leftJoinAndSelect('work_types', 'wt', 'wt.id = j.work_types_id')
+    //   .leftJoinAndSelect('job_categories', 'jc', 'jc.id = j.job_categories_id')
+    //   .leftJoinAndSelect('users', 'u', 'u.id = j.users_id')
+    //   .leftJoinAndSelect('job_positions', 'jp', 'jp.id = j.job_positions_id')
+    //   .leftJoinAndSelect('jobs_placements', 'jpl', 'jpl.jobs_id = j.id')
+    //   .leftJoinAndSelect('placements', 'p', 'p.id = jpl.placements_id')
+    //   .where('1=1')
+    //   .andWhere(title ? 'j.title ILIKE :title' : '1=1', { title: `%${title}%` })
+    //   .andWhere(categoriesId ? 'jc.id = :categoriesId' : '1=1', {
+    //     categoriesId: +categoriesId,
+    //   })
+    //   .andWhere(jobFieldsId ? 'jf.id = :jobFieldsId' : '1=1', {
+    //     jobFieldsId: +jobFieldsId,
+    //   })
+    //   .andWhere(workTypesId ? 'wt.id = :workTypesId' : '1=1', {
+    //     workTypesId: +workTypesId,
+    //   })
+    //   .andWhere(placementsId ? 'p.id = :placementsId' : '1=1', {
+    //     placementsId: +placementsId,
+    //   })
+    //   .andWhere(salaryMin ? 'j.salary_min >= :salaryMin' : '1=1', {
+    //     salaryMin: +salaryMin,
+    //   })
+    //   .andWhere(salaryMax ? 'j.salary_max <= :salaryMax' : '1=1', {
+    //     salaryMax: +salaryMax,
+    //   })
+    //   .orderBy('j.create_at', 'DESC');
+    // // .skip(paginationParams.skip)
+    // // .take(paginationParams.take);
+
+    // const [sql, parameters] = queryBuilder.getQueryAndParameters();
+    // console.log('Generated SQL:', sql);
+    // console.log('Parameters:', parameters);
+    // console.log('result:', await queryBuilder.getMany());
+
+    // return await queryBuilder.getManyAndCount();
     return await this.jobRepository.findAndCount({
       ...paginationParams,
       where: {
@@ -124,6 +166,9 @@ export class JobsRepository {
         ...(placementsId && {
           jobsPlacements: { placementsId: +placementsId },
         }),
+        // ...(placementsId && {
+        //   jobsPlacements: { placementsId: +placementsId },
+        // }),
         ...(workTypesId && { workType: { id: +workTypesId } }),
       },
       ...this.generateJobRelationships(),
