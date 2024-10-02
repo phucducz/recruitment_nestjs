@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, Repository } from 'typeorm';
 
-import { ENTITIES } from 'src/common/utils/constants';
+import { JobConverter } from 'src/common/converters/job.converter';
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { Job } from 'src/entities/job.entity';
@@ -10,6 +11,7 @@ import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { JobCategoriesService } from 'src/services/job_categories.service';
 import { JobFieldsService } from 'src/services/job_fields.service';
 import { JobPositionsService } from 'src/services/job_positions.service';
+import { JobsPlacementsService } from 'src/services/jobs_placements.service';
 import { PlacementsService } from 'src/services/placements.service';
 import { UsersService } from 'src/services/users.service';
 import { WorkTypesService } from 'src/services/work_types.service';
@@ -32,16 +34,12 @@ export class JobsRepository {
     private readonly jobPlacementRepository: Repository<JobsPlacement>,
     @Inject(PlacementsService)
     private readonly placementService: PlacementsService,
+    @Inject(JobsPlacementsService)
+    private readonly jobsPlacementsService: JobsPlacementsService,
+    @Inject(JobConverter) private readonly jobConverter: JobConverter,
   ) {}
 
   private readonly logger = new Logger(JobsRepository.name);
-
-  private readonly removeColumns = [
-    'updateBy',
-    'updateAt',
-    'createBy',
-    'createAt',
-  ];
 
   private readonly jobRelations = {
     entites: [
@@ -54,18 +52,18 @@ export class JobsRepository {
       'jobsPlacements.placement',
     ],
     fields: [
-      filterColumns(ENTITIES.FIELDS.USER, ['password', ...this.removeColumns]),
-      filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_FIELD, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.WORK_TYPE, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
+      filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_FIELD, removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
+      filterColumns(ENTITIES.FIELDS.WORK_TYPE, removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
     ],
   };
 
   private readonly placementSelectColumns = filterColumns(
     ENTITIES.FIELDS.PLACEMENT,
-    this.removeColumns,
+    removeColumns,
   );
 
   private readonly jobSelectColumns = this.jobRelations.entites.reduce(
@@ -109,74 +107,52 @@ export class JobsRepository {
       pageSize: +pageSize,
     });
 
-    console.log(jobsQueries);
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('j')
+      .select()
+      .leftJoinAndSelect('job_fields', 'jf', 'jf.id = j.job_fields_id')
+      .leftJoinAndSelect('work_types', 'wt', 'wt.id = j.work_types_id')
+      .leftJoinAndSelect('job_categories', 'jc', 'jc.id = j.job_categories_id')
+      .leftJoinAndSelect('users', 'u', 'u.id = j.users_id')
+      .leftJoinAndSelect('job_positions', 'jp', 'jp.id = j.job_positions_id')
+      .leftJoin('jobs_placements', 'jpl', 'jpl.jobs_id = j.id')
+      .leftJoin('placements', 'p', 'p.id = jpl.placements_id')
+      .andWhere(title ? 'j.title ILIKE :title' : '1=1', { title: `%${title}%` })
+      .andWhere(categoriesId ? 'jc.id = :categoriesId' : '1=1', {
+        categoriesId: +categoriesId,
+      })
+      .andWhere(jobFieldsId ? 'jf.id = :jobFieldsId' : '1=1', {
+        jobFieldsId: +jobFieldsId,
+      })
+      .andWhere(workTypesId ? 'wt.id = :workTypesId' : '1=1', {
+        workTypesId: +workTypesId,
+      })
+      .andWhere(placementsId ? 'p.id = :placementsId' : '1=1', {
+        placementsId: +placementsId,
+      })
+      .andWhere(salaryMin ? 'j.salary_min >= :salaryMin' : '1=1', {
+        salaryMin: +salaryMin,
+      })
+      .andWhere(salaryMax ? 'j.salary_max <= :salaryMax' : '1=1', {
+        salaryMax: +salaryMax,
+      })
+      .limit(paginationParams.take)
+      .offset(paginationParams.skip)
+      .orderBy('j.create_at', 'DESC');
 
-    // const queryBuilder = this.jobRepository
-    //   .createQueryBuilder('j')
-    //   .select(['j.*'])
-    //   .leftJoinAndSelect('job_fields', 'jf', 'jf.id = j.job_fields_id')
-    //   .leftJoinAndSelect('work_types', 'wt', 'wt.id = j.work_types_id')
-    //   .leftJoinAndSelect('job_categories', 'jc', 'jc.id = j.job_categories_id')
-    //   .leftJoinAndSelect('users', 'u', 'u.id = j.users_id')
-    //   .leftJoinAndSelect('job_positions', 'jp', 'jp.id = j.job_positions_id')
-    //   .leftJoinAndSelect('jobs_placements', 'jpl', 'jpl.jobs_id = j.id')
-    //   .leftJoinAndSelect('placements', 'p', 'p.id = jpl.placements_id')
-    //   .where('1=1')
-    //   .andWhere(title ? 'j.title ILIKE :title' : '1=1', { title: `%${title}%` })
-    //   .andWhere(categoriesId ? 'jc.id = :categoriesId' : '1=1', {
-    //     categoriesId: +categoriesId,
-    //   })
-    //   .andWhere(jobFieldsId ? 'jf.id = :jobFieldsId' : '1=1', {
-    //     jobFieldsId: +jobFieldsId,
-    //   })
-    //   .andWhere(workTypesId ? 'wt.id = :workTypesId' : '1=1', {
-    //     workTypesId: +workTypesId,
-    //   })
-    //   .andWhere(placementsId ? 'p.id = :placementsId' : '1=1', {
-    //     placementsId: +placementsId,
-    //   })
-    //   .andWhere(salaryMin ? 'j.salary_min >= :salaryMin' : '1=1', {
-    //     salaryMin: +salaryMin,
-    //   })
-    //   .andWhere(salaryMax ? 'j.salary_max <= :salaryMax' : '1=1', {
-    //     salaryMax: +salaryMax,
-    //   })
-    //   .orderBy('j.create_at', 'DESC');
-    // // .skip(paginationParams.skip)
-    // // .take(paginationParams.take);
+    const result = await Promise.all(
+      (await queryBuilder.getRawMany()).map(
+        async (item) =>
+          ({
+            ...this.jobConverter.convert(item),
+            jobsPlacements: await this.jobsPlacementsService.findByJobsId(
+              item.j_id,
+            ),
+          }) as Job,
+      ),
+    );
 
-    // const [sql, parameters] = queryBuilder.getQueryAndParameters();
-    // console.log('Generated SQL:', sql);
-    // console.log('Parameters:', parameters);
-    // console.log('result:', await queryBuilder.getMany());
-
-    // return await queryBuilder.getManyAndCount();
-    return await this.jobRepository.findAndCount({
-      ...paginationParams,
-      where: {
-        ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
-        ...(salaryMin && {
-          salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),
-        }),
-        ...(salaryMax && {
-          salaryMax: Raw((value) => `${value} <= ${+salaryMax}`),
-        }),
-        ...(categoriesId && { jobCategory: { id: +categoriesId } }),
-        ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
-        ...(placementsId && {
-          jobsPlacements: {
-            placementsId: +placementsId,
-            placement: await this.placementService.findById(+placementsId),
-          },
-        }),
-        // ...(placementsId && {
-        //   jobsPlacements: { placementsId: +placementsId },
-        // }),
-        ...(workTypesId && { workType: { id: +workTypesId } }),
-      },
-      ...this.generateJobRelationships(),
-      order: { createAt: 'DESC' },
-    });
+    return [result, await queryBuilder.getCount()] as [any[], number];
   }
 
   async findById(id: number) {
