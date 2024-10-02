@@ -6,15 +6,19 @@ import {
   Post,
   Request,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { JwtService } from '@nestjs/jwt';
 import { ForgotPasswordDto } from 'src/dto/auth/forgot-password.dto';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SendOTPDto } from 'src/dto/auth/send-otp.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { VerifyOTPDto } from 'src/dto/auth/verify-otp.dto';
+import { SendSignUpVerificationEmailDto } from 'src/dto/mail/send-verify-email.dto';
+import { VerifySignUpTokenDto } from 'src/dto/mail/verify-email-sign-up.dto';
 import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
 import { VerifyForgotPasswordTokenDto } from 'src/dto/users/verify-forgot-password-token.dto';
 import { ForgotPasswordService } from 'src/services/forgot_password.service';
@@ -35,6 +39,7 @@ export class AuthController {
     @Inject(MailService) private readonly mailService: MailService,
     @Inject(ForgotPasswordService)
     private readonly forgotPasswordService: ForgotPasswordService,
+    @Inject(JwtService) private jwtService: JwtService,
   ) {}
 
   @Post('/sign-in')
@@ -266,6 +271,107 @@ export class AuthController {
       return res.status(200).json({ message: 'Token hợp lệ', statusCode: 200 });
     } catch (error) {
       throw error;
+    }
+  }
+
+  @Post('/send-sign-up-verification-email')
+  async sendSignUpVerificationEmail(
+    @Body() sendSignUpVerificationEmailDto: SendSignUpVerificationEmailDto,
+    @Res() res: Response,
+  ) {
+    try {
+      this.mailService.sendSignUpVerificationEmailURL(
+        sendSignUpVerificationEmailDto.email,
+        {
+          token: await this.mailService.generateVerifyEmailSignUpToken(
+            sendSignUpVerificationEmailDto,
+          ),
+        },
+      );
+
+      return res.status(200).json({
+        message:
+          'Hãy kiểm tra email của bạn và tiến hành xác thực tài khoản Recruitment Web App',
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
+  }
+
+  @Post('/verify-sign-up-token')
+  async verifySignUpToken(
+    @Body() verifySignUpTokenDto: VerifySignUpTokenDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const tokenVerified =
+        await this.mailService.verifySignUpToken(verifySignUpTokenDto);
+      const { email, fullName, rolesId } = (await this.jwtService.decode(
+        tokenVerified,
+      )) as SendSignUpVerificationEmailDto;
+
+      return res.status(200).json({
+        message:
+          'Xác thực email thành công, hãy tiếp tục quá trình đăng ký tài khoản của bạn!',
+        statusCode: 200,
+        email,
+        fullName,
+        rolesId,
+      });
+
+      // const signUpResult = await this.authService.register({
+      //   email,
+      //   fullName,
+      //   password: password,
+      //   roleId: rolesId,
+      // });
+
+      // if (!signUpResult?.id)
+      //   return res
+      //     .status(401)
+      //     .json({
+      //       message:
+      //         'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
+      //       statusCode: 401,
+      //     });
+
+      // const signInResult = await this.authService.signIn({
+      //   email,
+      //   type: 'system',
+      //   fullName,
+      //   password,
+      // });
+
+      // if (!signInResult)
+      //   return res.status(401).json({
+      //     statusCode: 401,
+      //     message:
+      //       'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
+      //   });
+
+      // res.cookie('refreshToken', signInResult?.refreshToken, {
+      //   httpOnly: true,
+      //   secure: false,
+      //   sameSite: 'lax',
+      //   maxAge: 24 * 60 * 60 * 7000,
+      // });
+
+      // return res.status(200).json({
+      //   statusCode: 200,
+      //   message: 'Đăng ký tài khoản thành công!',
+      //   ...signInResult,
+      // });
+    } catch (error) {
+      if (error instanceof (NotFoundException || UnauthorizedException))
+        throw error;
+      return res.status(500).json({
+        message: error?.message ?? error,
+        statusCode: 500,
+      });
     }
   }
 }
