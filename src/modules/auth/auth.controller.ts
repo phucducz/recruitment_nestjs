@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 
 import { JwtService } from '@nestjs/jwt';
-import { ForgotPasswordDto } from 'src/dto/auth/forgot-password.dto';
+import { ResetPasswordDto } from 'src/dto/auth/forgot-password.dto';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SendOTPDto } from 'src/dto/auth/send-otp.dto';
@@ -20,8 +20,8 @@ import { VerifyOTPDto } from 'src/dto/auth/verify-otp.dto';
 import { SendSignUpVerificationEmailDto } from 'src/dto/mail/send-verify-email.dto';
 import { VerifySignUpTokenDto } from 'src/dto/mail/verify-email-sign-up.dto';
 import { RefreshAccessTokenDto } from 'src/dto/refresh_token/refresh-access_token.dto';
-import { VerifyForgotPasswordTokenDto } from 'src/dto/users/verify-forgot-password-token.dto';
-import { ForgotPasswordService } from 'src/services/forgot_password.service';
+import { VerifyResetPasswordTokenDto } from 'src/dto/users/verify-forgot-password-token.dto';
+import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { MailService } from 'src/services/mail.service';
 import { OTPService } from 'src/services/otp.service';
 import { UsersService } from 'src/services/users.service';
@@ -37,8 +37,8 @@ export class AuthController {
     private readonly refreshTokenService: RefreshTokenService,
     @Inject(OTPService) private readonly otpService: OTPService,
     @Inject(MailService) private readonly mailService: MailService,
-    @Inject(ForgotPasswordService)
-    private readonly forgotPasswordService: ForgotPasswordService,
+    @Inject(ResetPasswordService)
+    private readonly resetPasswordService: ResetPasswordService,
     @Inject(JwtService) private jwtService: JwtService,
   ) {}
 
@@ -174,7 +174,9 @@ export class AuthController {
       });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: error, statusCode: 500 });
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
     }
   }
 
@@ -223,13 +225,13 @@ export class AuthController {
     }
   }
 
-  @Post('/forgot-password')
-  async forgotPassword(
-    @Body() forgotPasswordDto: ForgotPasswordDto,
+  @Post('/send-reset-password-url')
+  async sendResetPasswordUrl(
+    @Body() resetPasswordDto: ResetPasswordDto,
     @Res() res: Response,
   ) {
     try {
-      const { email } = forgotPasswordDto;
+      const { email } = resetPasswordDto;
       const currentUser = await this.userService.findByEmail(email, {
         hasRelations: false,
       });
@@ -239,14 +241,18 @@ export class AuthController {
           `Không tìm thấy người dùng ${email} trên hệ thống`,
         );
 
-      const token = await this.forgotPasswordService.generate(currentUser.id);
+      const token = await this.resetPasswordService.generate({
+        email,
+        userId: currentUser.id,
+      });
 
-      await this.mailService.sendForgotPasswordURL(email, {
+      await this.mailService.sendResetPasswordURL(email, {
         token,
+        email,
         fullName: currentUser.fullName,
       });
 
-      this.forgotPasswordService.log();
+      this.resetPasswordService.log();
 
       res.status(200).json({
         message:
@@ -254,19 +260,21 @@ export class AuthController {
         statusCode: 200,
       });
     } catch (error) {
-      throw error;
+      if (error instanceof NotFoundException) throw error;
+      res.status(500).json({
+        message: error?.message ?? error,
+        statusCode: 500,
+      });
     }
   }
 
-  @Post('/verify-forgot-password-token')
-  async verifyForgotPasswordToken(
-    @Body() verifyForgotPasswordTokenDto: VerifyForgotPasswordTokenDto,
+  @Post('/verify-reset-password-token')
+  async verifyResetPasswordToken(
+    @Body() verifyResetPasswordTokenDto: VerifyResetPasswordTokenDto,
     @Res() res: Response,
   ) {
     try {
-      await this.forgotPasswordService.verify(
-        verifyForgotPasswordTokenDto.token,
-      );
+      await this.resetPasswordService.verify(verifyResetPasswordTokenDto);
 
       return res.status(200).json({ message: 'Token hợp lệ', statusCode: 200 });
     } catch (error) {
@@ -350,6 +358,8 @@ export class AuthController {
         sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 7000,
       });
+
+      this.mailService.deleteSignUpToken(email);
 
       return res.status(200).json({
         statusCode: 200,

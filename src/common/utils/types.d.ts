@@ -60,3 +60,20 @@ interface IJobsQueries extends BaseQueries {
   categoriesId?: string;
   jobFieldsId?: string;
 }
+
+interface IInitialMap {
+  attemptCount: number;
+  sendCount: number;
+  lastSentAt: number;
+}
+
+interface IPendingVerification extends IInitialMap {
+  token: string;
+}
+
+interface IOTP extends IInitialMap {
+  otp: number;
+  expiresAt: number;
+}
+
+interface IForgotPassword extends IPendingVerification {}

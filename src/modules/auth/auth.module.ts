@@ -4,10 +4,10 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/entities/auth.entity';
-import { ForgotPasswordModule } from '../forgot_password/forgot_password.module';
 import { MailModule } from '../mail/mail.module';
 import { OTPModule } from '../otp/otp.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
+import { ResetPasswordModule } from '../reset_password/reset_password.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersConverter } from '../users/users.converter';
 import { UsersModule } from '../users/users.module';
@@ -22,7 +22,7 @@ import { JwtStrategy } from './jwt.strategy';
     RolesModule,
     MailModule,
     OTPModule,
-    ForgotPasswordModule,
+    ResetPasswordModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),
     JwtModule.registerAsync({
