@@ -65,6 +65,10 @@ interface ISkillQueries extends BaseQueries {
   title?: string;
 }
 
+interface IForeignLanguageQueries extends BaseQueries {
+  title?: string;
+}
+
 interface IInitialMap {
   attemptCount: number;
   sendCount: number;
