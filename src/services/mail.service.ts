@@ -79,7 +79,7 @@ export class MailService {
       subject: 'Đặt lại mật khẩu cho tài khoản Recruitment Web App',
       template: './forgotPassword',
       context: {
-        fullName: params.fullName,
+        full_name: params.fullName,
         action_url: `${this.configService.get<string>('CLIENT_URL')}/reset-password?token=${
           params.token
         }`,
@@ -92,6 +92,7 @@ export class MailService {
     email: string,
     params: {
       token: string;
+      fullName: string;
     },
   ) {
     await this.mailerService.sendMail({
@@ -99,7 +100,8 @@ export class MailService {
       subject: 'Xác thực tài khoản Recruitment Web App',
       template: './sendVerifyEmail',
       context: {
-        verify_email_url: `${this.configService.get<string>('CLIENT_URL')}/verify-email?email=${email}&token=${
+        full_name: params.fullName,
+        action_url: `${this.configService.get<string>('CLIENT_URL')}/verify-email?email=${email}&token=${
           params.token
         }`,
         web_app_url: this.configService.get<string>('CLIENT_URL'),
