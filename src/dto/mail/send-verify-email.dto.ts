@@ -9,9 +9,9 @@ export class SendSignUpVerificationEmailDto {
   @IsNotEmpty()
   fullName: string;
 
-  // @IsString()
-  // @IsNotEmpty()
-  // password: string;
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 
   @IsNumber()
   @IsNotEmpty()

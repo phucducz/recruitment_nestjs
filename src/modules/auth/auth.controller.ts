@@ -310,63 +310,56 @@ export class AuthController {
     try {
       const tokenVerified =
         await this.mailService.verifySignUpToken(verifySignUpTokenDto);
-      const { email, fullName, rolesId } = (await this.jwtService.decode(
-        tokenVerified,
-      )) as SendSignUpVerificationEmailDto;
+      const { email, fullName, rolesId, password } =
+        (await this.jwtService.decode(
+          tokenVerified,
+        )) as SendSignUpVerificationEmailDto;
 
-      return res.status(200).json({
-        message:
-          'Xác thực email thành công, hãy tiếp tục quá trình đăng ký tài khoản của bạn!',
-        statusCode: 200,
+      const signUpResult = await this.authService.register({
         email,
         fullName,
-        rolesId,
+        password: password,
+        roleId: rolesId,
       });
 
-      // const signUpResult = await this.authService.register({
-      //   email,
-      //   fullName,
-      //   password: password,
-      //   roleId: rolesId,
-      // });
+      if (!signUpResult?.id)
+        return res.status(401).json({
+          message:
+            'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
+          statusCode: 401,
+        });
 
-      // if (!signUpResult?.id)
-      //   return res
-      //     .status(401)
-      //     .json({
-      //       message:
-      //         'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
-      //       statusCode: 401,
-      //     });
+      const signInResult = await this.authService.signIn({
+        email,
+        type: 'system',
+        fullName,
+        password,
+      });
 
-      // const signInResult = await this.authService.signIn({
-      //   email,
-      //   type: 'system',
-      //   fullName,
-      //   password,
-      // });
+      if (!signInResult)
+        return res.status(401).json({
+          statusCode: 401,
+          message:
+            'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
+        });
 
-      // if (!signInResult)
-      //   return res.status(401).json({
-      //     statusCode: 401,
-      //     message:
-      //       'Đã xảy ra lỗi trong quá trình xác thực, đăng ký tài khoản thất bại!',
-      //   });
+      res.cookie('refreshToken', signInResult?.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 7000,
+      });
 
-      // res.cookie('refreshToken', signInResult?.refreshToken, {
-      //   httpOnly: true,
-      //   secure: false,
-      //   sameSite: 'lax',
-      //   maxAge: 24 * 60 * 60 * 7000,
-      // });
-
-      // return res.status(200).json({
-      //   statusCode: 200,
-      //   message: 'Đăng ký tài khoản thành công!',
-      //   ...signInResult,
-      // });
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Đăng ký tài khoản thành công!',
+        ...signInResult,
+      });
     } catch (error) {
-      if (error instanceof (NotFoundException || UnauthorizedException))
+      if (
+        error instanceof NotFoundException ||
+        error instanceof UnauthorizedException
+      )
         throw error;
       return res.status(500).json({
         message: error?.message ?? error,

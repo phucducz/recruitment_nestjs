@@ -39,9 +39,13 @@ export class MailService {
     const token = this.pendingVerifycations.get(verifySignUpTokenDto.email);
 
     if (!token) throw new NotFoundException('Không tìm thấy token');
+    if (token !== verifySignUpTokenDto.token)
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
 
     try {
-      await this.jwtService.verifyAsync(token, {
+      await this.jwtService.verifyAsync(verifySignUpTokenDto.token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
     } catch {
