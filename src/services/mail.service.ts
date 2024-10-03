@@ -63,7 +63,10 @@ export class MailService {
       subject: `Mã đăng nhập tài khoản Recruitment Web App: ${otp}`,
       text: `Your OTP code is ${otp}`,
       template: './sendOTP',
-      context: { otp },
+      context: {
+        otp,
+        web_app_url: this.configService.get<string>('CLIENT_URL'),
+      },
     });
   }
 
