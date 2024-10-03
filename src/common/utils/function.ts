@@ -1,6 +1,4 @@
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
-import { BaseEntity } from 'src/entities/base.entity';
-import { MANY_TO_MANY_ENTITIES } from './constants';
 
 export const getPaginationParams = (
   params: IPagination,

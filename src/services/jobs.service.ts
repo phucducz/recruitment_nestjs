@@ -14,7 +14,7 @@ export class JobsService {
     return this.jobRepository.create(createJob);
   }
 
-  async findAll(jobsQueries: IJobsQueries) {
+  async findAll(jobsQueries: IJobQueries) {
     return await this.jobRepository.findAll(jobsQueries);
   }
 

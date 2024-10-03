@@ -15,8 +15,8 @@ export class ForeignLanguagesService {
     return 'This action adds a new foreignLanguage';
   }
 
-  findAll() {
-    return `This action returns all foreignLanguages`;
+  async findAll(foreignLanguageQueries: IForeignLanguageQueries) {
+    return await this.foreignLanguagesRepository.findAll(foreignLanguageQueries);
   }
 
   async findById(id: number) {
