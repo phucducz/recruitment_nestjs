@@ -34,8 +34,8 @@ export class UsersService {
     return await this.userRepository.findById(id, options);
   }
 
-  async findAll(pagination: IPagination) {
-    return await this.userRepository.findAll(pagination);
+  async findAll(userQueries: IUserQueries) {
+    return await this.userRepository.findAll(userQueries);
   }
 
   async isExist(email: string): Promise<boolean> {

@@ -29,9 +29,11 @@ interface APIResponse {
   statusCode: 200 | 401 | 400;
 }
 
-interface IGenerateRelationshipOptional {
+interface IGenerateRelationshipOptional<T = any> {
   hasPassword?: boolean;
   hasRelations?: boolean;
+  relationships?: string[];
+  select?: FindOptionsSelect<T>;
 }
 
 type TSalaryCurrency = 'vnd' | 'usd';
@@ -46,10 +48,7 @@ interface IPaginationQuery {
   pageSize?: string;
 }
 
-interface BaseQueries {
-  page?: string;
-  pageSize?: string;
-}
+interface BaseQueries extends IPaginationQuery {}
 
 interface IJobQueries extends BaseQueries {
   title?: string;
@@ -67,6 +66,11 @@ interface ISkillQueries extends BaseQueries {
 
 interface IForeignLanguageQueries extends BaseQueries {
   title?: string;
+}
+
+interface IUserQueries extends BaseQueries {
+  jobFieldsId?: string;
+  jobPositionsId?: string;
 }
 
 interface IInitialMap {

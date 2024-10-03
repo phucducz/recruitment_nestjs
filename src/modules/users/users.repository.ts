@@ -8,10 +8,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 
-import { ENTITIES } from 'src/common/utils/constants';
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { JobCategory } from 'src/entities/job_category.entity';
+import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { Placement } from 'src/entities/placement.entity';
 import { User } from 'src/entities/user.entity';
@@ -37,13 +38,6 @@ export class UsersRepository {
 
   private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
 
-  private readonly removeColumns = [
-    'createAt',
-    'createBy',
-    'updateAt',
-    'updateBy',
-  ];
-
   private userRelations = {
     entities: [
       'role',
@@ -59,39 +53,47 @@ export class UsersRepository {
       'workExperiences.jobCategory',
     ],
     fields: [
-      filterColumns(ENTITIES.FIELDS.ROLE, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_POSITION, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USER_SKILLS, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.ACHIVEMENT, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, this.removeColumns),
-      filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, this.removeColumns),
+      filterColumns(ENTITIES.FIELDS.ROLE, removeColumns),
+      filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
+      filterColumns(ENTITIES.FIELDS.USER_SKILLS, removeColumns),
+      filterColumns(ENTITIES.FIELDS.ACHIVEMENT, removeColumns),
+      filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, removeColumns),
+      filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, removeColumns),
     ],
   };
 
   private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
-    ...this.removeColumns,
+    ...removeColumns,
     'password',
   ]) as FindOptionsSelect<User>;
   private foreignLanguageSelectedFields = filterColumns(
     ENTITIES.FIELDS.FOREIGN_LANGUAGE,
-    this.removeColumns,
+    removeColumns,
   ) as FindOptionsSelect<UsersForeignLanguage>;
   private readonly placementFields = filterColumns(
     ENTITIES.FIELDS.PLACEMENT,
-    this.removeColumns,
+    removeColumns,
   ) as FindOptionsSelect<Placement>;
   private readonly positionFields = filterColumns(
     ENTITIES.FIELDS.JOB_POSITION,
-    this.removeColumns,
+    removeColumns,
   ) as FindOptionsSelect<JobPosition>;
   private readonly jobCategoryFields = filterColumns(
     ENTITIES.FIELDS.JOB_CATEGORY,
-    this.removeColumns,
+    removeColumns,
   ) as FindOptionsSelect<JobCategory>;
   private skillSelectedFields = filterColumns(
     ENTITIES.FIELDS.FOREIGN_LANGUAGE,
-    this.removeColumns,
+    removeColumns,
   ) as FindOptionsSelect<UsersForeignLanguage>;
+  private usersJobFieldsFields = filterColumns(
+    ENTITIES.FIELDS.USERS_JOB_FIELD,
+    removeColumns,
+  ) as FindOptionsSelect<UsersJobField>;
+  private jobFieldsFields = filterColumns(
+    ENTITIES.FIELDS.JOB_FIELD,
+    removeColumns,
+  ) as FindOptionsSelect<JobField>;
 
   private userSelectedRelations = this.userRelations.entities.reduce(
     (acc, entity, index) => {
@@ -123,11 +125,13 @@ export class UsersRepository {
   private generateRelationshipOptionals(
     options: IGenerateRelationshipOptional = {},
   ) {
-    const { hasPassword = false, hasRelations = true } = options;
+    const { hasPassword = false, hasRelations = true, relationships } = options;
 
     return {
       relations: hasRelations
-        ? this.userRelations.entities
+        ? !relationships
+          ? this.userRelations.entities
+          : relationships
         : ['role', 'jobPosition'],
       ...(hasRelations
         ? {
@@ -165,15 +169,53 @@ export class UsersRepository {
   }
 
   async findAll(
-    pagination: IPagination,
+    userQueries: IUserQueries,
   ): Promise<[Omit<User, 'password'>[], number]> {
-    const paginationParams = getPaginationParams(pagination);
+    const { jobFieldsId, jobPositionsId, page, pageSize } = userQueries;
+    const paginationParams = getPaginationParams({
+      page: +page,
+      pageSize: +pageSize,
+    });
+
+    console.log({
+      ...this.userFields,
+      password: false,
+      role: this.userSelectColumns.role,
+      jobPosition: this.userSelectColumns.jobPosition,
+      usersJobFields: {
+        ...this.usersJobFieldsFields,
+        jobField: { ...this.jobFieldsFields },
+      },
+    });
 
     return this.userRepository.findAndCount({
+      where: {
+        usersJobFields: {
+          ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
+        },
+        jobPosition: {
+          ...(jobPositionsId && { id: +jobPositionsId }),
+        },
+      },
       ...paginationParams,
-      ...this.generateRelationshipOptionals(),
-      // relations: this.userRelations.entities,
-      // select: this.userSelectColumns,
+      ...this.generateRelationshipOptionals({
+        relationships: [
+          'role',
+          'usersJobFields',
+          'jobPosition',
+          'usersJobFields.jobField',
+        ],
+        select: {
+          ...this.userFields,
+          password: false,
+          role: this.userSelectColumns.role,
+          jobPosition: this.userSelectColumns.jobPosition,
+          usersJobFields: {
+            ...this.usersJobFieldsFields,
+            jobField: { ...this.jobFieldsFields },
+          },
+        },
+      } as IGenerateRelationshipOptional<User>),
     });
   }
 
@@ -231,10 +273,10 @@ export class UsersRepository {
               UsersJobField,
               jobFields.map((jobField) => {
                 return this.usersJobFieldRepository.create({
-                  job_fields_id: jobField.id,
+                  jobFieldsId: jobField.id,
                   jobField: jobField,
                   user: newUserRecord,
-                  users_id: newUserRecord.id,
+                  usersId: newUserRecord.id,
                 });
               }),
             );
