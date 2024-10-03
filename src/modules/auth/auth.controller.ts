@@ -174,7 +174,9 @@ export class AuthController {
       });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: error, statusCode: 500 });
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
     }
   }
 
