@@ -286,6 +286,7 @@ export class AuthController {
           token: await this.mailService.generateVerifyEmailSignUpToken(
             sendSignUpVerificationEmailDto,
           ),
+          fullName: sendSignUpVerificationEmailDto.fullName,
         },
       );
 
