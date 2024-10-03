@@ -7,9 +7,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+
+import { BLOCK_TIME, MAX_SEND_COUNT } from 'src/common/utils/constants';
 import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { SendSignUpVerificationEmailDto } from 'src/dto/mail/send-verify-email.dto';
-
 import { VerifySignUpTokenDto } from 'src/dto/mail/verify-email-sign-up.dto';
 
 @Injectable()
@@ -24,8 +25,6 @@ export class MailService {
     string,
     IPendingVerification
   >();
-  private readonly maxSendCount = 3;
-  private readonly blockTime = 60 * 1000 * 15;
 
   async generateVerifyEmailSignUpToken(
     sendSignUpVerificationEmailDto: SendSignUpVerificationEmailDto,
@@ -41,14 +40,14 @@ export class MailService {
       const timeSinceLastSend = Date.now() - oldPendingVerification.lastSentAt;
 
       if (
-        oldPendingVerification.sendCount >= this.maxSendCount &&
-        timeSinceLastSend < this.blockTime
+        oldPendingVerification.sendCount >= MAX_SEND_COUNT &&
+        timeSinceLastSend < BLOCK_TIME
       )
         throw new Error(
           `Bạn đã yêu xác thực quá nhiều lần, vui lòng đợi 15 phút sau để có thể gửi yêu cầu mới!`,
         );
 
-      if (timeSinceLastSend >= this.blockTime) sendCount = 1;
+      if (timeSinceLastSend >= BLOCK_TIME) sendCount = 1;
       else sendCount = oldPendingVerification.sendCount + 1;
     }
 
@@ -117,9 +116,10 @@ export class MailService {
     });
   }
 
-  async sendForgotPasswordURL(
+  async sendResetPasswordURL(
     email: string,
     params: {
+      email: string;
       fullName: string;
       token: string;
     },
@@ -127,12 +127,10 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Đặt lại mật khẩu cho tài khoản Recruitment Web App',
-      template: './forgotPassword',
+      template: './resetPassword',
       context: {
         full_name: params.fullName,
-        action_url: `${this.configService.get<string>('CLIENT_URL')}/reset-password?token=${
-          params.token
-        }`,
+        action_url: `${this.configService.get<string>('CLIENT_URL')}/reset-password?email=${params.email}&token=${params.token}`,
         web_app_url: this.configService.get<string>('CLIENT_URL'),
       },
     });

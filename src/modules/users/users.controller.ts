@@ -15,10 +15,10 @@ import { Response } from 'express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
-import { ForgotPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ResetPasswordService } from 'src/services/forgot_password.service';
 
 @Controller('users')
 export class UsersController {
@@ -26,8 +26,8 @@ export class UsersController {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
-    @Inject(ForgotPasswordService)
-    private readonly forgotPasswordService: ForgotPasswordService,
+    @Inject(ResetPasswordService)
+    private readonly resetPasswordService: ResetPasswordService,
   ) {}
 
   // @Post()
@@ -159,9 +159,8 @@ export class UsersController {
     @Res() res: Response,
   ) {
     try {
-      const { token } = resetPasswordDto;
-      this.forgotPasswordService.log();
-      const userId = await this.forgotPasswordService.verify(token);
+      const { token, email } = resetPasswordDto;
+      const userId = await this.resetPasswordService.verify({ email, token });
 
       if (
         !(await this.usersService.updatePassword(
@@ -173,7 +172,7 @@ export class UsersController {
           .status(401)
           .json({ message: 'Đặt lại mật khẩu thất bại', statusCode: 401 });
 
-      this.forgotPasswordService.delete(token);
+      this.resetPasswordService.delete(token);
 
       return res
         .status(200)

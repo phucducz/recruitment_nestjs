@@ -1,40 +1,28 @@
 import { Injectable } from '@nestjs/common';
 
+import { BLOCK_TIME, MAX_SEND_COUNT } from 'src/common/utils/constants';
+
 @Injectable()
 export class OTPService {
   constructor() {}
 
-  private otp = new Map<
-    number,
-    {
-      otp: number;
-      expiresAt: number;
-      attemptCount: number;
-      maxSendCount: number;
-      lastSentAt: number;
-    }
-  >();
-  private readonly maxSendCount = 3;
-  private readonly blockTime = 60 * 1000 * 15;
+  private otp = new Map<number, IOTP>();
 
   generateOTP(userId: number) {
     const oldOTP = this.otp.get(userId);
     let attemptCount = 0;
-    let maxSendCount = 1;
+    let sendCount = 1;
 
     if (oldOTP) {
       let timeSinceLastSend = Date.now() - oldOTP.lastSentAt;
 
-      if (
-        oldOTP.maxSendCount >= this.maxSendCount &&
-        timeSinceLastSend < this.blockTime
-      )
+      if (oldOTP.sendCount >= MAX_SEND_COUNT && timeSinceLastSend < BLOCK_TIME)
         throw new Error(
           `Bạn đã yêu cầu mã OTP quá nhiều lần, vui lòng đợi 15 phút sau để có thể gửi yêu cầu mới!`,
         );
 
-      if (timeSinceLastSend >= this.blockTime) maxSendCount = 0;
-      else maxSendCount = oldOTP.maxSendCount + 1;
+      if (timeSinceLastSend >= BLOCK_TIME) sendCount = 0;
+      else sendCount = oldOTP.sendCount + 1;
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -42,7 +30,7 @@ export class OTPService {
       otp: otp,
       expiresAt: Date.now() + 5 * 60 * 1000,
       attemptCount,
-      maxSendCount,
+      sendCount,
       lastSentAt: Date.now(),
     });
 

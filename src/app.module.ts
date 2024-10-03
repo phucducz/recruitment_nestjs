@@ -14,7 +14,6 @@ import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
-import { ForgotPasswordModule } from './modules/forgot_password/forgot_password.module';
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
 import { JobPositionsModule } from './modules/job_positions/job_positions.module';
@@ -25,6 +24,7 @@ import { OTPModule } from './modules/otp/otp.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
+import { ResetPasswordModule } from './modules/reset_password/reset_password.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { UsersModule } from './modules/users/users.module';
@@ -85,7 +85,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     RefreshTokenModule,
     MailModule,
     OTPModule,
-    ForgotPasswordModule,
+    ResetPasswordModule,
   ],
   controllers: [AppController],
   providers: [AppService],

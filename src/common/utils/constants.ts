@@ -52,3 +52,7 @@ export const ENTITIES = {
 };
 
 export const removeColumns = ['updateBy', 'updateAt', 'createBy', 'createAt'];
+
+export const MAX_SEND_COUNT = 3;
+
+export const BLOCK_TIME = 60 * 1000 * 15;

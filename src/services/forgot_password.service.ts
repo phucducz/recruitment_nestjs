@@ -7,43 +7,71 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import {
-  FORGOT_PASSWORD_TOKEN_STATUS,
-  UNAUTHORIZED_EXCEPTION_MESSAGE,
-} from 'src/common/utils/enums';
+import { BLOCK_TIME, MAX_SEND_COUNT } from 'src/common/utils/constants';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
+import { VerifyResetPasswordTokenDto } from 'src/dto/users/verify-forgot-password-token.dto';
 
 @Injectable()
-export class ForgotPasswordService {
+export class ResetPasswordService {
   constructor(
     private configService: ConfigService,
     @Inject(JwtService) private readonly jwtService: JwtService,
   ) {}
 
-  private forgotPasswordToken = new Map<string, FORGOT_PASSWORD_TOKEN_STATUS>();
+  private resetPasswordToken = new Map<string, IForgotPassword>();
 
-  async generate(userId: number) {
+  async generate(payload: { userId: number; email: string }) {
+    const { email } = payload;
+    const oldResetPasswordToken = this.resetPasswordToken.get(email);
+    let sendCount = 1;
+
+    if (oldResetPasswordToken) {
+      const timeSinceLastSend = Date.now() - oldResetPasswordToken.lastSentAt;
+
+      if (
+        oldResetPasswordToken.sendCount >= MAX_SEND_COUNT &&
+        timeSinceLastSend < BLOCK_TIME
+      )
+        throw new Error(
+          `Bạn đã yêu quá nhiều lần, vui lòng đợi 15 phút sau để có thể gửi yêu cầu mới!`,
+        );
+
+      if (timeSinceLastSend >= BLOCK_TIME) sendCount = 0;
+      else sendCount = oldResetPasswordToken.sendCount + 1;
+    }
+
     const token = await this.jwtService.signAsync(
-      {
-        userId,
-        type: 'forgot-password',
-      },
+      { ...payload },
       { expiresIn: '15m' },
     );
 
-    this.forgotPasswordToken.set(token, FORGOT_PASSWORD_TOKEN_STATUS.VALID);
+    this.resetPasswordToken.set(email, {
+      token,
+      attemptCount: 0,
+      lastSentAt: Date.now(),
+      sendCount,
+    });
 
     return token;
   }
 
-  async verify(token: string) {
-    const status = this.forgotPasswordToken.get(token);
+  async verify(verifyResetPasswordTokenDto: VerifyResetPasswordTokenDto) {
+    const verifyForgotPasswordTokenData = this.resetPasswordToken.get(
+      verifyResetPasswordTokenDto.email,
+    );
 
-    if (!status || (status && status === FORGOT_PASSWORD_TOKEN_STATUS.INVALID))
+    if (!verifyForgotPasswordTokenData)
       throw new UnauthorizedException(
         UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
       );
 
+    const { token } = verifyForgotPasswordTokenData;
     const tokenDecoded = this.jwtService.decode(token);
+
+    if (token !== verifyResetPasswordTokenDto.token)
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
 
     try {
       await this.jwtService.verifyAsync(token, {
@@ -53,23 +81,18 @@ export class ForgotPasswordService {
       throw new UnauthorizedException('Token đã hết hạn');
     }
 
-    if (!tokenDecoded?.type || !tokenDecoded?.userId)
+    if (!tokenDecoded?.userId)
       throw new BadRequestException('Không tìm thấy người dùng');
-
-    if (tokenDecoded.type !== 'forgot-password')
-      throw new UnauthorizedException(
-        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
-      );
 
     return tokenDecoded.userId;
   }
 
   delete(token: string) {
-    this.forgotPasswordToken.delete(token);
+    this.resetPasswordToken.delete(token);
     return true;
   }
 
   log() {
-    console.log(this.forgotPasswordToken);
+    console.log(this.resetPasswordToken);
   }
 }

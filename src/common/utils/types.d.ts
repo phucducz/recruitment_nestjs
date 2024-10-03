@@ -70,3 +70,10 @@ interface IInitialMap {
 interface IPendingVerification extends IInitialMap {
   token: string;
 }
+
+interface IOTP extends IInitialMap {
+  otp: number;
+  expiresAt: number;
+}
+
+interface IForgotPassword extends IPendingVerification {}
