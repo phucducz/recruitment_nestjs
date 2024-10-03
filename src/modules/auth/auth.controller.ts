@@ -353,6 +353,8 @@ export class AuthController {
         maxAge: 24 * 60 * 60 * 7000,
       });
 
+      this.mailService.deleteSignUpToken(email);
+
       return res.status(200).json({
         statusCode: 200,
         message: 'Đăng ký tài khoản thành công!',

@@ -20,25 +20,68 @@ export class MailService {
     @Inject(JwtService) private readonly jwtService: JwtService,
   ) {}
 
-  private readonly pendingVerifycations = new Map<string, string>();
+  private readonly pendingVerifycations = new Map<
+    string,
+    IPendingVerification
+  >();
+  private readonly maxSendCount = 3;
+  private readonly blockTime = 60 * 1000 * 15;
 
   async generateVerifyEmailSignUpToken(
     sendSignUpVerificationEmailDto: SendSignUpVerificationEmailDto,
   ) {
+    const oldPendingVerification = this.pendingVerifycations.get(
+      sendSignUpVerificationEmailDto.email,
+    );
+    let sendCount = 1;
+
+    this.log();
+
+    if (oldPendingVerification) {
+      const timeSinceLastSend = Date.now() - oldPendingVerification.lastSentAt;
+
+      if (
+        oldPendingVerification.sendCount >= this.maxSendCount &&
+        timeSinceLastSend < this.blockTime
+      )
+        throw new Error(
+          `Bạn đã yêu xác thực quá nhiều lần, vui lòng đợi 15 phút sau để có thể gửi yêu cầu mới!`,
+        );
+
+      if (timeSinceLastSend >= this.blockTime) sendCount = 1;
+      else sendCount = oldPendingVerification.sendCount + 1;
+    }
+
     const token = await this.jwtService.signAsync(
       { ...sendSignUpVerificationEmailDto },
       { expiresIn: '24h' },
     );
 
-    this.pendingVerifycations.set(sendSignUpVerificationEmailDto.email, token);
+    this.pendingVerifycations.set(sendSignUpVerificationEmailDto.email, {
+      token,
+      attemptCount: 0,
+      sendCount,
+      lastSentAt: Date.now(),
+    });
+
+    this.log();
 
     return token;
   }
 
-  async verifySignUpToken(verifySignUpTokenDto: VerifySignUpTokenDto) {
-    const token = this.pendingVerifycations.get(verifySignUpTokenDto.email);
+  log() {
+    console.log(this.pendingVerifycations);
+  }
 
-    if (!token) throw new NotFoundException('Không tìm thấy token');
+  async verifySignUpToken(verifySignUpTokenDto: VerifySignUpTokenDto) {
+    const verificationData = this.pendingVerifycations.get(
+      verifySignUpTokenDto.email,
+    );
+
+    if (!verificationData) throw new NotFoundException('Không tìm thấy token');
+
+    const { token } = verificationData;
+
     if (token !== verifySignUpTokenDto.token)
       throw new UnauthorizedException(
         UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
@@ -55,6 +98,10 @@ export class MailService {
     }
 
     return token;
+  }
+
+  deleteSignUpToken(email: string) {
+    this.pendingVerifycations.delete(email);
   }
 
   async sendOTPEmail(email: string, otp: number) {
