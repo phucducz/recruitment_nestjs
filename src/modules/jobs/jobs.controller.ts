@@ -50,7 +50,7 @@ export class JobsController {
   }
 
   @Get('/all?')
-  async findAll(@Query() jobQueries: IJobsQueries, @Res() res: Response) {
+  async findAll(@Query() jobQueries: IJobQueries, @Res() res: Response) {
     const result = await this.jobsService.findAll(jobQueries);
 
     return res.status(200).json({

@@ -90,7 +90,7 @@ export class JobsRepository {
     };
   }
 
-  async findAll(jobsQueries: IJobsQueries) {
+  async findAll(jobsQueries: IJobQueries) {
     const {
       categoriesId,
       jobFieldsId,

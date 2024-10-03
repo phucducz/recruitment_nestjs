@@ -51,7 +51,7 @@ interface BaseQueries {
   pageSize?: string;
 }
 
-interface IJobsQueries extends BaseQueries {
+interface IJobQueries extends BaseQueries {
   title?: string;
   placementsId?: string;
   salaryMin?: string;
@@ -59,6 +59,10 @@ interface IJobsQueries extends BaseQueries {
   workTypesId?: string;
   categoriesId?: string;
   jobFieldsId?: string;
+}
+
+interface ISkillQueries extends BaseQueries {
+  title?: string;
 }
 
 interface IInitialMap {

@@ -19,8 +19,8 @@ export class SkillsService {
     return await this.skillsRepository.findById(id);
   }
 
-  findAll() {
-    return `This action returns all skills`;
+  async findAll(skillQueries: ISkillQueries) {
+    return await this.skillsRepository.findAll(skillQueries);
   }
 
   findOne(id: number) {
