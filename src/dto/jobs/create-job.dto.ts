@@ -29,12 +29,7 @@ export class CreateJobDto {
 
   @IsArray()
   @IsNotEmpty()
-  placements: number[];
-  // placements: {
-  //   id: number;
-  //   amount: number;
-  //   detailAddress: string;
-  // }[];
+  placementIds: number[];
 
   @IsNumber()
   @IsNotEmpty()

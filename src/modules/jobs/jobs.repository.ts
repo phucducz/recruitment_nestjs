@@ -2,41 +2,21 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
-import { JobConverter } from 'src/common/converters/job.converter';
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
-import { JobCategoriesService } from 'src/services/job_categories.service';
-import { JobFieldsService } from 'src/services/job_fields.service';
-import { JobPositionsService } from 'src/services/job_positions.service';
-import { JobsPlacementsService } from 'src/services/jobs_placements.service';
+import { Placement } from 'src/entities/placement.entity';
 import { PlacementsService } from 'src/services/placements.service';
-import { UsersService } from 'src/services/users.service';
-import { WorkTypesService } from 'src/services/work_types.service';
 
 @Injectable()
 export class JobsRepository {
   constructor(
     @InjectRepository(Job) private readonly jobRepository: Repository<Job>,
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(JobCategoriesService)
-    private readonly jobCategoryService: JobCategoriesService,
-    @Inject(JobPositionsService)
-    private readonly jobPositionService: JobPositionsService,
-    @Inject(JobFieldsService)
-    private readonly jobFieldService: JobFieldsService,
-    @Inject(UsersService) private readonly userService: UsersService,
-    @Inject(WorkTypesService)
-    private readonly workTypeService: WorkTypesService,
     @InjectRepository(JobsPlacement)
     private readonly jobPlacementRepository: Repository<JobsPlacement>,
-    @Inject(PlacementsService)
-    private readonly placementService: PlacementsService,
-    @Inject(JobsPlacementsService)
-    private readonly jobsPlacementsService: JobsPlacementsService,
-    @Inject(JobConverter) private readonly jobConverter: JobConverter,
   ) {}
 
   private readonly logger = new Logger(JobsRepository.name);
@@ -136,7 +116,15 @@ export class JobsRepository {
     });
   }
 
-  async create(createJob: ICreate<CreateJobDto>) {
+  async create(
+    createJob: ICreate<
+      CreateJobDto &
+        Pick<
+          Job,
+          'jobCategory' | 'jobPosition' | 'jobField' | 'user' | 'workType'
+        > & { placements: Placement[] }
+    >,
+  ) {
     try {
       const { createBy, variable } = createJob;
       let newJobRecord: Job | null = null;
@@ -159,28 +147,16 @@ export class JobsRepository {
               benefits: variable.benefits,
               salaryCurrency: variable.salaryCurrency,
               quantity: variable.quantity,
-              jobCategory: await this.jobCategoryService.findById(
-                variable.categoriesId,
-              ),
-              jobPosition: await this.jobPositionService.findById(
-                variable.positionsId,
-              ),
-              jobField: await this.jobFieldService.findById(variable.fieldsId),
-              user: await this.userService.findById(createBy),
-              workType: await this.workTypeService.findById(
-                variable.workTypesId,
-              ),
-            }),
-          );
-
-          const placements = await Promise.all(
-            variable.placements.map(async (placement) => {
-              return await this.placementService.findById(placement);
+              jobCategory: variable.jobCategory,
+              jobPosition: variable.jobPosition,
+              jobField: variable.jobField,
+              user: variable.user,
+              workType: variable.workType,
             }),
           );
 
           await Promise.all(
-            placements.map(async (placement) => {
+            variable.placements.map(async (placement) => {
               await transactionalEntityManager.save(
                 JobsPlacement,
                 this.jobPlacementRepository.create({
