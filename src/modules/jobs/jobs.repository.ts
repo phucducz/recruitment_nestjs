@@ -3,12 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
-import { filterColumns, getPaginationParams } from 'src/common/utils/function';
+import {
+  filterColumns,
+  filterUndefinedValues,
+  getPaginationParams,
+} from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
+import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { Placement } from 'src/entities/placement.entity';
-import { PlacementsService } from 'src/services/placements.service';
 
 @Injectable()
 export class JobsRepository {
@@ -110,7 +114,7 @@ export class JobsRepository {
   }
 
   async findById(id: number) {
-    return await this.jobRepository.find({
+    return await this.jobRepository.findOne({
       where: { id: id },
       ...this.generateJobRelationships(),
     });
@@ -177,6 +181,83 @@ export class JobsRepository {
     } catch (error) {
       this.logger.log(error);
       return null;
+    }
+  }
+
+  async update(
+    id: number,
+    updateJob: IUpdate<
+      UpdateJobDto &
+        Partial<
+          Pick<Job, 'jobCategory' | 'jobPosition' | 'jobField' | 'workType'> & {
+            placements: Placement[];
+          }
+        >
+    >,
+  ) {
+    try {
+      const { updateBy, variable } = updateJob;
+
+      await this.dataSource.transaction(async (transactionalEntityManager) => {
+        const newVariables = filterUndefinedValues<Job>({
+          salaryMin: variable.salaryMin,
+          salaryMax: variable.salaryMax,
+          quantity: variable.quantity,
+          description: variable.description,
+          requirements: variable.requirements,
+          benefits: variable.benefits,
+          jobField: variable.jobField,
+          jobCategory: variable.jobCategory,
+          workType: variable.workType,
+          jobPosition: variable.jobPosition,
+          updateBy,
+          updateAt: new Date().toString(),
+        });
+
+        console.log({
+          salaryMin: variable.salaryMin,
+          salaryMax: variable.salaryMax,
+          quantity: variable.quantity,
+          description: variable.description,
+          requirements: variable.requirements,
+          benefits: variable.benefits,
+          jobField: variable.jobField,
+          jobCategory: variable.jobCategory,
+          workType: variable.workType,
+          jobPosition: variable.jobPosition,
+          updateBy,
+          updateAt: new Date().toString(),
+        });
+
+        await transactionalEntityManager.update(Job, id, newVariables);
+
+        if ((variable?.placementIds ?? []).length > 0) {
+          const currentJob = await this.findById(id);
+
+          await transactionalEntityManager.delete(JobsPlacement, {
+            jobsId: currentJob.id,
+          });
+
+          await Promise.all(
+            variable.placements.map(async (placement) => {
+              await transactionalEntityManager.save(
+                JobsPlacement,
+                this.jobPlacementRepository.create({
+                  job: currentJob,
+                  jobsId: id,
+                  placement: placement,
+                  placementsId: placement.id,
+                  createAt: new Date().toString(),
+                  createBy: updateBy,
+                }),
+              );
+            }),
+          );
+        }
+      });
+      return { isSuccess: true, message: '' };
+    } catch (error) {
+      return { isSuccess: true, message: error };
     }
   }
 }

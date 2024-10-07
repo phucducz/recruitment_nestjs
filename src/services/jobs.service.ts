@@ -60,8 +60,32 @@ export class JobsService {
     return await this.jobRepository.findById(id);
   }
 
-  update(id: number, updateJobDto: UpdateJobDto) {
-    return `This action updates a #${id} job`;
+  async update(id: number, updateJobDto: IUpdate<UpdateJobDto>) {
+    const { variable } = updateJobDto;
+
+    return await this.jobRepository.update(id, {
+      ...updateJobDto,
+      variable: {
+        ...variable,
+        jobCategory: !variable.categoriesId
+          ? undefined
+          : await this.jobCategoryService.findById(variable.categoriesId),
+        jobPosition: !variable.positionsId
+          ? undefined
+          : await this.jobPositionService.findById(variable.positionsId),
+        jobField: !variable.fieldsId
+          ? undefined
+          : await this.jobFieldService.findById(variable.fieldsId),
+        workType: !variable.workTypesId
+          ? undefined
+          : await this.workTypeService.findById(variable.workTypesId),
+        placements: await Promise.all(
+          (variable?.placementIds ?? []).map(async (placement) => {
+            return await this.placementService.findById(placement);
+          }),
+        ),
+      },
+    });
   }
 
   remove(id: number) {

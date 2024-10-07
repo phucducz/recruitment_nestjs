@@ -52,18 +52,6 @@ export const snakeToCamelCase = (fieldName: string) => {
   return fieldName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 };
 
-// export const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
-//   const entityFields =
-//     Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
-
-//   if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
-
-//   const baseFields =
-//     Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
-
-//   return [...new Set([...baseFields, ...entityFields])];
-// };
-
 export const filterColumns = (
   columns: string[],
   removeColumns: string[],
@@ -74,4 +62,13 @@ export const filterColumns = (
 
     return acc;
   }, {});
+};
+
+export const filterUndefinedValues = <T extends object>(
+  object: Partial<T>,
+): Partial<T> => {
+  return Object.keys(object).reduce((acc, key) => {
+    if (object[key] !== undefined) acc[key] = object[key];
+    return acc;
+  }, {} as Partial<T>);
 };

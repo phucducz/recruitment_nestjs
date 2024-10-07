@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -12,6 +14,7 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
+import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { JobsService } from '../../services/jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -67,6 +70,35 @@ export class JobsController {
   @Get('?')
   async findOne(@Query('id') id: string) {
     return await this.jobsService.findById(+id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async updateJob(
+    @Param('id') id: string,
+    @Body() updateJobDto: UpdateJobDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.jobsService.update(+id, {
+        variable: updateJobDto,
+        updateBy: request.user.userId,
+      });
+
+      if (!result.isSuccess)
+        return res
+          .status(401)
+          .json({ message: 'Cập nhật công việc thành công!', statusCode: 401 });
+
+      return res
+        .status(200)
+        .json({ message: 'Cập nhật công việc thành công!', statusCode: 200 });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   // @Patch(':id')
