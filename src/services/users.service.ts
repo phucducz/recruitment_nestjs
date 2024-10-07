@@ -11,6 +11,8 @@ import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
+import { JobPositionsService } from './job_positions.service';
+import { RolesService } from './roles.service';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +20,9 @@ export class UsersService {
     @Inject(UsersRepository) private readonly userRepository: UsersRepository,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @Inject(RolesService) private readonly roleService: RolesService,
+    @Inject(forwardRef(() => JobPositionsService))
+    private readonly jobPositionService: JobPositionsService,
   ) {}
 
   async findByEmail(
@@ -34,8 +39,8 @@ export class UsersService {
     return await this.userRepository.findById(id, options);
   }
 
-  async findAll(pagination: IPagination) {
-    return await this.userRepository.findAll(pagination);
+  async findAll(userQueries: IUserQueries) {
+    return await this.userRepository.findAll(userQueries);
   }
 
   async isExist(email: string): Promise<boolean> {
@@ -43,7 +48,16 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto) {
-    return await this.userRepository.save(registerDto);
+    const role = await this.roleService.findById(registerDto.roleId);
+    const jobPosition = await this.jobPositionService.findById(
+      registerDto.jobPositionsId,
+    );
+
+    return await this.userRepository.save({
+      ...registerDto,
+      role,
+      jobPosition,
+    });
   }
 
   async changePassword(changePasswordDto: IUpdate<ChangePasswordDto>) {

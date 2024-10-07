@@ -18,7 +18,7 @@ export class ResetPasswordService {
     @Inject(JwtService) private readonly jwtService: JwtService,
   ) {}
 
-  private resetPasswordToken = new Map<string, IForgotPassword>();
+  private resetPasswordToken = new Map<string, IResetPassword>();
 
   async generate(payload: { userId: number; email: string }) {
     const { email } = payload;

@@ -10,6 +10,7 @@ import { Role } from 'src/entities/role.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
+import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
@@ -18,6 +19,7 @@ export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
   'UsersSkill',
   'JobsPlacement',
+  'UsersJobField',
 ];
 
 const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
@@ -48,6 +50,7 @@ export const ENTITIES = {
     FOREIGN_LANGUAGE: getEntityFields(ForeignLanguage),
     WORK_EXPERIENCE: getEntityFields(WorkExperience),
     PLACEMENT: getEntityFields(Placement),
+    USERS_JOB_FIELD: getEntityFields(UsersJobField),
   },
 };
 

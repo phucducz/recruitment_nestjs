@@ -15,6 +15,10 @@ export class JobsPlacementsService {
     return await this.jobsPlacementRepository.findByJobId(jobsId);
   }
 
+  async deleteByJobId(jobId: number) {
+    return await this.jobsPlacementRepository.deleteByJobId(jobId);
+  }
+
   create(createJobsPlacementDto: CreateJobsPlacementDto) {
     return 'This action adds a new jobsPlacement';
   }

@@ -1,31 +1,27 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperience } from 'src/entities/work_experience.entity';
-import { JobCategoriesService } from 'src/services/job_categories.service';
-import { JobPositionsService } from 'src/services/job_positions.service';
-import { PlacementsService } from 'src/services/placements.service';
-import { UsersService } from 'src/services/users.service';
 
 @Injectable()
 export class WorkExperiencesRepository {
   constructor(
     @InjectRepository(WorkExperience)
     private readonly workExperienceRepository: Repository<WorkExperience>,
-    @Inject(JobCategoriesService)
-    private readonly jobCategoryService: JobCategoriesService,
-    @Inject(JobPositionsService)
-    private readonly jobPositionService: JobPositionsService,
-    @Inject(PlacementsService)
-    private readonly placementService: PlacementsService,
-    @Inject(UsersService)
-    private readonly userService: UsersService,
   ) {}
 
-  async create(createWorkExperienceDto: ICreate<CreateWorkExperienceDto>) {
+  async create(
+    createWorkExperienceDto: ICreate<
+      CreateWorkExperienceDto &
+        Pick<
+          WorkExperience,
+          'jobCategory' | 'jobPosition' | 'placement' | 'user'
+        >
+    >,
+  ) {
     const { createBy, variable } = createWorkExperienceDto;
 
     return (await this.workExperienceRepository.save({
@@ -36,12 +32,10 @@ export class WorkExperiencesRepository {
       endDate: variable.endDate,
       isWorking: variable.endDate === null,
       startDate: variable.startDate,
-      jobCategory: await this.jobCategoryService.findById(
-        variable.jobCategoriesId,
-      ),
-      jobPosition: await this.jobPositionService.findById(variable.positionId),
-      placement: await this.placementService.findById(variable.placementsId),
-      user: await this.userService.findById(createBy),
+      jobCategory: variable.jobCategory,
+      jobPosition: variable.jobPosition,
+      placement: variable.placement,
+      user: variable.user,
     })) as WorkExperience;
   }
 
@@ -53,7 +47,12 @@ export class WorkExperiencesRepository {
 
   async update(
     id: number,
-    updateWorkExperienceDto: IUpdate<UpdateWorkExperienceDto>,
+    updateWorkExperienceDto: IUpdate<
+      UpdateWorkExperienceDto &
+        Partial<
+          Pick<WorkExperience, 'jobCategory' | 'jobPosition' | 'placement'>
+        >
+    >,
   ) {
     const { updateBy, variable } = updateWorkExperienceDto;
 
@@ -62,14 +61,12 @@ export class WorkExperiencesRepository {
       description: variable.description,
       endDate: variable.endDate,
       isWorking: variable.endDate === null,
-      jobCategory: await this.jobCategoryService.findById(
-        variable.jobCategoriesId,
-      ),
-      jobPosition: await this.jobPositionService.findById(variable.positionId),
-      placement: await this.placementService.findById(variable.placementsId),
-      updateAt: new Date().toString(),
-      updateBy,
+      jobCategory: variable.jobCategory,
+      jobPosition: variable.jobPosition,
+      placement: variable.placement,
       startDate: variable.startDate,
+      updateBy,
+      updateAt: new Date().toString(),
     });
 
     return result.affected > 0;

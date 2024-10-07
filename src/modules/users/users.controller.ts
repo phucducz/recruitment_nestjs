@@ -15,10 +15,10 @@ import { Response } from 'express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
+import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ResetPasswordService } from 'src/services/forgot_password.service';
 
 @Controller('users')
 export class UsersController {
@@ -67,16 +67,22 @@ export class UsersController {
   }
 
   @Get('/all?')
-  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+  async findAll(@Query() userQueries: IUserQueries, @Res() res: Response) {
     const paginationParams = {
-      page: +pagination.page,
-      pageSize: +pagination.pageSize,
+      page: +userQueries.page,
+      pageSize: +userQueries.pageSize,
     };
-    const result = await this.usersService.findAll(paginationParams);
+    try {
+      const result = await this.usersService.findAll(userQueries);
 
-    return res
-      .status(200)
-      .json({ ...rtPageInfoAndItems(paginationParams, result) });
+      return res
+        .status(200)
+        .json({ ...rtPageInfoAndItems(paginationParams, result) });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   @UseGuards(JwtAuthGuard)

@@ -24,7 +24,7 @@ export class JobCategoriesController {
   ) {}
 
   @Get('/all?')
-  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
     this.otpService.log();
 
     const paginationParams = {

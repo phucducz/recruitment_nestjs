@@ -23,4 +23,8 @@ export class JobsPlacementsRepository {
       },
     });
   }
+
+  async deleteByJobId(jobId: number) {
+    return await this.jobsPlacementRepository.delete(jobId);
+  }
 }
