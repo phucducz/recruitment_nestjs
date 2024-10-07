@@ -8,6 +8,7 @@ interface IJobQueries extends BaseQueries {
   workTypesId?: string;
   categoriesId?: string;
   jobFieldsId?: string;
+  usersId?: string;
 }
 
 interface ISkillQueries extends BaseQueries {
