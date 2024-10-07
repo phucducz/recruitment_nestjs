@@ -85,6 +85,7 @@ export class JobsRepository {
       salaryMin,
       title,
       workTypesId,
+      usersId,
     } = jobsQueries;
     const paginationParams = getPaginationParams({
       page: +page,
@@ -107,6 +108,7 @@ export class JobsRepository {
           jobsPlacements: { placementsId: +placementsId },
         }),
         ...(workTypesId && { workType: { id: +workTypesId } }),
+        ...(usersId && { user: { id: +usersId } }),
       },
       ...this.generateJobRelationships(),
       order: { createAt: 'DESC' },
