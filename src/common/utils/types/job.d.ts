@@ -1,0 +1,1 @@
+type TSalaryCurrency = 'vnd' | 'usd';

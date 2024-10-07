@@ -1,5 +1,4 @@
 import {
-  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -10,7 +9,7 @@ import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
-import { RegisterDto } from 'src/dto/auth/register.dto';
+import { ISaveUserParams } from 'src/common/utils/types/user';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
@@ -19,16 +18,11 @@ import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { JobFieldsService } from 'src/services/job_fields.service';
-import { JobPositionsService } from 'src/services/job_positions.service';
-import { RolesService } from 'src/services/roles.service';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(forwardRef(() => JobPositionsService))
-    private readonly jobPositionService: JobPositionsService,
-    @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(JobFieldsService)
     private readonly jobFieldService: JobFieldsService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -177,17 +171,6 @@ export class UsersRepository {
       pageSize: +pageSize,
     });
 
-    console.log({
-      ...this.userFields,
-      password: false,
-      role: this.userSelectColumns.role,
-      jobPosition: this.userSelectColumns.jobPosition,
-      usersJobFields: {
-        ...this.usersJobFieldsFields,
-        jobField: { ...this.jobFieldsFields },
-      },
-    });
-
     return this.userRepository.findAndCount({
       where: {
         usersJobFields: {
@@ -223,12 +206,11 @@ export class UsersRepository {
     return (await this.userRepository.countBy({ email })) > 0;
   }
 
-  async save(registerDto: RegisterDto): Promise<User> {
+  async save(saveUserParams: ISaveUserParams): Promise<User> {
     try {
-      const { roleId, email, fullName, password } = registerDto;
+      const { role, email, fullName, password } = saveUserParams;
       let newUserRecord: User | null = null;
 
-      const role = await this.roleService.findById(roleId);
       if (!role) return null;
 
       if (role.title === 'admin') {
@@ -239,13 +221,14 @@ export class UsersRepository {
           fullName: fullName,
           password: password,
           email: email,
-          phoneNumber: registerDto.phoneNumber,
+          phoneNumber: saveUserParams.phoneNumber,
           role: role,
         });
       } else if (role.title === 'employer') {
         this.logger.log(`${this.save.name} register employer account`);
 
-        const { companyName, companyUrl, phoneNumber } = registerDto;
+        const { companyName, companyUrl, phoneNumber, jobPosition } =
+          saveUserParams;
 
         await this.dataSource.manager.transaction(
           async (transactionalEntityManager) => {
@@ -259,14 +242,12 @@ export class UsersRepository {
               createAt: new Date().toString(),
               password: password,
               phoneNumber: phoneNumber,
-              jobPosition: await this.jobPositionService.findById(
-                registerDto.jobPositionsId,
-              ),
               role,
+              jobPosition,
             });
 
             const jobFields = await this.jobFieldService.findByIds(
-              registerDto.jobFieldsIds,
+              saveUserParams.jobFieldsIds,
             );
 
             await transactionalEntityManager.save(
