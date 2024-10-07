@@ -81,7 +81,7 @@ export class WorkTypesController {
   }
 
   @Get('/all?')
-  async findAll(@Query() pagination: IPaginationQuery, @Res() res: Response) {
+  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
     const paginationParams = {
       page: +pagination.page,
       pageSize: +pagination.pageSize,
