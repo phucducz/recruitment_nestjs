@@ -13,6 +13,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
@@ -86,6 +87,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     MailModule,
     OTPModule,
     ResetPasswordModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
