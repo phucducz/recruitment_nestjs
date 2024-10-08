@@ -29,21 +29,21 @@ export class CloudinaryController {
     @Res() res: Response,
   ) {
     try {
-      const result = await this.cloudinaryService.uploadFile(file);
+      const result = await this.cloudinaryService.uploadFileByPath(file.path);
 
-      if (result.http_code === 400)
+      if (result?.http_code === 400)
         return res.status(400).json({
-          message: `Tải file thất bại. ${result.message}!`,
+          message: `Tải file thất bại. ${result?.message}!`,
           stausCode: 400,
         });
 
       return res.status(200).json({
         message: 'Tải file thành công!',
         stausCode: 200,
-        url: result.secure_url,
-        publicId: result.public_id,
-        createAt: result.created_at,
-        originFileName: result.original_filename,
+        url: result?.secure_url,
+        publicId: result?.public_id,
+        createAt: result?.created_at,
+        originFileName: result?.original_filename,
       });
     } catch (error) {
       return res
