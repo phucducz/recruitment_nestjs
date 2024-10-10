@@ -117,6 +117,9 @@ export class AuthService {
             fullName: signInDto.fullName,
             roleId: role.id,
           });
+          const { refreshToken: rf } = await this.refreshTokenService.create({
+            userId: result.id,
+          });
 
           return {
             ...this.userConverter.entityToBasicInfo(
@@ -127,9 +130,7 @@ export class AuthService {
               result.email,
               result.fullName,
             ),
-            refreshToken: await this.refreshTokenService.create({
-              userId: result.id,
-            }),
+            refreshToken: rf,
           };
         }
 
