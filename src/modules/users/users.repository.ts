@@ -40,6 +40,7 @@ export class UsersRepository {
       'achivement',
       'userLanguages',
       'workExperiences',
+      'curriculumVitae',
       'userSkills.skill',
       'userLanguages.foreignLanguage',
       'workExperiences.placement',
@@ -53,6 +54,7 @@ export class UsersRepository {
       filterColumns(ENTITIES.FIELDS.ACHIVEMENT, removeColumns),
       filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, removeColumns),
       filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, removeColumns),
+      filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, removeColumns),
     ],
   };
 
