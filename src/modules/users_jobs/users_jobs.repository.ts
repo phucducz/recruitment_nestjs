@@ -23,4 +23,8 @@ export class UsersJobRepository {
       curriculumVitaeLink: variable.curriculumVitaeURL,
     })) as UsersJob;
   }
+
+  async isExist(params: { jobsId: number; usersId: number }) {
+    return !!(await this.usersJobRepository.findOneBy(params));
+  }
 }

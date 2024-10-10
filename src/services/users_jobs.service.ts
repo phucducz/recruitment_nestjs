@@ -11,8 +11,12 @@ export class UsersJobsService {
     private readonly usersJobRepository: UsersJobRepository,
   ) {}
 
-  async create(createUsersJobDto: ICreate<CreateUsersJobDto>) {
+  async aplly(createUsersJobDto: ICreate<CreateUsersJobDto>) {
     return await this.usersJobRepository.create(createUsersJobDto);
+  }
+
+  async isApplied(params: { jobsId: number; usersId: number }) {
+    return await this.usersJobRepository.isExist(params);
   }
 
   findAll() {
