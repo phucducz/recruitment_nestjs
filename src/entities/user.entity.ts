@@ -13,6 +13,7 @@ import { Job } from 'src/entities/job.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { Role } from 'src/entities/role.entity';
 import { BaseEntity } from './base.entity';
+import { CurriculumVitae } from './curriculum_vitae';
 import { RefreshToken } from './refresh_token.entity';
 import { UsersForeignLanguage } from './users_foreign_language.entity';
 import { UsersJob } from './users_job.entity';
@@ -102,4 +103,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
+
+  @OneToMany(() => CurriculumVitae, (curriculumVitae) => curriculumVitae.user)
+  curriculumVitae: CurriculumVitae;
 }

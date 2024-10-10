@@ -2,6 +2,7 @@ import {
   Controller,
   Inject,
   Post,
+  Request,
   Res,
   UploadedFile,
   UseGuards,
@@ -11,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
 import { CloudinaryService } from 'src/services/cloudinary.service';
+import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { cloudinaryStorage } from './cloudinary-storage.config';
 
@@ -19,6 +21,8 @@ export class CloudinaryController {
   constructor(
     @Inject(CloudinaryService)
     private readonly cloudinaryService: CloudinaryService,
+    @Inject(CurriculumVitaesService)
+    private readonly curriculumVitaesService: CurriculumVitaesService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -27,6 +31,7 @@ export class CloudinaryController {
   async uploadCV(
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
+    @Request() request: any,
   ) {
     try {
       const result = await this.cloudinaryService.uploadFileByPath(file.path);
@@ -36,6 +41,20 @@ export class CloudinaryController {
           message: `Tải file thất bại. ${result?.message}!`,
           stausCode: 400,
         });
+
+      const cv = await this.curriculumVitaesService.create({
+        createBy: request.user.userId,
+        variable: { url: result.secure_url },
+      });
+
+      if (!cv.id) {
+        await this.cloudinaryService.deleteFile(result?.public_id);
+
+        return res.status(401).json({
+          message: `Tải file thất bại. ${result?.message}!`,
+          stausCode: 401,
+        });
+      }
 
       return res.status(200).json({
         message: 'Tải file thành công!',

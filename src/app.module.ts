@@ -35,6 +35,7 @@ import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
 import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
 import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
 import { WorkTypesModule } from './modules/work_types/work_types.module';
+import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     OTPModule,
     ResetPasswordModule,
     CloudinaryModule,
+    CurriculumVitaesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
