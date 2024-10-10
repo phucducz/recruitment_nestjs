@@ -82,21 +82,28 @@ export class AuthService {
         hasPassword: true,
         hasRelations: false,
       });
-      const { refreshToken } = await this.refreshTokenService.create({
-        userId: currentUser.id,
-      });
 
-      const userInfo = {
-        ...this.userConverter.entityToBasicInfo(currentUser),
-        accessToken: currentUser
-          ? await this.generateToken(
-              currentUser.id,
-              currentUser.email,
-              currentUser.fullName,
-            )
-          : null,
-        refreshToken: refreshToken,
-      };
+      let refreshToken = null;
+      let userInfo = null;
+
+      if (currentUser) {
+        const rf = await this.refreshTokenService.create({
+          userId: currentUser.id,
+        });
+        refreshToken = rf.refreshToken;
+
+        userInfo = {
+          ...this.userConverter.entityToBasicInfo(currentUser),
+          accessToken: currentUser
+            ? await this.generateToken(
+                currentUser.id,
+                currentUser.email,
+                currentUser.fullName,
+              )
+            : null,
+          refreshToken: refreshToken,
+        };
+      }
 
       if (type === 'google') {
         if (!currentUser) {
@@ -120,7 +127,9 @@ export class AuthService {
               result.email,
               result.fullName,
             ),
-            refreshToken: refreshToken,
+            refreshToken: await this.refreshTokenService.create({
+              userId: result.id,
+            }),
           };
         }
 
