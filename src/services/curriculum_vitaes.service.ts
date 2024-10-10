@@ -24,6 +24,16 @@ export class CurriculumVitaesService {
     });
   }
 
+  async createMany(createManyCurriculumVitaeDto: ICreateMany<string>) {
+    const { createBy, variables } = createManyCurriculumVitaeDto;
+
+    return await this.curriculumVitaesRepository.createMany({
+      createBy,
+      variables,
+      user: await this.usersService.findById(createBy),
+    });
+  }
+
   async findByUserId(userId: number) {
     return await this.curriculumVitaesRepository.findByUserId(userId);
   }
