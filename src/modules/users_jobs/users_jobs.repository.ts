@@ -20,7 +20,7 @@ export class UsersJobRepository {
       createBy,
       jobsId: variable.jobsId,
       usersId: createBy,
-      curriculumVitaeLink: variable.curriculumVitaeLink,
+      curriculumVitaeLink: variable.curriculumVitaeURL,
     })) as UsersJob;
   }
 }

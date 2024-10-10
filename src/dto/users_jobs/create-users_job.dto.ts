@@ -7,5 +7,5 @@ export class CreateUsersJobDto {
 
   @IsNotEmpty()
   @IsString()
-  curriculumVitaeLink: string;
+  curriculumVitaeURL: string;
 }
