@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOptionsSelect, Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns } from 'src/common/utils/function';
@@ -35,6 +35,24 @@ export class CurriculumVitaesRepository {
       createAt: new Date().toString(),
       createBy,
     })) as CurriculumVitae;
+  }
+
+  async createMany(
+    createCurriculumVitaeDto: ICreateMany<string> & {
+      user: User;
+    },
+  ) {
+    const { createBy, variables, user } = createCurriculumVitaeDto;
+
+    return await Promise.all(
+      variables.map(
+        async (variable) =>
+          await this.create({
+            createBy,
+            variable: { url: variable, user },
+          }),
+      ),
+    );
   }
 
   async findByUserId(userId: number) {

@@ -81,6 +81,14 @@ export class CloudinaryService {
     }
   }
 
+  async uploadManyFilesByPath(
+    listFilePaths: string[],
+  ): Promise<Array<UploadApiResponse | UploadApiErrorResponse>> {
+    return await Promise.all(
+      listFilePaths.map((filePath) => this.uploadFileByPath(filePath)),
+    );
+  }
+
   async deleteFile(publicId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(publicId, (error, result) => {
@@ -88,5 +96,11 @@ export class CloudinaryService {
         resolve(result);
       });
     });
+  }
+
+  async deleteManyFiles(publicIds: string[]): Promise<any> {
+    return await Promise.all(
+      publicIds.map((publicId) => this.deleteFile(publicId)),
+    );
   }
 }
