@@ -1,13 +1,14 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { BaseEntityNotId } from './base.entity';
+import { CurriculumVitae } from './curriculum_vitae';
 import { Job } from './job.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_jobs' })
 export class UsersJob extends BaseEntityNotId {
-  @Column({ type: 'varchar', nullable: true })
-  curriculumVitaeLink: string;
+  // @Column({ type: 'varchar', nullable: true })
+  // curriculumVitaeLink: string;
 
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
@@ -22,4 +23,12 @@ export class UsersJob extends BaseEntityNotId {
   @ManyToOne(() => Job, (job) => job.usersJobs)
   @JoinColumn({ name: 'jobs_id', referencedColumnName: 'id' })
   job: Job;
+
+  @ManyToOne(
+    () => CurriculumVitae,
+    (curriculumVitae) => curriculumVitae.usersJobs,
+    { nullable: true, onDelete: 'SET NULL' },
+  )
+  @JoinColumn({ name: 'curriculum_vitaes_id', referencedColumnName: 'id' })
+  curriculumVitae: CurriculumVitae;
 }

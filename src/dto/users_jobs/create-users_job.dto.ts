@@ -6,8 +6,8 @@ export class CreateUsersJobDto {
   jobsId?: number;
 
   @IsOptional()
-  @IsString()
-  curriculumVitaeURL?: string;
+  @IsNumber()
+  curriculumVitaesId?: number;
 
   @IsOptional()
   cvFile?: Express.Multer.File;

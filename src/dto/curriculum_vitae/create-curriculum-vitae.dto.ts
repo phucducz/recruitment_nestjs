@@ -4,4 +4,8 @@ export class CreateCurriculumVitaeDto {
   @IsString()
   @IsNotEmpty()
   url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  fileName: string;
 }

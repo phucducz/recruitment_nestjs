@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
+import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { UsersJob } from 'src/entities/users_job.entity';
 
 @Injectable()
@@ -12,7 +13,11 @@ export class UsersJobRepository {
     private readonly usersJobRepository: Repository<UsersJob>,
   ) {}
 
-  async create(createUsersJobDto: ICreate<CreateUsersJobDto>) {
+  async create(
+    createUsersJobDto: ICreate<
+      CreateUsersJobDto & { curriculumVitae: CurriculumVitae }
+    >,
+  ) {
     const { createBy, variable } = createUsersJobDto;
 
     return (await this.usersJobRepository.save({
@@ -20,7 +25,7 @@ export class UsersJobRepository {
       createBy,
       jobsId: variable.jobsId,
       usersId: createBy,
-      curriculumVitaeLink: variable.curriculumVitaeURL,
+      curriculumVitae: variable.curriculumVitae,
     })) as UsersJob;
   }
 
