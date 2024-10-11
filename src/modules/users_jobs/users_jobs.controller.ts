@@ -22,7 +22,6 @@ import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { UsersJobsService } from '../../services/users_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { cloudinaryStorage } from '../cloudinary/cloudinary-storage.config';
 
 @Controller('users-jobs')
 export class UsersJobsController {
@@ -62,8 +61,8 @@ export class UsersJobsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(FileInterceptor('file', { storage: cloudinaryStorage }))
-  async create(
+  @UseInterceptors(FileInterceptor('file'))
+  async applyForAJob(
     @UploadedFile() file: Express.Multer.File,
     @Body() createUsersJobDto: any,
     @Res() res: Response,
@@ -72,7 +71,8 @@ export class UsersJobsController {
     try {
       let data = {
         ...createUsersJobDto,
-        jobsId: +createUsersJobDto?.jobsId,
+        jobsId: +(createUsersJobDto?.jobsId ?? '0'),
+        curriculumVitaesId: +(createUsersJobDto?.curriculumVitaesId ?? '0'),
       } as CreateUsersJobDto;
       const createBy = request.user.userId;
 
@@ -87,12 +87,13 @@ export class UsersJobsController {
         );
 
       if (file) {
-        const uploadResult = await this.cloudinaryService.uploadFileByPath(
-          file.path,
-        );
+        const uploadResult = await this.cloudinaryService.uploadFile(file);
         const saveCVResult = await this.curriculumVitaesService.create({
           createBy,
-          variable: { url: uploadResult.secure_url },
+          variable: {
+            url: uploadResult.secure_url,
+            fileName: file.originalname,
+          },
         });
 
         if (!saveCVResult?.id) {
@@ -102,7 +103,7 @@ export class UsersJobsController {
           });
         }
 
-        data.curriculumVitaeURL = uploadResult.secure_url;
+        data.curriculumVitaesId = saveCVResult.id;
       }
 
       const result = await this.usersJobsService.aplly({

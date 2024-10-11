@@ -31,6 +31,7 @@ export class CurriculumVitaesRepository {
 
     return (await this.curriculumVitaeRepository.save({
       url: variable.url,
+      fileName: variable.fileName,
       user: variable.user,
       createAt: new Date().toString(),
       createBy,
@@ -38,7 +39,7 @@ export class CurriculumVitaesRepository {
   }
 
   async createMany(
-    createCurriculumVitaeDto: ICreateMany<string> & {
+    createCurriculumVitaeDto: ICreateMany<{ url: string; fileName: string }> & {
       user: User;
     },
   ) {
@@ -49,7 +50,7 @@ export class CurriculumVitaesRepository {
         async (variable) =>
           await this.create({
             createBy,
-            variable: { url: variable, user },
+            variable: { url: variable.url, fileName: variable.fileName, user },
           }),
       ),
     );
@@ -62,5 +63,9 @@ export class CurriculumVitaesRepository {
         ...this.CVSelectColumns,
       },
     });
+  }
+
+  async findById(id: number) {
+    return await this.curriculumVitaeRepository.findOneBy({ id });
   }
 }

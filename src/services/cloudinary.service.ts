@@ -38,10 +38,6 @@ export class CloudinaryService {
     @Inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
-  private readonly folder = this.configService.get<string>(
-    'CLOUDINARY_CVs_FOLDER',
-  );
-
   async uploadFile(
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
@@ -52,7 +48,7 @@ export class CloudinaryService {
       }
 
       const upload = cloudinary.uploader.upload_stream(
-        { folder: this.folder },
+        { folder: 'recruitment-media/CVs' },
         (error, result) => {
           if (error) {
             reject(error);
@@ -72,7 +68,7 @@ export class CloudinaryService {
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     try {
       const result = await cloudinary.uploader.upload(filePath, {
-        folder: this.folder,
+        folder: 'recruitment-media/CVs',
       });
 
       return result;
