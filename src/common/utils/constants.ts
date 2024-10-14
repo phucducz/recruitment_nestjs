@@ -2,6 +2,7 @@ import { Achivement } from 'src/entities/achivement.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
+import { Job } from 'src/entities/job.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
@@ -53,6 +54,7 @@ export const ENTITIES = {
     PLACEMENT: getEntityFields(Placement),
     USERS_JOB_FIELD: getEntityFields(UsersJobField),
     CURRICULUM_VITAE: getEntityFields(CurriculumVitae),
+    JOB: getEntityFields(Job),
   },
 };
 
