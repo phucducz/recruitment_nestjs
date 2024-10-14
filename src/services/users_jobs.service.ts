@@ -32,6 +32,10 @@ export class UsersJobsService {
     return await this.usersJobRepository.isExist(params);
   }
 
+  async findAppliedJobsOfUser(appliedJobQueries: IAppliedJobQueries) {
+    return await this.usersJobRepository.findAppliedJobsByUserId(appliedJobQueries);
+  }
+
   findAll() {
     return `This action returns all usersJobs`;
   }
