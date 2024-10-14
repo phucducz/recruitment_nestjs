@@ -27,7 +27,7 @@ export class JobsRepository {
 
   private readonly jobRelations = {
     entites: [
-      'user',
+      // 'user',
       'jobPosition',
       'jobField',
       'jobsPlacements',
@@ -36,7 +36,7 @@ export class JobsRepository {
       'jobsPlacements.placement',
     ],
     fields: [
-      filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
+      // filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
       filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_FIELD, removeColumns),
       filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
@@ -49,8 +49,21 @@ export class JobsRepository {
     ENTITIES.FIELDS.PLACEMENT,
     removeColumns,
   );
+  private readonly jobSelectColumns = filterColumns(ENTITIES.FIELDS.JOB, [
+    // ...removeColumns,
+    'salaryMin',
+    'salaryMax',
+    'salaryMin',
+    'salaryMax',
+    'maxExpYearRequired',
+    'minExpYearRequired',
+    'applicationDeadline',
+    'salaryCurrency',
+    'requirements',
+    'benefits',
+  ]);
 
-  private readonly jobSelectColumns = this.jobRelations.entites.reduce(
+  private readonly jobSelectRelationColumns = this.jobRelations.entites.reduce(
     (acc, entity, index) => {
       acc[entity] = this.jobRelations.fields[index];
       return acc;
@@ -65,9 +78,9 @@ export class JobsRepository {
     return {
       relations: this.jobRelations.entites,
       select: {
-        ...this.jobSelectColumns,
+        ...this.jobSelectRelationColumns,
         jobsPlacements: {
-          ...this.jobSelectColumns.jobsPlacements,
+          ...this.jobSelectRelationColumns.jobsPlacements,
           placement: this.placementSelectColumns,
         },
       },
@@ -110,7 +123,14 @@ export class JobsRepository {
         ...(workTypesId && { workType: { id: +workTypesId } }),
         ...(usersId && { user: { id: +usersId } }),
       },
-      ...this.generateJobRelationships(),
+      relations: this.generateJobRelationships().relations,
+      select: {
+        ...this.generateJobRelationships().select,
+        ...this.jobSelectColumns,
+        createBy: false,
+        updateAt: false,
+        updateBy: false,
+      },
       order: { createAt: 'DESC' },
     });
   }

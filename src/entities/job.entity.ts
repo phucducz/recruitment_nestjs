@@ -7,6 +7,7 @@ import {
   Timestamp,
 } from 'typeorm';
 
+import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from 'src/entities/base.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -18,21 +19,27 @@ import { WorkType } from './work_type.entity';
 
 @Entity({ name: 'jobs' })
 export class Job extends BaseEntity {
+  @Field()
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
+  @Field()
   @Column({ type: 'float', nullable: true, name: 'salary_min' })
   salaryMin: number;
 
+  @Field()
   @Column({ type: 'float', nullable: true, name: 'salary_max' })
   salaryMax: number;
 
+  @Field()
   @Column({ type: 'int', nullable: true, name: 'min_exp_year_required' })
   maxExpYearRequired: number;
 
+  @Field()
   @Column({ type: 'int', nullable: true, name: 'max_exp_year_required' })
   minExpYearRequired: number;
 
+  @Field()
   @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
   applicationDeadline: Timestamp;
 
@@ -45,15 +52,19 @@ export class Job extends BaseEntity {
   })
   salaryCurrency: TSalaryCurrency;
 
+  @Field()
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Field()
   @Column({ type: 'text', nullable: true })
   requirements: string;
 
+  @Field()
   @Column({ type: 'text', nullable: true })
   benefits: string;
 
+  @Field()
   @Column({ type: 'int', default: 1, nullable: true })
   quantity: number;
 
