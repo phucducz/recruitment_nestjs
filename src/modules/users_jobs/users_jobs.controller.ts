@@ -136,7 +136,10 @@ export class UsersJobsController {
     @Request() request: any,
     @Res() res: Response,
   ) {
-    const result = await this.usersJobsService.findAppliedJobsOfUser(appliedJobQueries);
+    const result = await this.usersJobsService.findAppliedJobsOfUser({
+      ...appliedJobQueries,
+      usersId: request.user.userId,
+    });
 
     return res.status(200).json({
       ...rtPageInfoAndItems(
