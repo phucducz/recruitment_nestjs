@@ -12,16 +12,19 @@ import { Role } from 'src/entities/role.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
+import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
+import { filterColumns } from './function';
 
 export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
   'UsersSkill',
   'JobsPlacement',
   'UsersJobField',
+  'UsersJob',
 ];
 
 const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
@@ -55,6 +58,7 @@ export const ENTITIES = {
     USERS_JOB_FIELD: getEntityFields(UsersJobField),
     CURRICULUM_VITAE: getEntityFields(CurriculumVitae),
     JOB: getEntityFields(Job),
+    USERS_JOB: getEntityFields(UsersJob),
   },
 };
 
@@ -63,3 +67,44 @@ export const removeColumns = ['updateBy', 'updateAt', 'createBy', 'createAt'];
 export const MAX_SEND_COUNT = 3;
 
 export const BLOCK_TIME = 60 * 1000 * 15;
+
+export const jobRelations = {
+  entites: [
+    'user',
+    'jobPosition',
+    'jobField',
+    'jobsPlacements',
+    'workType',
+    'jobCategory',
+    'jobsPlacements.placement',
+  ],
+  fields: [
+    filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
+    filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
+    filterColumns(ENTITIES.FIELDS.JOB_FIELD, removeColumns),
+    filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
+    filterColumns(ENTITIES.FIELDS.WORK_TYPE, removeColumns),
+    filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
+  ],
+};
+
+export const jobSelectColumns = filterColumns(ENTITIES.FIELDS.JOB, [
+  'salaryMin',
+  'salaryMax',
+  'salaryMin',
+  'salaryMax',
+  'maxExpYearRequired',
+  'minExpYearRequired',
+  'applicationDeadline',
+  'salaryCurrency',
+  'requirements',
+  'benefits',
+]);
+
+export const jobSelectRelationColumns = jobRelations.entites.reduce(
+  (acc, entity, index) => {
+    acc[entity] = jobRelations.fields[index];
+    return acc;
+  },
+  {},
+) as any;

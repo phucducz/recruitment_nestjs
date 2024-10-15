@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import {
+  ENTITIES,
+  jobSelectColumns,
+  jobSelectRelationColumns,
+  removeColumns,
+} from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
@@ -15,8 +20,8 @@ export class UsersJobRepository {
     private readonly usersJobRepository: Repository<UsersJob>,
   ) {}
 
-  private readonly jobSelectColumns = filterColumns(
-    ENTITIES.FIELDS.JOB,
+  private readonly usersJobSelect = filterColumns(
+    ENTITIES.FIELDS.USERS_JOB,
     removeColumns,
   );
 
@@ -46,11 +51,27 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: ['job'],
+      relations: [
+        'curriculumVitae',
+        'job',
+        'job.user',
+        'job.jobPosition',
+        'job.jobField',
+        'job.jobsPlacements',
+        'job.workType',
+        'job.jobCategory',
+        'job.jobsPlacements.placement',
+      ],
       select: {
-        job: this.jobSelectColumns,
+        job: {
+          ...jobSelectRelationColumns,
+          ...jobSelectColumns,
+        },
+        ...this.usersJobSelect,
+        createAt: true,
       },
       ...paginationParams,
+      order: { createAt: 'DESC' },
     });
   }
 }

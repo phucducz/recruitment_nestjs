@@ -2,7 +2,13 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
-import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import {
+  ENTITIES,
+  jobRelations,
+  jobSelectColumns,
+  jobSelectRelationColumns,
+  removeColumns,
+} from 'src/common/utils/constants';
 import {
   filterColumns,
   filterUndefinedValues,
@@ -25,62 +31,21 @@ export class JobsRepository {
 
   private readonly logger = new Logger(JobsRepository.name);
 
-  private readonly jobRelations = {
-    entites: [
-      // 'user',
-      'jobPosition',
-      'jobField',
-      'jobsPlacements',
-      'workType',
-      'jobCategory',
-      'jobsPlacements.placement',
-    ],
-    fields: [
-      // filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
-      filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_FIELD, removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
-      filterColumns(ENTITIES.FIELDS.WORK_TYPE, removeColumns),
-      filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
-    ],
-  };
-
   private readonly placementSelectColumns = filterColumns(
     ENTITIES.FIELDS.PLACEMENT,
     removeColumns,
   );
-  private readonly jobSelectColumns = filterColumns(ENTITIES.FIELDS.JOB, [
-    // ...removeColumns,
-    'salaryMin',
-    'salaryMax',
-    'salaryMin',
-    'salaryMax',
-    'maxExpYearRequired',
-    'minExpYearRequired',
-    'applicationDeadline',
-    'salaryCurrency',
-    'requirements',
-    'benefits',
-  ]);
-
-  private readonly jobSelectRelationColumns = this.jobRelations.entites.reduce(
-    (acc, entity, index) => {
-      acc[entity] = this.jobRelations.fields[index];
-      return acc;
-    },
-    {},
-  ) as any;
 
   generateJobRelationships(): Pick<
     FindManyOptions<Job>,
     'select' | 'relations'
   > {
     return {
-      relations: this.jobRelations.entites,
+      relations: jobRelations.entites,
       select: {
-        ...this.jobSelectRelationColumns,
+        ...jobSelectRelationColumns,
         jobsPlacements: {
-          ...this.jobSelectRelationColumns.jobsPlacements,
+          ...jobSelectRelationColumns.jobsPlacements,
           placement: this.placementSelectColumns,
         },
       },
@@ -126,7 +91,7 @@ export class JobsRepository {
       relations: this.generateJobRelationships().relations,
       select: {
         ...this.generateJobRelationships().select,
-        ...this.jobSelectColumns,
+        ...jobSelectColumns,
         createBy: false,
         updateAt: false,
         updateBy: false,
