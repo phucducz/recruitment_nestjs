@@ -130,7 +130,8 @@ export class MailService {
       template: './resetPassword',
       context: {
         full_name: params.fullName,
-        action_url: `${this.configService.get<string>('CLIENT_URL')}/reset-password?email=${params.email}&token=${params.token}`,
+        action_url: `${this.configService.get<string>('CLIENT_URL')}/user/reset-password?email=${params.email}&token=${params.token}`,
+        local_url: `http://localhost:5173/user/reset-password?email=${params.email}&token=${params.token}`,
         web_app_url: this.configService.get<string>('CLIENT_URL'),
       },
     });
