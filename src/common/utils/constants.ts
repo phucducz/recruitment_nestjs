@@ -1,3 +1,5 @@
+import { FindOptionsSelect } from 'typeorm';
+
 import { Achivement } from 'src/entities/achivement.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
@@ -79,7 +81,11 @@ export const jobRelations = {
     'jobsPlacements.placement',
   ],
   fields: [
-    filterColumns(ENTITIES.FIELDS.USER, ['password', ...removeColumns]),
+    filterColumns(ENTITIES.FIELDS.USER, [
+      'password',
+      'isActive',
+      ...removeColumns,
+    ]),
     filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
     filterColumns(ENTITIES.FIELDS.JOB_FIELD, removeColumns),
     filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
@@ -108,3 +114,8 @@ export const jobSelectRelationColumns = jobRelations.entites.reduce(
   },
   {},
 ) as any;
+
+export const CVSelectColumns = filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
+  ...removeColumns,
+  'isDeleted',
+]) as FindOptionsSelect<CurriculumVitae>;

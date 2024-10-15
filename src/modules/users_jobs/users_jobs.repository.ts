@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import {
+  CVSelectColumns,
   ENTITIES,
   jobSelectColumns,
   jobSelectRelationColumns,
@@ -51,24 +52,19 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: [
-        'curriculumVitae',
-        'job',
-        'job.user',
-        'job.jobPosition',
-        'job.jobField',
-        'job.jobsPlacements',
-        'job.workType',
-        'job.jobCategory',
-        'job.jobsPlacements.placement',
-      ],
+      relations: ['curriculumVitae', 'job', 'job.user'],
       select: {
         job: {
           ...jobSelectRelationColumns,
           ...jobSelectColumns,
+          createAt: false,
+          createBy: false,
+          updateAt: false,
+          updateBy: false,
         },
         ...this.usersJobSelect,
         createAt: true,
+        curriculumVitae: CVSelectColumns,
       },
       ...paginationParams,
       order: { createAt: 'DESC' },
