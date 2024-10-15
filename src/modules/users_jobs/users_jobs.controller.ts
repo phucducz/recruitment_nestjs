@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UploadedFile,
@@ -16,6 +17,7 @@ import {
 import { Response } from 'express';
 
 import { FileInterceptor } from '@nestjs/platform-express';
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { CloudinaryService } from 'src/services/cloudinary.service';
@@ -125,6 +127,26 @@ export class UsersJobsController {
         .status(500)
         .json({ message: error?.message ?? error, statusCode: 500 });
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('applied-jobs')
+  async findAppliedJobs(
+    @Query() appliedJobQueries: IAppliedJobQueries,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    const result = await this.usersJobsService.findAppliedJobsOfUser(appliedJobQueries);
+
+    return res.status(200).json({
+      ...rtPageInfoAndItems(
+        {
+          page: +appliedJobQueries.page,
+          pageSize: +appliedJobQueries.pageSize,
+        },
+        result,
+      ),
+    });
   }
 
   @Get()

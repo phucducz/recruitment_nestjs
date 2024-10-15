@@ -23,3 +23,7 @@ interface IUserQueries extends BaseQueries {
   jobFieldsId?: string;
   jobPositionsId?: string;
 }
+
+interface IAppliedJobQueries extends BaseQueries {
+  usersId?: number;
+}
