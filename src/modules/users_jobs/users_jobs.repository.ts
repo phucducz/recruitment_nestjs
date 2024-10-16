@@ -50,6 +50,8 @@ export class UsersJobRepository {
     const { usersId, page, pageSize } = appliedJobQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
+    console.log(this.usersJobSelect);
+
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
       relations: ['curriculumVitae', 'job', 'job.user'],
