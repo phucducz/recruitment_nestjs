@@ -10,6 +10,7 @@ import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { ISaveUserParams } from 'src/common/utils/types/user';
+import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
@@ -295,6 +296,20 @@ export class UsersRepository {
         updateBy: id,
       },
     );
+
+    return result.affected > 0;
+  }
+
+  async updateAccountInfo(updateAccountInfoDto: IUpdate<UpdateAccountInfoDto>) {
+    const { updateBy, variable } = updateAccountInfoDto;
+
+    const result = await this.userRepository.update(updateBy, {
+      ...(variable.isChangePassword &&
+        variable?.newPassword && { password: variable.newPassword }),
+      ...(variable?.fullName && { fullName: variable.fullName }),
+      updateAt: new Date().toString(),
+      updateBy,
+    });
 
     return result.affected > 0;
   }
