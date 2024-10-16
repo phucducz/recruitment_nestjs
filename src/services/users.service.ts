@@ -8,6 +8,7 @@ import {
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 
+import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
@@ -60,18 +61,39 @@ export class UsersService {
     });
   }
 
+  async hasPassword(userId: number) {
+    return !!(await this.userRepository.findById(userId, {
+      hasPassword: true,
+    }));
+  }
+
+  async verifyPassword(oldPassword: string, storedPassword: string) {
+    if (!(await this.authService.comparePassword(oldPassword, storedPassword)))
+      throw new BadRequestException('Mật khẩu cũ không chính xác');
+
+    return true;
+  }
+
   async changePassword(changePasswordDto: IUpdate<ChangePasswordDto>) {
     const { updateBy, variable } = changePasswordDto;
     const currentUser = await this.findById(updateBy, { hasPassword: true });
 
     if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
-    if (
-      !(await this.authService.comparePassword(
-        variable.oldPassword,
-        currentUser.password,
-      ))
-    )
-      throw new BadRequestException('Mật khẩu cũ không chính xác');
+
+    if (!currentUser.password)
+      return await this.updatePassword(
+        updateBy,
+        await this.authService.hashPassword(variable.newPassword),
+      );
+
+    if (!!currentUser.password) {
+      if (!variable?.oldPassword)
+        throw new BadRequestException(
+          'Vui lòng cung cấp mật khẩu cũ của bạn để xác nhận thông tin',
+        );
+
+      await this.verifyPassword(variable.oldPassword, currentUser.password);
+    }
 
     return await this.updatePassword(
       updateBy,
@@ -83,6 +105,29 @@ export class UsersService {
     return await this.userRepository.changePassword({
       id,
       password: newPassword,
+    });
+  }
+
+  async updateAccountInfo(updateAccountInfoDto: IUpdate<UpdateAccountInfoDto>) {
+    const { updateBy, variable } = updateAccountInfoDto;
+    const currentUser = await this.findById(updateBy, { hasPassword: true });
+
+    if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
+
+    if (variable.isChangePassword && !!currentUser.password) {
+      if (!variable?.oldPassword)
+        throw new BadRequestException(
+          'Vui lòng cung cấp mật khẩu cũ của bạn để xác nhận thông tin',
+        );
+      await this.verifyPassword(variable.oldPassword, currentUser.password);
+    }
+
+    return await this.userRepository.updateAccountInfo({
+      ...updateAccountInfoDto,
+      variable: {
+        ...variable,
+        newPassword: await this.authService.hashPassword(variable.newPassword),
+      },
     });
   }
 }

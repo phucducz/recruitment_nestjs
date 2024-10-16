@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   forwardRef,
   Get,
   Inject,
+  NotFoundException,
   Patch,
   Query,
   Request,
@@ -15,6 +17,7 @@ import { Response } from 'express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
+import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
@@ -156,6 +159,43 @@ export class UsersController {
       });
     } catch (error) {
       throw error;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/update-account-info')
+  async updateAccountInfo(
+    @Body() updateAccountInfoDto: UpdateAccountInfoDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.usersService.updateAccountInfo({
+        updateBy: request.user.userId,
+        variable: updateAccountInfoDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Thay đổi thông tin người dùng không thành công',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Thay đổi thông tin người dùng thành công',
+      });
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
+        throw error;
+
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Thay đổi thông tin người dùng thất bại. ${error?.message ?? error}`,
+      });
     }
   }
 
