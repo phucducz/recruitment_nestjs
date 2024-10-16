@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntityNotId } from './base.entity';
@@ -9,13 +9,21 @@ import { User } from './user.entity';
 @Entity({ name: 'users_jobs' })
 export class UsersJob extends BaseEntityNotId {
   @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    name: 'cv_viewed_at',
+    nullable: true,
+  })
+  cvViewedAt: string;
+
+  @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
 
   @ManyToOne(() => User, (user) => user.usersJobs)
   @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   user: User;
-  
+
   @Field()
   @PrimaryColumn({ name: 'jobs_id', type: 'int' })
   jobsId: number;
