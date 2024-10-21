@@ -80,7 +80,7 @@ export class UsersRepository {
     removeColumns,
   ) as FindOptionsSelect<JobCategory>;
   private skillSelectedFields = filterColumns(
-    ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+    ENTITIES.FIELDS.SKILLS,
     removeColumns,
   ) as FindOptionsSelect<UsersForeignLanguage>;
   private usersJobFieldsFields = filterColumns(
