@@ -17,6 +17,10 @@ export class UsersJob extends BaseEntityNotId {
   cvViewedAt: string;
 
   @Field()
+  @Column({ type: 'int', name: 'referrer_id', nullable: true })
+  referrerId: number;
+
+  @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
 

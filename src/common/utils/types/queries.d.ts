@@ -27,3 +27,11 @@ interface IUserQueries extends BaseQueries {
 interface IAppliedJobQueries extends BaseQueries {
   usersId?: number;
 }
+
+interface IFindApplicantsQueries extends BaseQueries {
+  usersId?: number;
+  jobTitle?: string;
+  applicantName?: string;
+  source?: string;
+  applyDate?: string;
+}

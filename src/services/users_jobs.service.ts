@@ -33,7 +33,15 @@ export class UsersJobsService {
   }
 
   async findAppliedJobsOfUser(appliedJobQueries: IAppliedJobQueries) {
-    return await this.usersJobRepository.findAppliedJobsByUserId(appliedJobQueries);
+    return await this.usersJobRepository.findAppliedJobsByUserId(
+      appliedJobQueries,
+    );
+  }
+
+  async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
+    return await this.usersJobRepository.findApplicantsForJob(
+      findApplicantsForJob,
+    );
   }
 
   findAll() {
