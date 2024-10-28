@@ -119,3 +119,13 @@ export const CVSelectColumns = filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
   ...removeColumns,
   'isDeleted',
 ]) as FindOptionsSelect<CurriculumVitae>;
+
+export const jobFieldColumns = filterColumns(
+  ENTITIES.FIELDS.JOB_FIELD,
+  removeColumns,
+);
+
+export const usersJobColumns = filterColumns(
+  ENTITIES.FIELDS.USERS_JOB_FIELD,
+  removeColumns,
+);

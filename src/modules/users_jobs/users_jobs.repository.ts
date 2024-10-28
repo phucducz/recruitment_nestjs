@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 import {
   CVSelectColumns,
@@ -12,6 +12,7 @@ import {
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
+import { Job } from 'src/entities/job.entity';
 import { UsersJob } from 'src/entities/users_job.entity';
 
 @Injectable()
@@ -21,10 +22,9 @@ export class UsersJobRepository {
     private readonly usersJobRepository: Repository<UsersJob>,
   ) {}
 
-  private readonly usersJobSelect = filterColumns(
-    ENTITIES.FIELDS.USERS_JOB,
-    removeColumns,
-  );
+  generateUsersJobSelect(rmColumns: string[]) {
+    return filterColumns(ENTITIES.FIELDS.USERS_JOB, rmColumns);
+  }
 
   async create(
     createUsersJobDto: ICreate<
@@ -50,8 +50,6 @@ export class UsersJobRepository {
     const { usersId, page, pageSize } = appliedJobQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
-    console.log(this.usersJobSelect);
-
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
       relations: ['curriculumVitae', 'job', 'job.user'],
@@ -64,12 +62,32 @@ export class UsersJobRepository {
           updateAt: false,
           updateBy: false,
         },
-        ...this.usersJobSelect,
+        ...this.generateUsersJobSelect(removeColumns),
         createAt: true,
         curriculumVitae: CVSelectColumns,
       },
       ...paginationParams,
       order: { createAt: 'DESC' },
+    });
+  }
+
+  async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
+    const { usersId, page, pageSize } = findApplicantsForJob;
+    const paginationParams = getPaginationParams({ page, pageSize });
+
+    console.log(this.generateUsersJobSelect([]));
+    console.log(filterColumns(ENTITIES.FIELDS.USERS_JOB, []));
+
+    return this.usersJobRepository.findAndCount({
+      where: { job: { user: usersId } as FindOptionsWhere<Job> },
+      relations: ['job', 'user'],
+      select: {
+        user: { fullName: true, id: true },
+        job: { title: true, id: true },
+        ...this.generateUsersJobSelect([]),
+        createAt: true,
+      },
+      ...paginationParams,
     });
   }
 }

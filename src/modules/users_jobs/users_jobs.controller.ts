@@ -14,9 +14,9 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
-import { FileInterceptor } from '@nestjs/platform-express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
@@ -150,6 +150,36 @@ export class UsersJobsController {
         result,
       ),
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('applicants')
+  async findApplicantsForJob(
+    @Query() applicantsQueries: Omit<IFindApplicantsQueries, 'usersId'>,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.usersJobsService.findApplicantsForJob({
+        ...applicantsQueries,
+        usersId: request?.user?.userId,
+      });
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: applicantsQueries.page,
+            pageSize: applicantsQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ statusCode: 500, message: `Lỗi. ${error?.message ?? error}` });
+    }
   }
 
   @Get()
