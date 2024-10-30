@@ -14,6 +14,10 @@ import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
+import { DesiredJobsModule } from './modules/desired_jobs/desired_jobs.module';
+import { DesiredJobsPlacementsModule } from './modules/desired_jobs_placements/desired_jobs_placements.module';
+import { DesiredJobsPositionsModule } from './modules/desired_jobs_positions/desired_jobs_positions.module';
 import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
@@ -35,7 +39,6 @@ import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
 import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
 import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
 import { WorkTypesModule } from './modules/work_types/work_types.module';
-import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
 
 @Module({
   imports: [
@@ -90,6 +93,9 @@ import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_v
     ResetPasswordModule,
     CloudinaryModule,
     CurriculumVitaesModule,
+    DesiredJobsModule,
+    DesiredJobsPlacementsModule,
+    DesiredJobsPositionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
