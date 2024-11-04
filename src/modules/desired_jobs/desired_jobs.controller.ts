@@ -21,11 +21,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class DesiredJobsController {
   constructor(private readonly desiredJobsService: DesiredJobsService) {}
 
-  @Get('s')
-  get(@Res() res: Response) {
-    return res.status(200).json({ message: 'get' });
-  }
-
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(
@@ -52,7 +47,7 @@ export class DesiredJobsController {
       });
     } catch (error) {
       return res.status(500).json({
-        message: 'Tạo công việc mong muốn không thành công!',
+        message: `Tạo công việc mong muốn không thành công. ${error?.message ?? error}!`,
         statusCode: 500,
       });
     }

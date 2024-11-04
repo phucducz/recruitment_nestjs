@@ -21,6 +21,10 @@ export class UsersSkillsRepository {
     return await this.usersSkillRepository.findOneBy(params);
   }
 
+  async findByUserId(usersId: number) {
+    return await this.usersSkillRepository.findBy({ usersId });
+  }
+
   async create(createUsersSkillDto: ICreate<CreateUsersSkillDto>) {
     const { createBy, variable } = createUsersSkillDto;
 
@@ -61,5 +65,33 @@ export class UsersSkillsRepository {
     const result = await this.usersSkillRepository.delete(params);
 
     return result.affected > 0;
+  }
+
+  async removeMany(params: { skillsId: number; usersId: number }[]) {
+    await Promise.all(params.map((params) => this.remove(params)));
+  }
+
+  async createMany(createUsersSkillDto: ICreateMany<CreateUsersSkillDto>) {
+    const { createBy, variables } = createUsersSkillDto;
+
+    await Promise.all(
+      variables.map((variable) =>
+        this.create({ variable: variable, createBy: createBy }),
+      ),
+    );
+  }
+
+  async updateMany(updateUsersSkillDto: IUpdateMany<CreateUsersSkillDto>) {
+    const { updateBy, variables } = updateUsersSkillDto;
+
+    await Promise.all(
+      variables.map((variable) =>
+        this.update({
+          queries: { skillsId: variable.skillsId, usersId: updateBy },
+          updateBy,
+          variable: { level: variable.level },
+        }),
+      ),
+    );
   }
 }
