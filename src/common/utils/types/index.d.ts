@@ -1,6 +1,7 @@
 interface ICreate<T> {
   variable: T;
   createBy: number;
+  transactionalEntityManager?: EntityManager;
 }
 
 interface ICreateMany<T> {

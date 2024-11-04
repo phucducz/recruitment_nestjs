@@ -16,8 +16,6 @@ export class PlacementsRepository {
   async createMany(createManyPlacement: ICreateMany<CreatePlacementDto>) {
     const { createBy, variables } = createManyPlacement;
 
-    console.log(variables);
-
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) =>
         await Promise.all(
@@ -40,7 +38,7 @@ export class PlacementsRepository {
   }
 
   async findByIds(ids: number[]) {
-    return await Promise.all(ids.map(async (id) => await this.findById(id)));
+    return await Promise.all(ids.map((id) => this.findById(id)));
   }
 
   async findAll(pagination: IPagination) {

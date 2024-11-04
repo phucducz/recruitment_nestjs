@@ -25,8 +25,8 @@ export class DesiredJob extends BaseEntity {
   startAfterOffer: string;
 
   @Field()
-  @Column({ type: 'varchar', name: 'total_year_experience' })
-  totalYearExperience: string;
+  @Column({ type: 'int', name: 'total_year_experience' })
+  totalYearExperience: number;
 
   @Field()
   @Column({ type: 'varchar', name: 'year_of_birth' })
