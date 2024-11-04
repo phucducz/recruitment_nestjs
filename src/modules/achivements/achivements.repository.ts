@@ -37,4 +37,8 @@ export class AchivementsRepository {
 
     return affected > 0;
   }
+
+  async findById(id: number) {
+    return await this.achivementRepository.findOneBy({ id });
+  }
 }

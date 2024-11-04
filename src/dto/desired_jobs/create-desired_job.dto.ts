@@ -19,6 +19,13 @@ export class CreateDesiredJobDto {
   @IsNotEmpty()
   totalYearExperience: number;
 
+  @IsArray()
+  @IsOptional()
+  skills: {
+    id: number;
+    level: number;
+  }[];
+
   @IsString()
   @IsNotEmpty()
   yearOfBirth: string;

@@ -35,3 +35,7 @@ interface IFindApplicantsQueries extends BaseQueries {
   source?: string;
   applyDate?: string;
 }
+
+interface IFindDesiredJobQueries extends BaseQueries {
+  
+}
