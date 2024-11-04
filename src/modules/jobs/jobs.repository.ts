@@ -147,8 +147,8 @@ export class JobsRepository {
           );
 
           await Promise.all(
-            variable.placements.map(async (placement) => {
-              await transactionalEntityManager.save(
+            variable.placements.map((placement) => {
+              transactionalEntityManager.save(
                 JobsPlacement,
                 this.jobPlacementRepository.create({
                   job: newJobRecord,
