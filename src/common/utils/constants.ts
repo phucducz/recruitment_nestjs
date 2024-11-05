@@ -4,6 +4,7 @@ import { Achivement } from 'src/entities/achivement.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { DesiredJob } from 'src/entities/desired_job.entity';
+import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
 import { Job } from 'src/entities/job.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
@@ -28,13 +29,18 @@ export const MANY_TO_MANY_ENTITIES = [
   'JobsPlacement',
   'UsersJobField',
   'UsersJob',
+  'DesiredJobsPlacement',
 ];
 
 const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
   const entityFields =
     Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
 
-  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
+  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) {
+    console.log(entityFields);
+
+    return entityFields;
+  }
 
   const baseFields =
     Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];
@@ -63,6 +69,7 @@ export const ENTITIES = {
     JOB: getEntityFields(Job),
     USERS_JOB: getEntityFields(UsersJob),
     DESIRED_JOB: getEntityFields(DesiredJob),
+    DESIRED_JOBS_PLACEMENT: getEntityFields(DesiredJobsPlacement),
   },
 };
 

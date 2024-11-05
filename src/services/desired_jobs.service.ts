@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { filterColumns } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
+import { DesiredJob } from 'src/entities/desired_job.entity';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
 import { DesiredJobsRepository } from 'src/modules/desired_jobs/desired_jobs.repository';
 import { DesiredJobsPlacementRepository } from 'src/modules/desired_jobs_placements/desired_jobs_placement.repository';
@@ -145,7 +148,29 @@ export class DesiredJobsService {
   }
 
   async findAll(desiredJobsQueries: IFindDesiredJobsQueries) {
-    return await this.desiredJobRepository.findAll(desiredJobsQueries);
+    const [items, totalItems] =
+      await this.desiredJobRepository.findAll(desiredJobsQueries);
+
+    return [
+      await Promise.all(
+        items.map(async (item) => ({
+          ...item,
+          desiredJobsPlacement:
+            await this.desiredJobsPlacementRepository.findBy({
+              where: { desiredJob: { id: item.id } },
+              relations: ['placement'],
+              select: {
+                ...filterColumns(
+                  ENTITIES.FIELDS.DESIRED_JOBS_PLACEMENT,
+                  removeColumns,
+                ),
+                placement: { id: true, title: true },
+              },
+            }),
+        })),
+      ),
+      totalItems,
+    ] as [DesiredJob[], number];
   }
 
   findOne(id: number) {

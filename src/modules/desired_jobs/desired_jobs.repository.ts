@@ -58,10 +58,12 @@ export class DesiredJobsRepository {
     return await this.desiredJobRepository.findAndCount({
       where: {
         ...(placementsId && {
-          desiredJobsPlacement: { placement: { id: placementsId } },
+          desiredJobsPlacement: {
+            placement: { id: +placementsId },
+          },
         }),
         ...(totalYearExperience && { totalYearExperience }),
-        ...(jobFieldsId && { jobField: { id: jobFieldsId } }),
+        ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
       },
       relations: [
         'user',
