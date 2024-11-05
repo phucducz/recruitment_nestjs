@@ -11,7 +11,6 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
-import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { cloudinaryStorage } from './cloudinary-storage.config';

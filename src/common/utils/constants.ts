@@ -3,6 +3,7 @@ import { FindOptionsSelect } from 'typeorm';
 import { Achivement } from 'src/entities/achivement.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
+import { DesiredJob } from 'src/entities/desired_job.entity';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
 import { Job } from 'src/entities/job.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
@@ -61,6 +62,7 @@ export const ENTITIES = {
     CURRICULUM_VITAE: getEntityFields(CurriculumVitae),
     JOB: getEntityFields(Job),
     USERS_JOB: getEntityFields(UsersJob),
+    DESIRED_JOB: getEntityFields(DesiredJob),
   },
 };
 
