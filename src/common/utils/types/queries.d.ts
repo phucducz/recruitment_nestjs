@@ -36,6 +36,8 @@ interface IFindApplicantsQueries extends BaseQueries {
   applyDate?: string;
 }
 
-interface IFindDesiredJobQueries extends BaseQueries {
-  
+interface IFindDesiredJobsQueries extends BaseQueries {
+  jobFieldsId?: number;
+  totalYearExperience?: number;
+  placementsId?: number;
 }

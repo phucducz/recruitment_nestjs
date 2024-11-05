@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
-import { DesiredJob } from 'src/entities/desired_job.entity';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
 import { DesiredJobsRepository } from 'src/modules/desired_jobs/desired_jobs.repository';
 import { DesiredJobsPlacementRepository } from 'src/modules/desired_jobs_placements/desired_jobs_placement.repository';
@@ -12,7 +12,6 @@ import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.
 import { PlacementsRepository } from 'src/modules/placements/placements.repository';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { UsersSkillsRepository } from 'src/modules/users_skills/users_skills.repository';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class DesiredJobsService {
@@ -145,8 +144,8 @@ export class DesiredJobsService {
     );
   }
 
-  findAll() {
-    return `This action returns all desiredJobs`;
+  async findAll(desiredJobsQueries: IFindDesiredJobsQueries) {
+    return await this.desiredJobRepository.findAll(desiredJobsQueries);
   }
 
   findOne(id: number) {

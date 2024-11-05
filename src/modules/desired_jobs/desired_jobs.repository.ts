@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 
+import { ENTITIES } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 
@@ -11,6 +13,11 @@ export class DesiredJobsRepository {
     @InjectRepository(DesiredJob)
     private readonly desiredJobRepository: Repository<DesiredJob>,
   ) {}
+
+  private readonly desiredJobSelect = filterColumns(
+    ENTITIES.FIELDS.DESIRED_JOB,
+    ['updateBy', 'updateAt', 'createBy'],
+  ) as FindOptionsSelect<DesiredJob>;
 
   async create(
     createDesiredJobDto: ICreate<
@@ -41,5 +48,52 @@ export class DesiredJobsRepository {
 
   getDesiredJobRepository() {
     return this.desiredJobRepository;
+  }
+
+  async findAll(desiredJobsQueries: IFindDesiredJobsQueries) {
+    const { page, pageSize, jobFieldsId, placementsId, totalYearExperience } =
+      desiredJobsQueries;
+    const paginationParams = getPaginationParams({ page, pageSize });
+
+    return await this.desiredJobRepository.findAndCount({
+      where: {
+        ...(placementsId && {
+          desiredJobsPlacement: { placement: { id: placementsId } },
+        }),
+        ...(totalYearExperience && { totalYearExperience }),
+        ...(jobFieldsId && { jobField: { id: jobFieldsId } }),
+      },
+      relations: [
+        'user',
+        'desiredJobsPlacement',
+        'desiredJobsPosition',
+        'jobField',
+        'user.achivement',
+        'desiredJobsPlacement.placement',
+        'desiredJobsPosition.jobPosition',
+      ],
+      select: {
+        ...this.desiredJobSelect,
+        user: {
+          fullName: true,
+          achivement: { description: true },
+        },
+        desiredJobsPlacement: {
+          desiredJobsId: true,
+          placementsId: true,
+          placement: { title: true },
+        },
+        desiredJobsPosition: {
+          desiredJobsId: true,
+          jobPositionsId: true,
+          jobPosition: { title: true },
+        },
+        jobField: {
+          id: true,
+          title: true,
+        },
+      },
+      ...paginationParams,
+    });
   }
 }

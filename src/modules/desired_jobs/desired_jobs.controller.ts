@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJobsService } from '../../services/desired_jobs.service';
@@ -54,8 +56,28 @@ export class DesiredJobsController {
   }
 
   @Get()
-  findAll() {
-    return this.desiredJobsService.findAll();
+  async findAll(
+    @Query() desiredJobsQueries: IFindDesiredJobsQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.desiredJobsService.findAll(desiredJobsQueries);
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: +desiredJobsQueries.page,
+            pageSize: +desiredJobsQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   @Get(':id')
