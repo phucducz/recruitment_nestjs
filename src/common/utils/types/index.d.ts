@@ -12,6 +12,7 @@ interface ICreateMany<T> {
 interface IUpdate<T> {
   variable: T;
   updateBy: number;
+  transactionalEntityManager?: EntityManager;
 }
 
 interface IUpdateMTM<T, QT> {

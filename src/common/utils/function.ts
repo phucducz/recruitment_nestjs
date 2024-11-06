@@ -72,3 +72,42 @@ export const filterUndefinedValues = <T extends object>(
     return acc;
   }, {} as Partial<T>);
 };
+
+export const getItemsDiff = (params: {
+  items: {
+    key?: string;
+    data: any[];
+  };
+  storedItems: {
+    key: string;
+    data: any[];
+  };
+}): { itemsToAdd: any[]; itemsToRemove: any[]; itemToUpdate: any[] } => {
+  const { items, storedItems } = params;
+
+  const itemsToAdd = items.data.filter(
+    (item) =>
+      !storedItems.data.some(
+        (storedItem) =>
+          storedItem[storedItems.key] ===
+          (!!items?.key ? item[items?.key] : item),
+      ),
+  );
+  const itemsToRemove = storedItems.data.filter(
+    (storedItem) =>
+      !items.data.some(
+        (item) =>
+          (!!items?.key ? item[items?.key] : item) ===
+          storedItem[storedItems.key],
+      ),
+  );
+  const itemToUpdate = items.data.filter((item) =>
+    storedItems.data.some(
+      (storedItem) =>
+        storedItem[storedItems.key] ===
+        (!!items?.key ? item[items?.key] : item),
+    ),
+  );
+
+  return { itemsToAdd, itemsToRemove, itemToUpdate };
+};

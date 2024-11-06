@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   Request,
@@ -15,7 +14,6 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
-import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJobsService } from '../../services/desired_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -85,13 +83,13 @@ export class DesiredJobsController {
     return this.desiredJobsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateDesiredJobDto: UpdateDesiredJobDto,
-  ) {
-    return this.desiredJobsService.update(+id, updateDesiredJobDto);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateDesiredJobDto: UpdateDesiredJobDto,
+  // ) {
+  //   return this.desiredJobsService.update(+id, updateDesiredJobDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

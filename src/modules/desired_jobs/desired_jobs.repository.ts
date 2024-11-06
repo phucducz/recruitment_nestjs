@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindOptionsSelect,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
+import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 
 @Injectable()
@@ -102,5 +108,34 @@ export class DesiredJobsRepository {
       },
       ...paginationParams,
     });
+  }
+
+  async update(
+    id: number,
+    updateDesiredJobDto: IUpdate<
+      UpdateDesiredJobDto & Pick<DesiredJob, 'jobField'>
+    >,
+  ) {
+    const { updateBy, variable, transactionalEntityManager } =
+      updateDesiredJobDto;
+
+    const paramsUpdate = {
+      salarayExpectation: variable.salaryExpectation,
+      startAfterOffer: variable.startAfterOffer,
+      updateAt: new Date().toString(),
+      updateBy,
+      jobField: variable.jobField,
+    } as Partial<DesiredJob>;
+    let result = { affected: 0 } as UpdateResult;
+
+    if (transactionalEntityManager)
+      result = await (transactionalEntityManager as EntityManager).update(
+        DesiredJob,
+        id,
+        paramsUpdate,
+      );
+    else result = await this.desiredJobRepository.update(id, paramsUpdate);
+
+    return result?.affected > 0;
   }
 }

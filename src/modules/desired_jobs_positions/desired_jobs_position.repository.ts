@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 
 import { CreateDesiredJobsPositionDto } from 'src/dto/desired_jobs_positions/create-desired_jobs_position.dto';
 import { DesiredJobsPosition } from 'src/entities/desired_jobs_position.entity';
@@ -32,5 +32,11 @@ export class DesiredJobsPositionRepository {
         this.desiredJobsPosition.create(createParams),
       );
     return await this.desiredJobsPosition.save(createParams);
+  }
+
+  async findBy(options: FindManyOptions<DesiredJobsPosition>) {
+    return await this.desiredJobsPosition.find({
+      ...options,
+    });
   }
 }
