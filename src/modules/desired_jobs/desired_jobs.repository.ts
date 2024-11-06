@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, Repository } from 'typeorm';
 
-import { ENTITIES } from 'src/common/utils/constants';
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
@@ -71,6 +71,7 @@ export class DesiredJobsRepository {
         'desiredJobsPosition',
         'jobField',
         'user.achivement',
+        'user.curriculumVitae',
         'desiredJobsPlacement.placement',
         'desiredJobsPosition.jobPosition',
       ],
@@ -79,6 +80,10 @@ export class DesiredJobsRepository {
         user: {
           fullName: true,
           achivement: { description: true },
+          curriculumVitae: filterColumns(
+            ENTITIES.FIELDS.CURRICULUM_VITAE,
+            removeColumns,
+          ),
         },
         desiredJobsPlacement: {
           desiredJobsId: true,
