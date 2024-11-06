@@ -7,6 +7,7 @@ interface ICreate<T> {
 interface ICreateMany<T> {
   variables: T[];
   createBy: number;
+  transactionalEntityManager?: EntityManager;
 }
 
 interface IUpdate<T> {
@@ -24,6 +25,11 @@ interface IUpdateMTM<T, QT> {
 interface IUpdateMany<T> {
   variables: T[];
   updateBy: number;
+}
+
+interface IDelete<T> {
+  variable: T;
+  transactionalEntityManager?: EntityManager;
 }
 
 interface APIResponse {

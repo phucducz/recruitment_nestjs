@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
+  FindOneOptions,
   FindOptionsSelect,
   Repository,
   UpdateResult,
@@ -24,6 +25,44 @@ export class DesiredJobsRepository {
     ENTITIES.FIELDS.DESIRED_JOB,
     ['updateBy', 'updateAt', 'createBy'],
   ) as FindOptionsSelect<DesiredJob>;
+
+  private readonly desiredJobOptions = {
+    relations: [
+      'user',
+      'desiredJobsPlacement',
+      'desiredJobsPosition',
+      'jobField',
+      'user.achivement',
+      'user.curriculumVitae',
+      'desiredJobsPlacement.placement',
+      'desiredJobsPosition.jobPosition',
+    ],
+    select: {
+      ...this.desiredJobSelect,
+      user: {
+        fullName: true,
+        achivement: { description: true },
+        curriculumVitae: filterColumns(
+          ENTITIES.FIELDS.CURRICULUM_VITAE,
+          removeColumns,
+        ),
+      },
+      desiredJobsPlacement: {
+        desiredJobsId: true,
+        placementsId: true,
+        placement: { title: true },
+      },
+      desiredJobsPosition: {
+        desiredJobsId: true,
+        jobPositionsId: true,
+        jobPosition: { title: true },
+      },
+      jobField: {
+        id: true,
+        title: true,
+      },
+    },
+  } as FindOneOptions<DesiredJob>;
 
   async create(
     createDesiredJobDto: ICreate<
@@ -71,42 +110,15 @@ export class DesiredJobsRepository {
         ...(totalYearExperience && { totalYearExperience }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
       },
-      relations: [
-        'user',
-        'desiredJobsPlacement',
-        'desiredJobsPosition',
-        'jobField',
-        'user.achivement',
-        'user.curriculumVitae',
-        'desiredJobsPlacement.placement',
-        'desiredJobsPosition.jobPosition',
-      ],
-      select: {
-        ...this.desiredJobSelect,
-        user: {
-          fullName: true,
-          achivement: { description: true },
-          curriculumVitae: filterColumns(
-            ENTITIES.FIELDS.CURRICULUM_VITAE,
-            removeColumns,
-          ),
-        },
-        desiredJobsPlacement: {
-          desiredJobsId: true,
-          placementsId: true,
-          placement: { title: true },
-        },
-        desiredJobsPosition: {
-          desiredJobsId: true,
-          jobPositionsId: true,
-          jobPosition: { title: true },
-        },
-        jobField: {
-          id: true,
-          title: true,
-        },
-      },
+      ...this.desiredJobOptions,
       ...paginationParams,
+    });
+  }
+
+  async findById(id: number) {
+    return await this.desiredJobRepository.findOne({
+      where: { id },
+      ...this.desiredJobOptions,
     });
   }
 

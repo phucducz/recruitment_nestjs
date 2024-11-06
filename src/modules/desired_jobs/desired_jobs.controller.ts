@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -14,6 +15,7 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
+import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJobsService } from '../../services/desired_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -83,13 +85,37 @@ export class DesiredJobsController {
     return this.desiredJobsService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateDesiredJobDto: UpdateDesiredJobDto,
-  // ) {
-  //   return this.desiredJobsService.update(+id, updateDesiredJobDto);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateDesiredJobDto: UpdateDesiredJobDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.desiredJobsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateDesiredJobDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật công việc mong muốn không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật công việc mong muốn thành công!',
+        statusCode: 200,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật công việc mong muốn không thành công. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
+    }
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

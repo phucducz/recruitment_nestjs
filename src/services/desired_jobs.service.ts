@@ -6,6 +6,8 @@ import { filterColumns, getItemsDiff } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
+import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
+import { DesiredJobsPosition } from 'src/entities/desired_jobs_position.entity';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
 import { DesiredJobsRepository } from 'src/modules/desired_jobs/desired_jobs.repository';
 import { DesiredJobsPlacementRepository } from 'src/modules/desired_jobs_placements/desired_jobs_placement.repository';
@@ -113,29 +115,27 @@ export class DesiredJobsService {
           variable.jobPlacementIds,
         );
 
-        await Promise.all(
-          placements.map((placement) =>
-            this.desiredJobsPlacementRepository.create({
-              createBy,
-              variable: { desiredJob, placement },
-              transactionalEntityManager,
-            }),
-          ),
-        );
+        await this.desiredJobsPlacementRepository.createMany({
+          createBy,
+          variables: placements.map((placement) => ({
+            desiredJob,
+            placement,
+          })),
+          transactionalEntityManager,
+        });
 
         const jobPositions = await this.jobPositionRepository.findByIds(
           variable.jobPositionIds,
         );
 
-        await Promise.all(
-          jobPositions.map((jobPosition) =>
-            this.desiredJobPositionRepository.create({
-              createBy,
-              variable: { desiredJob, jobPosition },
-              transactionalEntityManager,
-            }),
-          ),
-        );
+        await this.desiredJobPositionRepository.createMany({
+          createBy,
+          variables: jobPositions.map((jobPosition) => ({
+            desiredJob,
+            jobPosition,
+          })),
+          transactionalEntityManager,
+        });
 
         return desiredJob;
       },
@@ -173,26 +173,80 @@ export class DesiredJobsService {
   }
 
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
-    const { variable } = updateDesiredJobDto;
+    const { updateBy, variable } = updateDesiredJobDto;
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
-        const storedDesiredJobPositions =
-          await this.desiredJobPositionRepository.findBy({
-            where: { desiredJobsId: id },
+        const desiredJob = await this.desiredJobRepository.findById(id);
+
+        const {
+          itemsToAdd: desiredJobPositionToAdd,
+          itemsToRemove: desiredJobPositionToRemove,
+        } = getItemsDiff({
+          items: {
+            data: variable.jobPositionIds,
+          },
+          storedItems: {
+            data: await this.desiredJobPositionRepository.findBy({
+              where: { desiredJobsId: id },
+            }),
+            key: 'jobPositionsId',
+          },
+        });
+
+        if (desiredJobPositionToAdd.length > 0) {
+          const jobPositions = await this.jobPositionRepository.findByIds(
+            desiredJobPositionToAdd as number[],
+          );
+
+          await this.desiredJobPositionRepository.createMany({
+            createBy: updateBy,
+            variables: await Promise.all(
+              jobPositions.map((jobPosition) => ({
+                desiredJob,
+                jobPosition,
+              })),
+            ),
           });
-        const desiredJobPositionsToAdd = variable.jobPositionIds.filter(
-          (positionId) =>
-            !storedDesiredJobPositions.some(
-              (jobPosition) => jobPosition.jobPositionsId === positionId,
+        }
+        if (desiredJobPositionToRemove.length > 0) {
+          await this.desiredJobPositionRepository.removeMany({
+            variable: desiredJobPositionToRemove as DesiredJobsPosition[],
+            transactionalEntityManager,
+          });
+        }
+
+        const {
+          itemsToAdd: desiredJobsPlacementToAdd,
+          itemsToRemove: desiredJobsPlacementToRemove,
+        } = getItemsDiff({
+          items: { data: variable.jobPlacementIds },
+          storedItems: {
+            data: await this.desiredJobsPlacementRepository.findBy({
+              where: { desiredJobsId: id },
+            }),
+            key: 'placementsId',
+          },
+        });
+
+        if (desiredJobsPlacementToAdd.length > 0) {
+          const placements = await this.placementRepository.findByIds(
+            desiredJobsPlacementToAdd as number[],
+          );
+
+          await this.desiredJobsPlacementRepository.createMany({
+            createBy: updateBy,
+            variables: await Promise.all(
+              placements.map((placement) => ({ placement, desiredJob })),
             ),
-        );
-        const desiredJobPositionsToRemove = storedDesiredJobPositions.filter(
-          (jobPosition) =>
-            !variable.jobPositionIds.some(
-              (positionId) => positionId === jobPosition.jobPositionsId,
-            ),
-        );
+          });
+        }
+        if (desiredJobsPlacementToRemove.length > 0) {
+          await this.desiredJobsPlacementRepository.removeMany({
+            variable: desiredJobsPlacementToRemove as DesiredJobsPlacement[],
+            transactionalEntityManager,
+          });
+        }
 
         return await this.desiredJobRepository.update(id, {
           ...updateDesiredJobDto,
