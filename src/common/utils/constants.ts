@@ -36,11 +36,7 @@ const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
   const entityFields =
     Reflect.getMetadata(`fields_${entity.name}`, entity.prototype) || [];
 
-  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) {
-    console.log(entityFields);
-
-    return entityFields;
-  }
+  if (MANY_TO_MANY_ENTITIES.includes(entity.name)) return entityFields;
 
   const baseFields =
     Reflect.getMetadata('fields_BaseEntity', BaseEntity.prototype) || [];

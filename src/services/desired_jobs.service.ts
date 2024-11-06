@@ -2,10 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
-import { filterColumns } from 'src/common/utils/function';
+import { filterColumns, getItemsDiff } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
+import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
+import { DesiredJobsPosition } from 'src/entities/desired_jobs_position.entity';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
 import { DesiredJobsRepository } from 'src/modules/desired_jobs/desired_jobs.repository';
 import { DesiredJobsPlacementRepository } from 'src/modules/desired_jobs_placements/desired_jobs_placement.repository';
@@ -49,19 +51,14 @@ export class DesiredJobsService {
           user.id,
         );
 
-        const skillsToRemove = storedSkills.filter(
-          (storedSkill) =>
-            !variable.skills.some((skill) => storedSkill.skillsId === skill.id),
-        );
-        const skillsToAdd = variable.skills.filter(
-          (skill) =>
-            !storedSkills.some(
-              (storedSkill) => storedSkill.skillsId === skill.id,
-            ),
-        );
-        const skillToUpdate = variable.skills.filter((skill) =>
-          storedSkills.some((storedSkill) => storedSkill.skillsId === skill.id),
-        );
+        const {
+          itemToUpdate: skillToUpdate,
+          itemsToAdd: skillsToAdd,
+          itemsToRemove: skillsToRemove,
+        } = getItemsDiff({
+          items: { data: variable.skills, key: 'id' },
+          storedItems: { data: storedSkills, key: 'skillsId' },
+        });
 
         if (skillsToRemove.length > 0)
           await this.userSkillRepository.removeMany(
@@ -118,29 +115,27 @@ export class DesiredJobsService {
           variable.jobPlacementIds,
         );
 
-        await Promise.all(
-          placements.map((placement) =>
-            this.desiredJobsPlacementRepository.create({
-              createBy,
-              variable: { desiredJob, placement },
-              transactionalEntityManager,
-            }),
-          ),
-        );
+        await this.desiredJobsPlacementRepository.createMany({
+          createBy,
+          variables: placements.map((placement) => ({
+            desiredJob,
+            placement,
+          })),
+          transactionalEntityManager,
+        });
 
         const jobPositions = await this.jobPositionRepository.findByIds(
           variable.jobPositionIds,
         );
 
-        await Promise.all(
-          jobPositions.map((jobPosition) =>
-            this.desiredJobPositionRepository.create({
-              createBy,
-              variable: { desiredJob, jobPosition },
-              transactionalEntityManager,
-            }),
-          ),
-        );
+        await this.desiredJobPositionRepository.createMany({
+          createBy,
+          variables: jobPositions.map((jobPosition) => ({
+            desiredJob,
+            jobPosition,
+          })),
+          transactionalEntityManager,
+        });
 
         return desiredJob;
       },
@@ -177,8 +172,94 @@ export class DesiredJobsService {
     return `This action returns a #${id} desiredJob`;
   }
 
-  update(id: number, updateDesiredJobDto: UpdateDesiredJobDto) {
-    return `This action updates a #${id} desiredJob`;
+  async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
+    const { updateBy, variable } = updateDesiredJobDto;
+
+    return await this.dataSource.manager.transaction(
+      async (transactionalEntityManager) => {
+        const desiredJob = await this.desiredJobRepository.findById(id);
+
+        const {
+          itemsToAdd: desiredJobPositionToAdd,
+          itemsToRemove: desiredJobPositionToRemove,
+        } = getItemsDiff({
+          items: {
+            data: variable.jobPositionIds,
+          },
+          storedItems: {
+            data: await this.desiredJobPositionRepository.findBy({
+              where: { desiredJobsId: id },
+            }),
+            key: 'jobPositionsId',
+          },
+        });
+
+        if (desiredJobPositionToAdd.length > 0) {
+          const jobPositions = await this.jobPositionRepository.findByIds(
+            desiredJobPositionToAdd as number[],
+          );
+
+          await this.desiredJobPositionRepository.createMany({
+            createBy: updateBy,
+            variables: await Promise.all(
+              jobPositions.map((jobPosition) => ({
+                desiredJob,
+                jobPosition,
+              })),
+            ),
+          });
+        }
+        if (desiredJobPositionToRemove.length > 0) {
+          await this.desiredJobPositionRepository.removeMany({
+            variable: desiredJobPositionToRemove as DesiredJobsPosition[],
+            transactionalEntityManager,
+          });
+        }
+
+        const {
+          itemsToAdd: desiredJobsPlacementToAdd,
+          itemsToRemove: desiredJobsPlacementToRemove,
+        } = getItemsDiff({
+          items: { data: variable.jobPlacementIds },
+          storedItems: {
+            data: await this.desiredJobsPlacementRepository.findBy({
+              where: { desiredJobsId: id },
+            }),
+            key: 'placementsId',
+          },
+        });
+
+        if (desiredJobsPlacementToAdd.length > 0) {
+          const placements = await this.placementRepository.findByIds(
+            desiredJobsPlacementToAdd as number[],
+          );
+
+          await this.desiredJobsPlacementRepository.createMany({
+            createBy: updateBy,
+            variables: await Promise.all(
+              placements.map((placement) => ({ placement, desiredJob })),
+            ),
+          });
+        }
+        if (desiredJobsPlacementToRemove.length > 0) {
+          await this.desiredJobsPlacementRepository.removeMany({
+            variable: desiredJobsPlacementToRemove as DesiredJobsPlacement[],
+            transactionalEntityManager,
+          });
+        }
+
+        return await this.desiredJobRepository.update(id, {
+          ...updateDesiredJobDto,
+          variable: {
+            ...variable,
+            jobField: await this.jobFieldRepository.findById(
+              variable.jobFieldsId,
+            ),
+          },
+          transactionalEntityManager,
+        });
+      },
+    );
   }
 
   remove(id: number) {

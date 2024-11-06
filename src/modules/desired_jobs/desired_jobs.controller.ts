@@ -85,12 +85,36 @@ export class DesiredJobsController {
     return this.desiredJobsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateDesiredJobDto: UpdateDesiredJobDto,
+    @Res() res: Response,
+    @Request() request: any,
   ) {
-    return this.desiredJobsService.update(+id, updateDesiredJobDto);
+    try {
+      const result = await this.desiredJobsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateDesiredJobDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật công việc mong muốn không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật công việc mong muốn thành công!',
+        statusCode: 200,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật công việc mong muốn không thành công. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
+    }
   }
 
   @Delete(':id')
