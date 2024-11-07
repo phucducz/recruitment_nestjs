@@ -15,6 +15,7 @@ import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { CloudinaryService } from './cloudinary.service';
 import { DesiredJobsService } from './desired_jobs.service';
+import { JobFieldsService } from './job_fields.service';
 import { JobPositionsService } from './job_positions.service';
 import { RolesService } from './roles.service';
 
@@ -31,6 +32,8 @@ export class UsersService {
     private readonly cloudinaryService: CloudinaryService,
     @Inject(forwardRef(() => DesiredJobsService))
     private readonly desiredJobService: DesiredJobsService,
+    @Inject(JobFieldsService)
+    private readonly jobFieldService: JobFieldsService,
   ) {}
 
   async findByEmail(
@@ -64,15 +67,13 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto) {
-    const role = await this.roleService.findById(registerDto.roleId);
-    const jobPosition = await this.jobPositionService.findById(
-      registerDto.jobPositionsId,
-    );
-
     return await this.userRepository.save({
       ...registerDto,
-      role,
-      jobPosition,
+      role: await this.roleService.findById(registerDto.roleId),
+      jobPosition: await this.jobPositionService.findById(
+        registerDto.jobPositionsId,
+      ),
+      jobFields: await this.jobFieldService.findByIds(registerDto.jobFieldsIds),
     });
   }
 

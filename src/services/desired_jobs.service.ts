@@ -15,8 +15,8 @@ import { DesiredJobsPositionRepository } from 'src/modules/desired_jobs_position
 import { JobFieldsRepository } from 'src/modules/job_fields/job_fields.repository';
 import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.repository';
 import { PlacementsRepository } from 'src/modules/placements/placements.repository';
-import { UsersRepository } from 'src/modules/users/users.repository';
 import { UsersSkillsRepository } from 'src/modules/users_skills/users_skills.repository';
+import { SkillsService } from './skills.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -34,7 +34,6 @@ export class DesiredJobsService {
     private readonly jobPositionRepository: JobPositionsRepository,
     @Inject(JobFieldsRepository)
     private readonly jobFieldRepository: JobFieldsRepository,
-    @Inject(UsersRepository) private readonly userRepository: UsersRepository,
     @Inject(AchivementsRepository)
     private readonly achivementRepository: AchivementsRepository,
     @Inject(UsersSkillsRepository)
@@ -42,6 +41,7 @@ export class DesiredJobsService {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     @Inject(DataSource) private readonly dataSource: DataSource,
+    @Inject(SkillsService) private readonly skillService: SkillsService,
   ) {}
 
   async create(createDesiredJobDto: ICreate<CreateDesiredJobDto>) {
@@ -49,7 +49,7 @@ export class DesiredJobsService {
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
-        const user = await this.userRepository.findById(createBy);
+        const user = await this.userService.findById(createBy);
         const storedSkills = await this.userSkillRepository.findByUserId(
           user.id,
         );
@@ -70,13 +70,18 @@ export class DesiredJobsService {
               usersId: user.id,
             })),
           );
+
         if (skillsToAdd.length > 0)
           await this.userSkillRepository.createMany({
             createBy,
-            variables: skillsToAdd.map((skill) => ({
-              level: skill.level,
-              skillsId: skill.id,
-            })),
+            variables: await Promise.all(
+              skillsToAdd.map(async (skill) => ({
+                level: skill.level,
+                skillsId: skill.id,
+                skill: await this.skillService.findById(skill.id),
+                user,
+              })),
+            ),
           });
         if (skillToUpdate.length > 0)
           await this.userSkillRepository.updateMany({
@@ -101,8 +106,7 @@ export class DesiredJobsService {
             createBy,
             variable: {
               description: variable.achivements,
-              // user: null,
-              user: await this.userService.findById(createBy),
+              user,
             },
           });
 

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsSelect, Repository } from 'typeorm';
 
@@ -7,16 +7,14 @@ import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
 import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
 import { UsersSkill } from 'src/entities/users_skill.entity';
-import { SkillsService } from 'src/services/skills.service';
-import { UsersService } from 'src/services/users.service';
 
 @Injectable()
 export class UsersSkillsRepository {
   constructor(
     @InjectRepository(UsersSkill)
     private readonly usersSkillRepository: Repository<UsersSkill>,
-    @Inject(UsersService) private readonly userSerivce: UsersService,
-    @Inject(SkillsService) private readonly skillsService: SkillsService,
+    // @Inject(UsersService) private readonly userSerivce: UsersService,
+    // @Inject(SkillsService) private readonly skillsService: SkillsService,
   ) {}
 
   async findByCompositePrKey(params: { skillsId: number; usersId: number }) {
@@ -48,11 +46,13 @@ export class UsersSkillsRepository {
     });
   }
 
-  async create(createUsersSkillDto: ICreate<CreateUsersSkillDto>) {
+  async create(
+    createUsersSkillDto: ICreate<
+      CreateUsersSkillDto & Pick<UsersSkill, 'user' | 'skill'>
+    >,
+  ) {
     const { createBy, variable } = createUsersSkillDto;
-
-    const user = await this.userSerivce.findById(createBy);
-    const skill = await this.skillsService.findById(variable.skillsId);
+    const { user, skill } = variable;
 
     return (await this.usersSkillRepository.save({
       createAt: new Date().toString(),
@@ -94,7 +94,11 @@ export class UsersSkillsRepository {
     await Promise.all(params.map((params) => this.remove(params)));
   }
 
-  async createMany(createUsersSkillDto: ICreateMany<CreateUsersSkillDto>) {
+  async createMany(
+    createUsersSkillDto: ICreateMany<
+      CreateUsersSkillDto & Pick<UsersSkill, 'user' | 'skill'>
+    >,
+  ) {
     const { createBy, variables } = createUsersSkillDto;
 
     await Promise.all(
