@@ -41,3 +41,22 @@ interface IFindDesiredJobsQueries extends BaseQueries {
   totalYearExperience?: number;
   placementsId?: number;
 }
+
+interface IFindAchivementQueries extends BaseQueries {
+  id?: string;
+}
+
+interface IFindWorkExperiencesQueries extends BaseQueries {
+  id?: string;
+  usersId?: string;
+}
+
+interface IFindUserSkillsQueries extends BaseQueries {
+  skillsId?: string;
+  usersId?: string;
+}
+
+interface IFindUserForeignLanguagesQueries extends BaseQueries {
+  foreignLanguagesId?: string;
+  usersId?: string;
+}

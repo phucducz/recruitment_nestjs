@@ -11,8 +11,9 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-
 import { Response } from 'express';
+
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
 import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
 import { UsersSkillsService } from '../../services/users_skills.service';
@@ -50,9 +51,30 @@ export class UsersSkillsController {
     }
   }
 
-  @Get()
-  findAll() {
-    return this.usersSkillsService.findAll();
+  @Get('/all')
+  async findAll(
+    @Query() userSkillQueries: IFindUserSkillsQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.usersSkillsService.findAll(userSkillQueries);
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: +userSkillQueries.page,
+            pageSize: +userSkillQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Lấy danh sách kỹ năng không thành công. ${error?.message ?? error}`,
+        statusCode: 500,
+      });
+    }
   }
 
   @Get(':id')

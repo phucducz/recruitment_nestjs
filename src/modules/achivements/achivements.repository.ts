@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { filterColumns } from 'src/common/utils/function';
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { Achivement } from 'src/entities/achivement.entity';
@@ -39,6 +41,9 @@ export class AchivementsRepository {
   }
 
   async findById(id: number) {
-    return await this.achivementRepository.findOneBy({ id });
+    return await this.achivementRepository.findOne({
+      where: { id },
+      select: filterColumns(ENTITIES.FIELDS.ACHIVEMENT, removeColumns),
+    });
   }
 }

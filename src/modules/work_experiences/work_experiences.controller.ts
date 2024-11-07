@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperiencesService } from '../../services/work_experiences.service';
@@ -38,12 +40,12 @@ export class WorkExperiencesController {
 
       if (!result?.id)
         return res.status(401).json({
-          message: 'Thêm kinh nghiệm việc không thành công!',
+          message: 'Thêm kinh nghiệm làm việc không thành công!',
           statusCode: 401,
         });
 
       return res.status(200).json({
-        message: 'Thêm kinh nghiệm việc làm thành công!',
+        message: 'Thêm kinh nghiệm làm việc thành công!',
         statusCode: 200,
         ...result,
       });
@@ -56,14 +58,31 @@ export class WorkExperiencesController {
     }
   }
 
-  @Get()
-  findAll() {
-    return this.workExperiencesService.findAll();
-  }
+  @Get('/all')
+  async findOne(
+    @Query() workExperienceQueries: IFindWorkExperiencesQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.workExperiencesService.findBy(
+        workExperienceQueries,
+      );
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.workExperiencesService.findOne(+id);
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: +workExperienceQueries.page,
+            pageSize: +workExperienceQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   @UseGuards(JwtAuthGuard)

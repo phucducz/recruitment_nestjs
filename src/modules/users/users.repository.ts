@@ -5,7 +5,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOneOptions,
+  FindOptionsSelect,
+  Repository,
+} from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
@@ -100,7 +105,7 @@ export class UsersRepository {
     {},
   ) as any;
 
-  private readonly userSelectColumns = {
+  private readonly userSelectColumns: FindOptionsSelect<User> = {
     ...this.userSelectedRelations,
     ...this.userFields,
     userSkills: {
@@ -121,7 +126,7 @@ export class UsersRepository {
 
   private generateRelationshipOptionals(
     options: IGenerateRelationshipOptional = {},
-  ) {
+  ): FindOneOptions<User> {
     const { hasPassword = false, hasRelations = true, relationships } = options;
 
     return {
@@ -129,7 +134,7 @@ export class UsersRepository {
         ? !relationships
           ? this.userRelations.entities
           : relationships
-        : ['role', 'jobPosition'],
+        : ['role', 'jobPosition', 'achivement'],
       ...(hasRelations
         ? {
             select: { ...this.userSelectColumns, password: hasPassword },
@@ -140,6 +145,7 @@ export class UsersRepository {
               jobPosition: this.userSelectColumns.jobPosition,
               ...this.userFields,
               password: hasPassword,
+              achivement: { id: true },
             },
           }),
     };

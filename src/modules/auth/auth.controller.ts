@@ -8,9 +8,9 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 
-import { JwtService } from '@nestjs/jwt';
 import { ResetPasswordDto } from 'src/dto/auth/forgot-password.dto';
 import { LogOutDto } from 'src/dto/auth/log-out.dto';
 import { RegisterDto } from 'src/dto/auth/register.dto';

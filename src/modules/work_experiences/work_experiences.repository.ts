@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperience } from 'src/entities/work_experience.entity';
@@ -70,5 +72,28 @@ export class WorkExperiencesRepository {
     });
 
     return result.affected > 0;
+  }
+
+  async findBy(workExperienceQueries: IFindWorkExperiencesQueries) {
+    const { id, usersId, page, pageSize } = workExperienceQueries;
+    const paginationParams = getPaginationParams({
+      page: +page,
+      pageSize: +pageSize,
+    });
+
+    return await this.workExperienceRepository.findAndCount({
+      where: {
+        ...(id && { id: +id }),
+        ...(usersId && { user: { id: +usersId } }),
+      } as FindOptionsWhere<WorkExperience>,
+      relations: ['jobCategory', 'jobPosition', 'placement'],
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, removeColumns),
+        jobCategory: filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
+        jobPosition: filterColumns(ENTITIES.FIELDS.JOB_POSITION, removeColumns),
+        placement: filterColumns(ENTITIES.FIELDS.PLACEMENT, removeColumns),
+      } as FindOptionsSelect<WorkExperience>,
+      ...paginationParams,
+    });
   }
 }

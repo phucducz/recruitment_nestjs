@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
 import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
 import { UsersSkill } from 'src/entities/users_skill.entity';
@@ -23,6 +25,27 @@ export class UsersSkillsRepository {
 
   async findByUserId(usersId: number) {
     return await this.usersSkillRepository.findBy({ usersId });
+  }
+
+  async findBy(userSkillQueries: IFindUserSkillsQueries) {
+    const { skillsId, page, pageSize, usersId } = userSkillQueries;
+    const paginationParams = getPaginationParams({
+      page: +page,
+      pageSize: +pageSize,
+    });
+
+    return await this.usersSkillRepository.findAndCount({
+      where: {
+        ...(usersId && { usersId: +usersId }),
+        ...(skillsId && { skillsId: +skillsId }),
+      },
+      relations: ['skill'],
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.USER_SKILLS, removeColumns),
+        skill: filterColumns(ENTITIES.FIELDS.SKILLS, removeColumns),
+      } as FindOptionsSelect<UsersSkill>,
+      ...paginationParams,
+    });
   }
 
   async create(createUsersSkillDto: ICreate<CreateUsersSkillDto>) {
