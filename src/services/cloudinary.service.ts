@@ -76,4 +76,17 @@ export class CloudinaryService {
       publicIds.map((publicId) => this.deleteFile(publicId)),
     );
   }
+
+  getPublicIdFromUrl(url: string) {
+    try {
+      const urlArr = url.split('/');
+      const folderNameIndex = urlArr.indexOf('recruitment-media');
+      const [publicId, _] = urlArr[urlArr.length - 1].split('.');
+
+      return `${urlArr[folderNameIndex]}/${urlArr[folderNameIndex + 1]}/${publicId}`;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }
