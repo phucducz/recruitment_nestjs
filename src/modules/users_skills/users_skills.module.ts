@@ -14,12 +14,12 @@ import { UsersSkillsRepository } from './users_skills.repository';
   imports: [
     TypeOrmModule.forFeature([UsersSkill]),
     SkillsModule,
-    UsersModule,
-    RefreshTokenModule,
+    forwardRef(() => UsersModule),
+    forwardRef(() => RefreshTokenModule),
     forwardRef(() => AuthModule),
   ],
   controllers: [UsersSkillsController],
   providers: [UsersSkillsService, UsersSkillsRepository],
-  exports: [UsersSkillsService],
+  exports: [UsersSkillsService, UsersSkillsRepository],
 })
 export class UsersSkillsModule {}

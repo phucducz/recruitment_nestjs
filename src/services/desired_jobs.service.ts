@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
@@ -17,6 +17,7 @@ import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.
 import { PlacementsRepository } from 'src/modules/placements/placements.repository';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { UsersSkillsRepository } from 'src/modules/users_skills/users_skills.repository';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class DesiredJobsService {
@@ -38,6 +39,8 @@ export class DesiredJobsService {
     private readonly achivementRepository: AchivementsRepository,
     @Inject(UsersSkillsRepository)
     private readonly userSkillRepository: UsersSkillsRepository,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
@@ -96,7 +99,11 @@ export class DesiredJobsService {
         } else
           await this.achivementRepository.create({
             createBy,
-            variable: { description: variable.achivements },
+            variable: {
+              description: variable.achivements,
+              // user: null,
+              user: await this.userService.findById(createBy),
+            },
           });
 
         const desiredJob = await this.desiredJobRepository.create({
@@ -168,8 +175,8 @@ export class DesiredJobsService {
     ] as [DesiredJob[], number];
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} desiredJob`;
+  async findById(id: number) {
+    return await this.desiredJobRepository.findById(id);
   }
 
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {

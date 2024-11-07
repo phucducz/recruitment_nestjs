@@ -82,7 +82,7 @@ export class DesiredJobsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.desiredJobsService.findOne(+id);
+    return this.desiredJobsService.findById(+id);
   }
 
   @UseGuards(JwtAuthGuard)

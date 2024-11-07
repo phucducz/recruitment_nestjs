@@ -17,6 +17,6 @@ import { JobPositionsRepository } from './job_positions.repository';
   ],
   controllers: [JobPositionsController],
   providers: [JobPositionsService, JobPositionsRepository, JwtAuthGuard],
-  exports: [JobPositionsService],
+  exports: [JobPositionsService, JobPositionsRepository],
 })
 export class JobPositionsModule {}

@@ -6,6 +6,7 @@ import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { DesiredJobsModule } from '../desired_jobs/desired_jobs.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
@@ -26,12 +27,13 @@ import { UsersRepository } from './users.repository';
     UsersJobFieldsModule,
     MailModule,
     ResetPasswordModule,
+    forwardRef(() => DesiredJobsModule),
     forwardRef(() => CloudinaryModule),
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, UsersConverter],
-  exports: [UsersService],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
