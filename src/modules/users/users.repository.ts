@@ -23,17 +23,16 @@ import { Placement } from 'src/entities/placement.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
-import { JobFieldsService } from 'src/services/job_fields.service';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(JobFieldsService)
-    private readonly jobFieldService: JobFieldsService,
+    // @Inject(JobFieldsService)
+    // private readonly jobFieldService: JobFieldsService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(UsersJobField)
-    private readonly usersJobFieldRepository: Repository<UsersJobField>,
+    // @InjectRepository(UsersJobField)
+    // private readonly usersJobFieldRepository: Repository<UsersJobField>,
   ) {}
 
   private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
@@ -47,6 +46,7 @@ export class UsersRepository {
       'userLanguages',
       'workExperiences',
       'curriculumVitae',
+      'placement',
       'userSkills.skill',
       'userLanguages.foreignLanguage',
       'workExperiences.placement',
@@ -61,6 +61,7 @@ export class UsersRepository {
       filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, removeColumns),
       filterColumns(ENTITIES.FIELDS.WORK_EXPERIENCE, removeColumns),
       filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, removeColumns),
+      filterColumns(ENTITIES.FIELDS.PLACEMENT, removeColumns),
     ],
   };
 
@@ -134,7 +135,7 @@ export class UsersRepository {
         ? !relationships
           ? this.userRelations.entities
           : relationships
-        : ['role', 'jobPosition', 'achivement'],
+        : ['role', 'jobPosition', 'achivement', 'placement'],
       ...(hasRelations
         ? {
             select: { ...this.userSelectColumns, password: hasPassword },
@@ -215,7 +216,9 @@ export class UsersRepository {
     return (await this.userRepository.countBy({ email })) > 0;
   }
 
-  async save(saveUserParams: ISaveUserParams): Promise<User> {
+  async save(
+    saveUserParams: ISaveUserParams & { jobFields: JobField[] },
+  ): Promise<User> {
     try {
       const { role, email, fullName, password, avatarURL } = saveUserParams;
       let newUserRecord: User | null = null;
@@ -257,14 +260,10 @@ export class UsersRepository {
               avatarUrl: avatarURL,
             });
 
-            const jobFields = await this.jobFieldService.findByIds(
-              saveUserParams.jobFieldsIds,
-            );
-
             await transactionalEntityManager.save(
               UsersJobField,
-              jobFields.map((jobField) => {
-                return this.usersJobFieldRepository.create({
+              saveUserParams.jobFields.map((jobField) => {
+                return transactionalEntityManager.create(UsersJobField, {
                   jobFieldsId: jobField.id,
                   jobField: jobField,
                   user: newUserRecord,

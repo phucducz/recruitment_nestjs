@@ -15,6 +15,7 @@ import { Role } from 'src/entities/role.entity';
 import { BaseEntity } from './base.entity';
 import { CurriculumVitae } from './curriculum_vitae';
 import { DesiredJob } from './desired_job.entity';
+import { Placement } from './placement.entity';
 import { RefreshToken } from './refresh_token.entity';
 import { UsersForeignLanguage } from './users_foreign_language.entity';
 import { UsersJob } from './users_job.entity';
@@ -84,8 +85,6 @@ export class User extends BaseEntity {
   )
   userLanguages: UsersForeignLanguage[];
 
-  // @OneToMany(() => Achivement, (achivement) => achivement.user)
-  // achivements: Achivement[];
   @OneToOne(() => Achivement, (achivement) => achivement.user)
   @JoinColumn({ name: 'achivements_id' })
   achivement: Achivement;
@@ -110,4 +109,8 @@ export class User extends BaseEntity {
 
   @OneToOne(() => DesiredJob, (desiredJob) => desiredJob.user)
   desiredJob: DesiredJob;
+
+  @ManyToOne(() => Placement, (placement) => placement.users)
+  @JoinColumn({ name: 'placements_id', referencedColumnName: 'id' })
+  placement: Placement;
 }

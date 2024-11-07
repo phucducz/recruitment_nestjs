@@ -10,6 +10,6 @@ import { DesiredJobsPlacementsController } from './desired_jobs_placements.contr
   imports: [TypeOrmModule.forFeature([DesiredJobsPlacement])],
   controllers: [DesiredJobsPlacementsController],
   providers: [DesiredJobsPlacementsService, DesiredJobsPlacementRepository],
-  exports: [DesiredJobsPlacementsService],
+  exports: [DesiredJobsPlacementsService, DesiredJobsPlacementRepository],
 })
 export class DesiredJobsPlacementsModule {}

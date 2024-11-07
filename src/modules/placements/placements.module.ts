@@ -17,6 +17,6 @@ import { PlacementsRepository } from './placements.repository';
   ],
   controllers: [PlacementsController],
   providers: [PlacementsService, PlacementsRepository],
-  exports: [PlacementsService],
+  exports: [PlacementsService, PlacementsRepository],
 })
 export class PlacementsModule {}

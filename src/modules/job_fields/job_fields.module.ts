@@ -16,6 +16,6 @@ import { JobFieldsRepository } from './job_fields.repository';
   ],
   controllers: [JobFieldsController],
   providers: [JobFieldsService, JobFieldsRepository],
-  exports: [JobFieldsService],
+  exports: [JobFieldsService, JobFieldsRepository],
 })
 export class JobFieldsModule {}

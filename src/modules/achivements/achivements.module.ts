@@ -18,6 +18,6 @@ import { AchivementsRepository } from './achivements.repository';
   ],
   controllers: [AchivementsController],
   providers: [AchivementsService, AchivementsRepository],
-  exports: [AchivementsService],
+  exports: [AchivementsService, AchivementsRepository],
 })
 export class AchivementsModule {}

@@ -3,16 +3,26 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class AchivementsService {
   constructor(
     @Inject(AchivementsRepository)
     private readonly achivementRepository: AchivementsRepository,
+    @Inject(UsersService) private readonly userService: UsersService,
   ) {}
 
   async create(createAchivementDto: ICreate<CreateAchivementDto>) {
-    return await this.achivementRepository.create(createAchivementDto);
+    const { createBy, variable } = createAchivementDto;
+
+    return await this.achivementRepository.create({
+      ...createAchivementDto,
+      variable: {
+        ...variable,
+        user: await this.userService.findById(createBy),
+      },
+    });
   }
 
   findAll() {
