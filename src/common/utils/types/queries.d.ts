@@ -37,9 +37,9 @@ interface IFindApplicantsQueries extends BaseQueries {
 }
 
 interface IFindDesiredJobsQueries extends BaseQueries {
-  jobFieldsId?: number;
-  totalYearExperience?: number;
-  placementsId?: number;
+  jobFieldsId?: string;
+  totalYearExperience?: string;
+  placementsId?: string;
 }
 
 interface IFindAchivementQueries extends BaseQueries {

@@ -107,7 +107,9 @@ export class DesiredJobsRepository {
             placement: { id: +placementsId },
           },
         }),
-        ...(totalYearExperience && { totalYearExperience }),
+        ...(totalYearExperience && {
+          totalYearExperience: +totalYearExperience,
+        }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
       },
       ...this.desiredJobOptions,
