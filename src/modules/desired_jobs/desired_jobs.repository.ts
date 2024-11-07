@@ -124,6 +124,13 @@ export class DesiredJobsRepository {
     });
   }
 
+  async findOneBy(options: FindOneOptions<DesiredJob>) {
+    return await this.desiredJobRepository.findOne({
+      ...options,
+      ...this.desiredJobOptions,
+    });
+  }
+
   async update(
     id: number,
     updateDesiredJobDto: IUpdate<
@@ -134,11 +141,18 @@ export class DesiredJobsRepository {
       updateDesiredJobDto;
 
     const paramsUpdate = {
-      salarayExpectation: variable.salaryExpectation,
-      startAfterOffer: variable.startAfterOffer,
+      ...(variable.salaryExpectation && {
+        salarayExpectation: variable.salaryExpectation,
+      }),
+      ...(variable.startAfterOffer && {
+        startAfterOffer: variable.startAfterOffer,
+      }),
+      ...(variable.jobField && { jobField: variable.jobField }),
+      ...(variable.totalYearExperience && {
+        totalYearExperience: variable.totalYearExperience,
+      }),
       updateAt: new Date().toString(),
       updateBy,
-      jobField: variable.jobField,
     } as Partial<DesiredJob>;
     let result = { affected: 0 } as UpdateResult;
 

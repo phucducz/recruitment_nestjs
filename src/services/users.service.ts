@@ -9,14 +9,17 @@ import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
+import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
+import { DataSource } from 'typeorm';
 import { CloudinaryService } from './cloudinary.service';
 import { DesiredJobsService } from './desired_jobs.service';
 import { JobFieldsService } from './job_fields.service';
 import { JobPositionsService } from './job_positions.service';
+import { PlacementsService } from './placements.service';
 import { RolesService } from './roles.service';
 
 @Injectable()
@@ -34,6 +37,10 @@ export class UsersService {
     private readonly desiredJobService: DesiredJobsService,
     @Inject(JobFieldsService)
     private readonly jobFieldService: JobFieldsService,
+    @Inject(DataSource)
+    private readonly dataSource: DataSource,
+    @Inject(PlacementsService)
+    private readonly placementsService: PlacementsService,
   ) {}
 
   async findByEmail(
@@ -165,5 +172,37 @@ export class UsersService {
         }),
       },
     });
+  }
+
+  async updatePersonalInfo(
+    updatePersonalInfoDto: IUpdate<UpdatePersonalInfoDto>,
+  ) {
+    const { updateBy, variable } = updatePersonalInfoDto;
+
+    return await this.dataSource.manager.transaction(
+      async (transactionalEntityManager) => {
+        const desiredJob = await this.desiredJobService.findOneBy({
+          where: { user: { id: updateBy } },
+        });
+
+        await this.desiredJobService.update(desiredJob.id, {
+          updateBy,
+          variable: { totalYearExperience: variable.totalYearExperience },
+          transactionalEntityManager,
+        });
+
+        const result = await transactionalEntityManager.update(User, updateBy, {
+          fullName: variable.fullName,
+          jobPosition: await this.jobPositionService.findById(
+            variable.jobPositionsId,
+          ),
+          placement: await this.placementsService.findById(
+            variable.placementsId,
+          ),
+        });
+
+        return result.affected > 0;
+      },
+    );
   }
 }

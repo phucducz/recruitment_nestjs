@@ -7,9 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
+  EntityManager,
   FindOneOptions,
   FindOptionsSelect,
   Repository,
+  UpdateResult,
 } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
@@ -28,11 +30,7 @@ import { UsersJobField } from 'src/entities/users_job_field.entity';
 export class UsersRepository {
   constructor(
     @Inject(DataSource) private readonly dataSource: DataSource,
-    // @Inject(JobFieldsService)
-    // private readonly jobFieldService: JobFieldsService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    // @InjectRepository(UsersJobField)
-    // private readonly usersJobFieldRepository: Repository<UsersJobField>,
   ) {}
 
   private readonly logger = new Logger(`API-Gateway.${UsersRepository.name}`);
@@ -315,16 +313,25 @@ export class UsersRepository {
       UpdateAccountInfoDto & { avatarUrl: string | null }
     >,
   ) {
-    const { updateBy, variable } = updateAccountInfoDto;
-
-    const result = await this.userRepository.update(updateBy, {
+    const { updateBy, variable, transactionalEntityManager } =
+      updateAccountInfoDto;
+    const updateParams = {
       ...(variable.isChangePassword &&
         variable?.newPassword && { password: variable.newPassword }),
       ...(variable?.fullName && { fullName: variable.fullName }),
       ...(variable?.avatarUrl && { avatarUrl: variable.avatarUrl }),
       updateAt: new Date().toString(),
       updateBy,
-    });
+    };
+    let result = { affected: 0 } as UpdateResult;
+
+    if (transactionalEntityManager) {
+      result = await (transactionalEntityManager as EntityManager).update(
+        User,
+        updateBy,
+        updateParams,
+      );
+    } else result = await this.userRepository.update(updateBy, updateParams);
 
     return result.affected > 0;
   }

@@ -14,12 +14,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
-import { FileInterceptor } from '@nestjs/platform-express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
+import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
@@ -167,7 +168,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('/update-account-info')
+  @Patch('/account-info')
   @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
     @UploadedFile() file: Express.Multer.File,
@@ -245,6 +246,37 @@ export class UsersController {
         .json({ message: 'Đặt lại mật khẩu thành công', statusCode: 200 });
     } catch (error) {
       throw error;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/personal-info')
+  async updatePersonalInfo(
+    @Body() updatePersonalInfoDto: UpdatePersonalInfoDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.usersService.updatePersonalInfo({
+        updateBy: request.user.userId,
+        variable: updatePersonalInfoDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật thông tin cá nhân thất bại!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        message: 'Cập nhật thông tin cá nhân thành công!',
+        statusCode: 200,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật thông tin cá nhân thất bại. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
     }
   }
 }
