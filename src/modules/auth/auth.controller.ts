@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Inject,
+  InternalServerErrorException,
   NotFoundException,
   Post,
   Request,
@@ -44,24 +45,34 @@ export class AuthController {
 
   @Post('/sign-in')
   async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
-    const result = await this.authService.signIn(signInDto);
+    try {
+      const result = await this.authService.signIn(signInDto);
 
-    if (!result?.id)
-      return res.status(401).json({
-        statusCode: 401,
-        message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
+      if (!result?.id)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Đăng nhập thất bại. Sai tên tài khoản hoặc mật khẩu!',
+        });
+
+      res.cookie('refreshToken', result?.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 7000,
       });
 
-    res.cookie('refreshToken', result?.refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 7000,
-    });
-
-    return res
-      .status(200)
-      .json({ statusCode: 200, message: 'Đăng nhập thành công!', ...result });
+      return res
+        .status(200)
+        .json({ statusCode: 200, message: 'Đăng nhập thành công!', ...result });
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) throw error;
+      return res
+        .status(500)
+        .json({
+          statusCode: 500,
+          message: `Đăng nhập thất bại. ${error?.message ?? error}`,
+        });
+    }
   }
 
   @Post('/refresh')

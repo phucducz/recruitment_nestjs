@@ -77,77 +77,148 @@ export class AuthService {
     this.logger.log(this.signIn.name);
     const { type } = signInDto;
 
-    try {
-      const currentUser = await this.userService.findByEmail(signInDto.email, {
-        hasPassword: true,
-        hasRelations: false,
+    const currentUser = await this.userService.findByEmail(signInDto.email, {
+      hasPassword: true,
+      hasRelations: false,
+    });
+
+    let refreshToken = null;
+    let userInfo = null;
+
+    if (currentUser) {
+      const rf = await this.refreshTokenService.create({
+        userId: currentUser.id,
       });
+      refreshToken = rf.refreshToken;
 
-      let refreshToken = null;
-      let userInfo = null;
+      userInfo = {
+        ...this.userConverter.entityToBasicInfo(currentUser),
+        accessToken: currentUser
+          ? await this.generateToken(
+              currentUser.id,
+              currentUser.email,
+              currentUser.fullName,
+            )
+          : null,
+        refreshToken: refreshToken,
+      };
+    }
 
-      if (currentUser) {
-        const rf = await this.refreshTokenService.create({
-          userId: currentUser.id,
+    if (type === 'google') {
+      if (!currentUser) {
+        const role = await this.roleService.findByTitle('user');
+
+        if (!role) return null;
+
+        const result = await this.register({
+          email: signInDto.email,
+          password: undefined,
+          fullName: signInDto.fullName,
+          roleId: role.id,
+          avatarURL: signInDto.avatarURL,
         });
-        refreshToken = rf.refreshToken;
+        const { refreshToken: rf } = await this.refreshTokenService.create({
+          userId: result.id,
+        });
 
-        userInfo = {
-          ...this.userConverter.entityToBasicInfo(currentUser),
-          accessToken: currentUser
-            ? await this.generateToken(
-                currentUser.id,
-                currentUser.email,
-                currentUser.fullName,
-              )
-            : null,
-          refreshToken: refreshToken,
+        return {
+          ...this.userConverter.entityToBasicInfo(
+            await this.userService.findByEmail(result.email),
+          ),
+          accessToken: await this.generateToken(
+            result.id,
+            result.email,
+            result.fullName,
+          ),
+          refreshToken: rf,
         };
       }
 
-      if (type === 'google') {
-        if (!currentUser) {
-          const role = await this.roleService.findByTitle('user');
-
-          if (!role) return null;
-
-          const result = await this.register({
-            email: signInDto.email,
-            password: undefined,
-            fullName: signInDto.fullName,
-            roleId: role.id,
-          });
-          const { refreshToken: rf } = await this.refreshTokenService.create({
-            userId: result.id,
-          });
-
-          return {
-            ...this.userConverter.entityToBasicInfo(
-              await this.userService.findByEmail(result.email),
-            ),
-            accessToken: await this.generateToken(
-              result.id,
-              result.email,
-              result.fullName,
-            ),
-            refreshToken: rf,
-          };
-        }
-
-        return userInfo;
-      }
-
-      if (
-        !currentUser ||
-        !(await this.comparePassword(signInDto.password, currentUser.password))
-      )
-        return null;
-
       return userInfo;
-    } catch (error) {
-      this.logger.log(`signIn: ${error}`);
-      return null;
     }
+
+    if (
+      !currentUser ||
+      !(await this.comparePassword(signInDto.password, currentUser.password))
+    )
+      return null;
+
+    return userInfo;
+    // this.logger.log(this.signIn.name);
+    // const { type } = signInDto;
+
+    // try {
+    //   const currentUser = await this.userService.findByEmail(signInDto.email, {
+    //     hasPassword: true,
+    //     hasRelations: false,
+    //   });
+
+    //   let refreshToken = null;
+    //   let userInfo = null;
+
+    //   if (currentUser) {
+    //     const rf = await this.refreshTokenService.create({
+    //       userId: currentUser.id,
+    //     });
+    //     refreshToken = rf.refreshToken;
+
+    //     userInfo = {
+    //       ...this.userConverter.entityToBasicInfo(currentUser),
+    //       accessToken: currentUser
+    //         ? await this.generateToken(
+    //             currentUser.id,
+    //             currentUser.email,
+    //             currentUser.fullName,
+    //           )
+    //         : null,
+    //       refreshToken: refreshToken,
+    //     };
+    //   }
+
+    //   if (type === 'google') {
+    //     if (!currentUser) {
+    //       const role = await this.roleService.findByTitle('user');
+
+    //       if (!role) return null;
+
+    //       const result = await this.register({
+    //         email: signInDto.email,
+    //         password: undefined,
+    //         fullName: signInDto.fullName,
+    //         roleId: role.id,
+    //         avatarURL: signInDto.avatarURL,
+    //       });
+    //       const { refreshToken: rf } = await this.refreshTokenService.create({
+    //         userId: result.id,
+    //       });
+
+    //       return {
+    //         ...this.userConverter.entityToBasicInfo(
+    //           await this.userService.findByEmail(result.email),
+    //         ),
+    //         accessToken: await this.generateToken(
+    //           result.id,
+    //           result.email,
+    //           result.fullName,
+    //         ),
+    //         refreshToken: rf,
+    //       };
+    //     }
+
+    //     return userInfo;
+    //   }
+
+    //   if (
+    //     !currentUser ||
+    //     !(await this.comparePassword(signInDto.password, currentUser.password))
+    //   )
+    //     return null;
+
+    //   return userInfo;
+    // } catch (error) {
+    //   this.logger.log(`signIn: ${error}`);
+    //   return null;
+    // }
   }
 
   async register(registerDto: RegisterDto) {

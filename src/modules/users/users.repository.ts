@@ -217,7 +217,7 @@ export class UsersRepository {
 
   async save(saveUserParams: ISaveUserParams): Promise<User> {
     try {
-      const { role, email, fullName, password } = saveUserParams;
+      const { role, email, fullName, password, avatarURL } = saveUserParams;
       let newUserRecord: User | null = null;
 
       if (!role) return null;
@@ -232,6 +232,7 @@ export class UsersRepository {
           email: email,
           phoneNumber: saveUserParams.phoneNumber,
           role: role,
+          avatarUrl: avatarURL,
         });
       } else if (role.title === 'employer') {
         this.logger.log(`${this.save.name} register employer account`);
@@ -253,6 +254,7 @@ export class UsersRepository {
               phoneNumber: phoneNumber,
               role,
               jobPosition,
+              avatarUrl: avatarURL,
             });
 
             const jobFields = await this.jobFieldService.findByIds(
@@ -281,13 +283,16 @@ export class UsersRepository {
           password: password,
           email: email,
           role: role,
+          avatarUrl: avatarURL,
         });
       }
 
       return newUserRecord;
     } catch (error: any) {
       this.logger.log(error);
-      throw new InternalServerErrorException('Failed to register account');
+      throw new InternalServerErrorException(
+        `Tạo tài khoản thất bại. ${error}`,
+      );
     }
   }
 

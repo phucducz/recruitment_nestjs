@@ -47,7 +47,7 @@ export class User extends BaseEntity {
   password: string;
 
   @Field()
-  @Column({ type: 'varchar', name: 'avatar_url', length: 45, nullable: true })
+  @Column({ type: 'varchar', name: 'avatar_url', length: 1000, nullable: true })
   avatarUrl: string;
 
   @Field()
