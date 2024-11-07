@@ -10,14 +10,17 @@ import {
   Query,
   Request,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { FileInterceptor } from '@nestjs/platform-express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
-import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
+import { CloudinaryService } from 'src/services/cloudinary.service';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
@@ -31,6 +34,7 @@ export class UsersController {
     private readonly authService: AuthService,
     @Inject(ResetPasswordService)
     private readonly resetPasswordService: ResetPasswordService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   // @Post()
@@ -164,15 +168,31 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('/update-account-info')
+  @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
-    @Body() updateAccountInfoDto: UpdateAccountInfoDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateAccountInfoDto: any,
     @Res() res: Response,
     @Request() request: any,
   ) {
     try {
+      let avatarUrl = null;
+
+      if (file) {
+        try {
+          const uploadResult = await this.cloudinaryService.uploadFile(
+            file,
+            'avatars',
+          );
+          avatarUrl = uploadResult.secure_url;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
       const result = await this.usersService.updateAccountInfo({
         updateBy: request.user.userId,
-        variable: updateAccountInfoDto,
+        variable: { ...updateAccountInfoDto, avatarUrl },
       });
 
       if (!result)

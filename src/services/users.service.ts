@@ -12,6 +12,7 @@ import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
+import { CloudinaryService } from './cloudinary.service';
 import { JobPositionsService } from './job_positions.service';
 import { RolesService } from './roles.service';
 
@@ -24,6 +25,8 @@ export class UsersService {
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(forwardRef(() => JobPositionsService))
     private readonly jobPositionService: JobPositionsService,
+    @Inject(CloudinaryService)
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findByEmail(
@@ -108,13 +111,21 @@ export class UsersService {
     });
   }
 
-  async updateAccountInfo(updateAccountInfoDto: IUpdate<UpdateAccountInfoDto>) {
+  async updateAccountInfo(
+    updateAccountInfoDto: IUpdate<
+      UpdateAccountInfoDto & { avatarUrl: string | null }
+    >,
+  ) {
     const { updateBy, variable } = updateAccountInfoDto;
     const currentUser = await this.findById(updateBy, { hasPassword: true });
 
     if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
 
-    if (variable.isChangePassword && !!currentUser.password) {
+    if (
+      variable.newPassword &&
+      variable.isChangePassword &&
+      !!currentUser.password
+    ) {
       if (!variable?.oldPassword)
         throw new BadRequestException(
           'Vui lòng cung cấp mật khẩu cũ của bạn để xác nhận thông tin',
@@ -122,11 +133,23 @@ export class UsersService {
       await this.verifyPassword(variable.oldPassword, currentUser.password);
     }
 
+    if (variable.avatarUrl !== null) {
+      const publicId = this.cloudinaryService.getPublicIdFromUrl(
+        currentUser.avatarUrl,
+      );
+
+      publicId && (await this.cloudinaryService.deleteFile(publicId));
+    }
+
     return await this.userRepository.updateAccountInfo({
       ...updateAccountInfoDto,
       variable: {
         ...variable,
-        newPassword: await this.authService.hashPassword(variable.newPassword),
+        ...(variable.newPassword && {
+          newPassword: await this.authService.hashPassword(
+            variable.newPassword,
+          ),
+        }),
       },
     });
   }

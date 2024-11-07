@@ -311,13 +311,18 @@ export class UsersRepository {
     return result.affected > 0;
   }
 
-  async updateAccountInfo(updateAccountInfoDto: IUpdate<UpdateAccountInfoDto>) {
+  async updateAccountInfo(
+    updateAccountInfoDto: IUpdate<
+      UpdateAccountInfoDto & { avatarUrl: string | null }
+    >,
+  ) {
     const { updateBy, variable } = updateAccountInfoDto;
 
     const result = await this.userRepository.update(updateBy, {
       ...(variable.isChangePassword &&
         variable?.newPassword && { password: variable.newPassword }),
       ...(variable?.fullName && { fullName: variable.fullName }),
+      ...(variable?.avatarUrl && { avatarUrl: variable.avatarUrl }),
       updateAt: new Date().toString(),
       updateBy,
     });

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CloudinaryService } from 'src/services/cloudinary.service';
@@ -11,9 +11,9 @@ import { CloudinaryController } from './cloudinary.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature(),
-    RefreshTokenModule,
-    AuthModule,
-    CurriculumVitaesModule,
+    forwardRef(() => RefreshTokenModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => CurriculumVitaesModule),
   ],
   controllers: [CloudinaryController],
   providers: [CloudinaryService, CloudinaryConfig],

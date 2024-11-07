@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Inject,
@@ -65,13 +66,15 @@ export class AuthController {
         .status(200)
         .json({ statusCode: 200, message: 'Đăng nhập thành công!', ...result });
     } catch (error) {
-      if (error instanceof InternalServerErrorException) throw error;
-      return res
-        .status(500)
-        .json({
-          statusCode: 500,
-          message: `Đăng nhập thất bại. ${error?.message ?? error}`,
-        });
+      if (
+        error instanceof InternalServerErrorException ||
+        error instanceof BadRequestException
+      )
+        throw error;
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Đăng nhập thất bại. ${error?.message ?? error}`,
+      });
     }
   }
 

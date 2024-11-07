@@ -5,6 +5,7 @@ import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
 import { AuthModule } from '../auth/auth.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
@@ -25,6 +26,7 @@ import { UsersRepository } from './users.repository';
     UsersJobFieldsModule,
     MailModule,
     ResetPasswordModule,
+    forwardRef(() => CloudinaryModule),
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
   ],

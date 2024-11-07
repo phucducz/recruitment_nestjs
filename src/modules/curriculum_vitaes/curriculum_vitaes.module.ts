@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
@@ -12,9 +12,9 @@ import { CurriculumVitaesController } from './curriculum_vitaes.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CurriculumVitae]),
-    UsersModule,
-    RefreshTokenModule,
-    AuthModule,
+    forwardRef(() => UsersModule),
+    forwardRef(() => RefreshTokenModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [CurriculumVitaesController],
   providers: [CurriculumVitaesService, CurriculumVitaesRepository],
