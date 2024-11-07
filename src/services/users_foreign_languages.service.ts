@@ -19,8 +19,10 @@ export class UsersForeignLanguagesService {
     );
   }
 
-  findAll() {
-    return `This action returns all usersForeignLanguages`;
+  async findAll(userForeignLanguageQueries: IFindUserForeignLanguagesQueries) {
+    return await this.usersForeignLanguagesRepository.findBy(
+      userForeignLanguageQueries,
+    );
   }
 
   findOne(id: number) {

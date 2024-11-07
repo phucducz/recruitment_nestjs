@@ -6,12 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
-
 import { Response } from 'express';
+
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { AchivementsService } from '../../services/achivements.service';
@@ -54,14 +55,33 @@ export class AchivementsController {
     }
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.achivementsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.achivementsService.findOne(+id);
+  @Get()
+  async findById(
+    @Query() achivementQueries: IFindAchivementQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.achivementsService.findById(
+        +achivementQueries.id,
+      );
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Lấy thành tựu không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   @UseGuards(JwtAuthGuard)

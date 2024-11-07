@@ -15,8 +15,8 @@ export class UsersSkillsService {
     return await this.usersSkillRepository.create(createUsersSkillDto);
   }
 
-  findAll() {
-    return `This action returns all usersSkills`;
+  async findAll(userSkillQueries: IFindUserSkillsQueries) {
+    return await this.usersSkillRepository.findBy(userSkillQueries);
   }
 
   findOne(id: number) {

@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/create-users_foreign_language.dto';
 import { UpdateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/update-users_foreign_language.dto';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
@@ -66,5 +68,30 @@ export class UsersForeignLanguagesRepository {
     const result = await this.usersForeignLanguageRepository.delete(params);
 
     return result.affected > 0;
+  }
+
+  async findBy(userForeignLanguageQueries: IFindUserForeignLanguagesQueries) {
+    const { foreignLanguagesId, page, pageSize, usersId } =
+      userForeignLanguageQueries;
+    const paginationParams = getPaginationParams({
+      page: +page,
+      pageSize: +pageSize,
+    });
+
+    return await this.usersForeignLanguageRepository.findAndCount({
+      where: {
+        ...(foreignLanguagesId && { foreignLanguagesId: +foreignLanguagesId }),
+        ...(usersId && { usersId: +usersId }),
+      },
+      relations: ['foreignLanguage'],
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.USERS_FOREIGN_LANGUAGE, removeColumns),
+        foreignLanguage: filterColumns(
+          ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+          removeColumns,
+        ),
+      } as FindOptionsSelect<UsersForeignLanguage>,
+      ...paginationParams,
+    });
   }
 }

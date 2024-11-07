@@ -19,8 +19,8 @@ export class AchivementsService {
     return `This action returns all achivements`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} achivement`;
+  async findById(id: number) {
+    return await this.achivementRepository.findById(id);
   }
 
   async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {

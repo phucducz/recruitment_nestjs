@@ -45,8 +45,8 @@ export class WorkExperiencesService {
     return `This action returns all workExperiences`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workExperience`;
+  async findBy(workExperienceQueries: IFindWorkExperiencesQueries) {
+    return await this.workExperiencesRepository.findBy(workExperienceQueries);
   }
 
   async update(
