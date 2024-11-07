@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UsersJob } from 'src/entities/users_job.entity';
@@ -16,7 +16,7 @@ import { UsersJobRepository } from './users_jobs.repository';
     RefreshTokenModule,
     AuthModule,
     CloudinaryModule,
-    CurriculumVitaesModule,
+    forwardRef(() => CurriculumVitaesModule),
   ],
   controllers: [UsersJobsController],
   providers: [UsersJobsService, UsersJobRepository],

@@ -108,13 +108,21 @@ export class UsersService {
     });
   }
 
-  async updateAccountInfo(updateAccountInfoDto: IUpdate<UpdateAccountInfoDto>) {
+  async updateAccountInfo(
+    updateAccountInfoDto: IUpdate<
+      UpdateAccountInfoDto & { avatarUrl: string | null }
+    >,
+  ) {
     const { updateBy, variable } = updateAccountInfoDto;
     const currentUser = await this.findById(updateBy, { hasPassword: true });
 
     if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
 
-    if (variable.isChangePassword && !!currentUser.password) {
+    if (
+      variable.newPassword &&
+      variable.isChangePassword &&
+      !!currentUser.password
+    ) {
       if (!variable?.oldPassword)
         throw new BadRequestException(
           'Vui lòng cung cấp mật khẩu cũ của bạn để xác nhận thông tin',
@@ -126,7 +134,11 @@ export class UsersService {
       ...updateAccountInfoDto,
       variable: {
         ...variable,
-        newPassword: await this.authService.hashPassword(variable.newPassword),
+        ...(variable.newPassword && {
+          newPassword: await this.authService.hashPassword(
+            variable.newPassword,
+          ),
+        }),
       },
     });
   }
