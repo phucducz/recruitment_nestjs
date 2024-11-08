@@ -20,7 +20,6 @@ import { Response } from 'express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
-import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
@@ -177,23 +176,9 @@ export class UsersController {
     @Request() request: any,
   ) {
     try {
-      let avatarUrl = null;
-
-      if (file) {
-        try {
-          const uploadResult = await this.cloudinaryService.uploadFile(
-            file,
-            'avatars',
-          );
-          avatarUrl = uploadResult.secure_url;
-        } catch (error) {
-          console.log(error);
-        }
-      }
-
       const result = await this.usersService.updateAccountInfo({
         updateBy: request.user.userId,
-        variable: { ...updateAccountInfoDto, avatarUrl },
+        variable: { ...updateAccountInfoDto, file },
       });
 
       if (!result)
@@ -251,15 +236,29 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('/personal-info')
+  @UseInterceptors(FileInterceptor('file'))
   async updatePersonalInfo(
-    @Body() updatePersonalInfoDto: UpdatePersonalInfoDto,
+    @UploadedFile('file') file: Express.Multer.File,
+    @Body() updatePersonalInfoDto: any,
     @Res() res: Response,
     @Request() request: any,
   ) {
     try {
       const result = await this.usersService.updatePersonalInfo({
         updateBy: request.user.userId,
-        variable: updatePersonalInfoDto,
+        variable: {
+          ...updatePersonalInfoDto,
+          totalYearExperience:
+            updatePersonalInfoDto?.totalYearExperience &&
+            +updatePersonalInfoDto?.totalYearExperience,
+          jobPositionsId:
+            updatePersonalInfoDto?.jobPositionsId &&
+            +updatePersonalInfoDto?.jobPositionsId,
+          placementsId:
+            updatePersonalInfoDto?.placementsId &&
+            +updatePersonalInfoDto?.placementsId,
+          file,
+        },
       });
 
       if (!result)

@@ -1,8 +1,14 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 
 export class UpdatePersonalInfoDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   fullName: string;
 
   @IsNumber()
@@ -10,10 +16,24 @@ export class UpdatePersonalInfoDto {
   jobPositionsId?: number;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   totalYearExperience: number;
 
   @IsNumber()
   @IsOptional()
   placementsId?: number;
+
+  @IsString()
+  @IsOptional()
+  @MinLength(10)
+  @MaxLength(10)
+  phoneNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  companyName?: string;
+
+  @IsString()
+  @IsOptional()
+  companyUrl?: string;
 }

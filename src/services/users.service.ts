@@ -54,7 +54,9 @@ export class UsersService {
     id: number,
     options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
-    const desiredJob = await this.desiredJobService.findById(id);
+    const desiredJob = await this.desiredJobService.findOneBy({
+      where: { user: { id } },
+    });
     const result = await this.userRepository.findById(id, options);
 
     return {
@@ -133,10 +135,11 @@ export class UsersService {
 
   async updateAccountInfo(
     updateAccountInfoDto: IUpdate<
-      UpdateAccountInfoDto & { avatarUrl: string | null }
+      UpdateAccountInfoDto & { file: Express.Multer.File }
     >,
   ) {
     const { updateBy, variable } = updateAccountInfoDto;
+    const { file, ...otherVariables } = variable;
     const currentUser = await this.findById(updateBy, { hasPassword: true });
 
     if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
@@ -153,53 +156,83 @@ export class UsersService {
       await this.verifyPassword(variable.oldPassword, currentUser.password);
     }
 
-    if (variable.avatarUrl !== null) {
-      const publicId = this.cloudinaryService.getPublicIdFromUrl(
+    let avatarUrl: string | null = null;
+
+    if (variable.file)
+      avatarUrl = await this.cloudinaryService.updateAvatar(
+        variable.file,
         currentUser.avatarUrl,
       );
-
-      publicId && (await this.cloudinaryService.deleteFile(publicId));
-    }
 
     return await this.userRepository.updateAccountInfo({
       ...updateAccountInfoDto,
       variable: {
-        ...variable,
-        ...(variable.newPassword && {
+        ...otherVariables,
+        ...(otherVariables.newPassword && {
           newPassword: await this.authService.hashPassword(
-            variable.newPassword,
+            otherVariables.newPassword,
           ),
         }),
+        avatarUrl,
       },
     });
   }
 
   async updatePersonalInfo(
-    updatePersonalInfoDto: IUpdate<UpdatePersonalInfoDto>,
+    updatePersonalInfoDto: IUpdate<
+      UpdatePersonalInfoDto & { file: Express.Multer.File }
+    >,
   ) {
     const { updateBy, variable } = updatePersonalInfoDto;
+
+    const currentUser = await this.userRepository.findById(updateBy, {
+      hasRelations: false,
+    });
+
+    if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng');
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
         const desiredJob = await this.desiredJobService.findOneBy({
-          where: { user: { id: updateBy } },
+          where: { user: { id: currentUser.id } },
         });
 
-        await this.desiredJobService.update(desiredJob.id, {
-          updateBy,
-          variable: { totalYearExperience: variable.totalYearExperience },
-          transactionalEntityManager,
-        });
+        if (desiredJob)
+          await this.desiredJobService.update(desiredJob.id, {
+            updateBy,
+            variable: { totalYearExperience: variable.totalYearExperience },
+            transactionalEntityManager,
+          });
 
-        const result = await transactionalEntityManager.update(User, updateBy, {
-          fullName: variable.fullName,
-          jobPosition: await this.jobPositionService.findById(
-            variable.jobPositionsId,
-          ),
-          placement: await this.placementsService.findById(
-            variable.placementsId,
-          ),
-        });
+        let avatarUrl: string | null = null;
+
+        if (variable.file)
+          avatarUrl = await this.cloudinaryService.updateAvatar(
+            variable.file,
+            currentUser.avatarUrl,
+          );
+
+        const result = await transactionalEntityManager.update(
+          User,
+          currentUser.id,
+          {
+            fullName: variable.fullName,
+            ...(variable.jobPositionsId && {
+              jobPosition: await this.jobPositionService.findById(
+                variable.jobPositionsId,
+              ),
+            }),
+            ...(variable.placementsId && {
+              placement: await this.placementsService.findById(
+                variable.placementsId,
+              ),
+            }),
+            ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
+            ...(variable.companyName && { companyName: variable.companyName }),
+            ...(variable.companyUrl && { companyUrl: variable.companyUrl }),
+            ...(variable.file && { avatarUrl }),
+          },
+        );
 
         return result.affected > 0;
       },
