@@ -89,4 +89,28 @@ export class CloudinaryService {
       return null;
     }
   }
+
+  async updateAvatar(
+    file: Express.Multer.File,
+    oldAvatarUrl: string,
+  ): Promise<string | null> {
+    let url = null;
+
+    if (file) {
+      try {
+        const uploadResult = await this.uploadFile(file, 'avatars');
+        url = uploadResult.secure_url;
+
+        if (url !== null) {
+          const publicId = this.getPublicIdFromUrl(oldAvatarUrl);
+          publicId && (await this.deleteFile(publicId));
+        }
+
+        return url;
+      } catch (error) {
+        console.log(error);
+        return null;
+      }
+    }
+  }
 }
