@@ -154,6 +154,8 @@ export class UsersRepository {
     email: string,
     options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
+    console.log('email', email);
+
     return await this.userRepository.findOne({
       where: { email: email },
       ...this.generateRelationshipOptionals(options),

@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -143,12 +144,13 @@ export class AuthService {
 
     if (!signInDto.password)
       throw new BadRequestException('Vui lòng cung cấp mật khẩu!');
-    if (!currentUser.password)
+    if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng!');
+    if (!currentUser?.password)
       throw new BadRequestException('Hãy đặt mật khẩu cho tài khoản của bạn!');
 
     if (
       !currentUser ||
-      !(await this.comparePassword(signInDto.password, currentUser.password))
+      !(await this.comparePassword(signInDto.password, currentUser?.password))
     )
       return null;
 
