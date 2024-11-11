@@ -6,8 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateApplicationStatusDto } from 'src/dto/application_status/create-application_status.dto';
 import { UpdateApplicationStatusDto } from 'src/dto/application_status/update-application_status.dto';
 import { ApplicationStatusService } from '../../services/application_status.service';
@@ -23,9 +27,20 @@ export class ApplicationStatusController {
     return this.applicationStatusService.create(createApplicationStatusDto);
   }
 
-  @Get()
-  findAll() {
-    return this.applicationStatusService.findAll();
+  @Get('/all')
+  async findAll(
+    @Query() findAllQueries: IFindApplicationStatusQueries,
+    @Res() res: Response,
+  ) {
+    const result = await this.applicationStatusService.findAll(findAllQueries);
+
+    return res.status(200).json({
+      statusCode: 200,
+      ...rtPageInfoAndItems(
+        { page: +findAllQueries.page, pageSize: +findAllQueries.pageSize },
+        result,
+      ),
+    });
   }
 
   @Get(':id')

@@ -60,3 +60,7 @@ interface IFindUserForeignLanguagesQueries extends BaseQueries {
   foreignLanguagesId?: string;
   usersId?: string;
 }
+
+interface IFindApplicationStatusQueries extends BaseQueries {
+  statusId: string;
+}
