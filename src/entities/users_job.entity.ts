@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
+import { ApplicationStatus } from './application_status.entity';
 import { BaseEntityNotId } from './base.entity';
 import { CurriculumVitae } from './curriculum_vitae';
 import { Job } from './job.entity';
@@ -19,6 +20,22 @@ export class UsersJob extends BaseEntityNotId {
   @Field()
   @Column({ type: 'int', name: 'referrer_id', nullable: true })
   referrerId: number;
+
+  @Field()
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'employer_update_by',
+  })
+  employerUpdateBy: string;
+
+  @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'employer_update_at',
+  })
+  employerUpdateAt: string;
 
   @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
@@ -43,4 +60,11 @@ export class UsersJob extends BaseEntityNotId {
   )
   @JoinColumn({ name: 'curriculum_vitaes_id', referencedColumnName: 'id' })
   curriculumVitae: CurriculumVitae;
+
+  @ManyToOne(
+    () => ApplicationStatus,
+    (applicationStatus) => applicationStatus.usesJobs,
+  )
+  @JoinColumn({ name: 'application_status_id', referencedColumnName: 'id' })
+  applicationStatus: ApplicationStatus;
 }

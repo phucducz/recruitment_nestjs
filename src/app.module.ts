@@ -12,6 +12,7 @@ const envModule = ConfigModule.forRoot({
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
+import { ApplicationStatusModule } from './modules/application_status/application_status.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
@@ -96,6 +97,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     DesiredJobsModule,
     DesiredJobsPlacementsModule,
     DesiredJobsPositionsModule,
+    ApplicationStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
