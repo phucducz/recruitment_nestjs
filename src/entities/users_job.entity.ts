@@ -22,6 +22,22 @@ export class UsersJob extends BaseEntityNotId {
   referrerId: number;
 
   @Field()
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'employer_update_by',
+  })
+  employerUpdateBy: string;
+
+  @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'employer_update_at',
+  })
+  employerUpdateAt: string;
+
+  @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
   usersId: number;
 

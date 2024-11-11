@@ -10,3 +10,9 @@ export enum FORGOT_PASSWORD_TOKEN_STATUS {
   VALID = 'valid',
   INVALID = 'invalid',
 }
+
+export enum ROLES {
+  USER = 'user',
+  ADMIN = 'admin',
+  EMPLOYER = 'employer',
+}

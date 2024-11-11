@@ -192,12 +192,35 @@ export class UsersJobsController {
     return this.usersJobsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async update(
     @Body() updateUsersJobDto: UpdateUsersJobDto,
+    @Request() request: any,
+    @Res() res: Response,
   ) {
-    return this.usersJobsService.update(+id, updateUsersJobDto);
+    try {
+      const result = await this.usersJobsService.update({
+        updateBy: request.user.userId,
+        variable: updateUsersJobDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Cập nhật công việc đã ứng tuyển thất bại!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Cập nhật công việc đã ứng tuyển thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Cập nhật công việc đã ứng tuyển thất bại. ${error?.message ?? error}!`,
+      });
+    }
   }
 
   @Delete(':id')

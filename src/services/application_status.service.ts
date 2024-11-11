@@ -19,8 +19,8 @@ export class ApplicationStatusService {
     return await this.applicationStatusRepository.findAll(findAllQueries);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} applicationStatus`;
+  async findById(id: number) {
+    return await this.applicationStatusRepository.findById(id);
   }
 
   update(id: number, updateApplicationStatusDto: UpdateApplicationStatusDto) {

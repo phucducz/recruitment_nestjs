@@ -11,6 +11,7 @@ import {
 } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
+import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { Job } from 'src/entities/job.entity';
 import { UsersJob } from 'src/entities/users_job.entity';
@@ -75,19 +76,45 @@ export class UsersJobRepository {
     const { usersId, page, pageSize } = findApplicantsForJob;
     const paginationParams = getPaginationParams({ page, pageSize });
 
-    console.log(this.generateUsersJobSelect([]));
-    console.log(filterColumns(ENTITIES.FIELDS.USERS_JOB, []));
-
-    return this.usersJobRepository.findAndCount({
+    return await this.usersJobRepository.findAndCount({
       where: { job: { user: usersId } as FindOptionsWhere<Job> },
-      relations: ['job', 'user'],
+      relations: ['job', 'user', 'applicationStatus'],
       select: {
         user: { fullName: true, id: true },
         job: { title: true, id: true },
         ...this.generateUsersJobSelect([]),
         createAt: true,
+        applicationStatus: filterColumns(
+          ENTITIES.FIELDS.APPLICATION_STATUS,
+          removeColumns,
+        ),
       },
       ...paginationParams,
     });
+  }
+
+  async update(
+    updateUsersJobDto: IUpdateMTM<
+      UpdateUsersJobDto & Partial<UsersJob>,
+      { jobsId: number; usersId: number }
+    >,
+  ) {
+    const { variable, queries } = updateUsersJobDto;
+
+    const result = await this.usersJobRepository.update(queries, {
+      ...[
+        'employerUpdateBy',
+        'employerUpdateAt',
+        'updateBy',
+        'updateAt',
+        'applicationStatus',
+      ].reduce((acc, key) => {
+        if (variable[key]) acc[key] = variable[key];
+
+        return acc;
+      }, {} as UsersJob),
+    });
+
+    return result.affected > 0;
   }
 }

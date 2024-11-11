@@ -45,7 +45,7 @@ export class ApplicationStatusController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.applicationStatusService.findOne(+id);
+    return this.applicationStatusService.findById(+id);
   }
 
   @Patch(':id')

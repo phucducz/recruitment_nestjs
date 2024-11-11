@@ -27,4 +27,8 @@ export class ApplicationStatusRepository {
       order: { id: 'ASC' },
     });
   }
+
+  async findById(id: number) {
+    return await this.applicationStatusRepository.findOneBy({ id });
+  }
 }

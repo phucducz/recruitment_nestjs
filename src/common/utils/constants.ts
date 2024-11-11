@@ -1,6 +1,7 @@
 import { FindOptionsSelect } from 'typeorm';
 
 import { Achivement } from 'src/entities/achivement.entity';
+import { ApplicationStatus } from 'src/entities/application_status.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { DesiredJob } from 'src/entities/desired_job.entity';
@@ -66,6 +67,7 @@ export const ENTITIES = {
     USERS_JOB: getEntityFields(UsersJob),
     DESIRED_JOB: getEntityFields(DesiredJob),
     DESIRED_JOBS_PLACEMENT: getEntityFields(DesiredJobsPlacement),
+    APPLICATION_STATUS: getEntityFields(ApplicationStatus),
   },
 };
 
