@@ -138,6 +138,9 @@ export class AuthService {
       return userInfo;
     }
 
+    console.log(currentUser);
+    console.log(signInDto);
+
     if (!signInDto.password)
       throw new BadRequestException('Vui lòng cung cấp mật khẩu!');
     if (!currentUser.password)
