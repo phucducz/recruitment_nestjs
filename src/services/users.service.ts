@@ -82,7 +82,9 @@ export class UsersService {
       jobPosition: await this.jobPositionService.findById(
         registerDto.jobPositionsId,
       ),
-      jobFields: await this.jobFieldService.findByIds(registerDto.jobFieldsIds),
+      jobFields: await this.jobFieldService.findByIds(
+        registerDto?.jobFieldsIds ?? [],
+      ),
     });
   }
 
