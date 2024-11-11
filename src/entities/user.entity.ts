@@ -40,7 +40,7 @@ export class User extends BaseEntity {
   phoneNumber: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 45 })
+  @Column({ type: 'varchar', length: 45, unique: true })
   email: string;
 
   @Field()
