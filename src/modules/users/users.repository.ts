@@ -154,7 +154,7 @@ export class UsersRepository {
     email: string,
     options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
-    return this.userRepository.findOne({
+    return await this.userRepository.findOne({
       where: { email: email },
       ...this.generateRelationshipOptionals(options),
     });
@@ -164,7 +164,7 @@ export class UsersRepository {
     id: number,
     options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
-    return this.userRepository.findOne({
+    return await this.userRepository.findOne({
       where: { id: id },
       ...this.generateRelationshipOptionals(options),
     });
@@ -179,7 +179,7 @@ export class UsersRepository {
       pageSize: +pageSize,
     });
 
-    return this.userRepository.findAndCount({
+    return await this.userRepository.findAndCount({
       where: {
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
