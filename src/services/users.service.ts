@@ -240,4 +240,8 @@ export class UsersService {
       },
     );
   }
+
+  async deleteAchivement(userId: number) {
+    return (await this.userRepository.deleteAchivement(userId)).affected > 0;
+  }
 }

@@ -335,4 +335,10 @@ export class UsersRepository {
 
     return result.affected > 0;
   }
+
+  async deleteAchivement(userId: number) {
+    return await this.userRepository.update(userId, {
+      achivement: null,
+    });
+  }
 }

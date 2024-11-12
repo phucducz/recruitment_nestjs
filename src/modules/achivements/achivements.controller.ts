@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -114,8 +115,36 @@ export class AchivementsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.achivementsService.remove(+id);
+  async remove(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.achivementsService.remove(
+        +request.user.userId,
+        +id,
+      );
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Xóa thành tựu không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Xóa thành tựu thành công!',
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Xóa thành tựu không thành công. ${error?.message ?? error}!`,
+      });
+    }
   }
 }
