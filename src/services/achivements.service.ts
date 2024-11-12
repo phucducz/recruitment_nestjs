@@ -37,7 +37,11 @@ export class AchivementsService {
     return await this.achivementRepository.update(id, updateAchivementDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} achivement`;
+  async remove(userId: number, id: number) {
+    const result = await this.userService.deleteAchivement(userId);
+
+    if (!result) return false;
+
+    return await this.achivementRepository.delete(id);
   }
 }

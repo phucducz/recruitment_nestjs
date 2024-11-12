@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns } from 'src/common/utils/function';
@@ -47,5 +47,16 @@ export class AchivementsRepository {
       where: { id },
       select: filterColumns(ENTITIES.FIELDS.ACHIVEMENT, removeColumns),
     });
+  }
+
+  async findOne(options: FindOneOptions<Achivement>) {
+    return await this.achivementRepository.findOne({
+      select: filterColumns(ENTITIES.FIELDS.ACHIVEMENT, removeColumns),
+      ...options,
+    });
+  }
+
+  async delete(id: number) {
+    return (await this.achivementRepository.delete(id)).affected > 0;
   }
 }
