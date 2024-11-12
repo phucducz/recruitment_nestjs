@@ -91,12 +91,10 @@ export class JobsController {
         ),
       });
     } catch (error) {
-      return res
-        .status(500)
-        .json({
-          statusCode: 500,
-          message: `Lấy danh sách công việc thất bại. ${error?.message ?? error}!`,
-        });
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Lấy danh sách công việc thất bại. ${error?.message ?? error}!`,
+      });
     }
   }
 
@@ -119,7 +117,7 @@ export class JobsController {
         updateBy: request.user.userId,
       });
 
-      if (!result.isSuccess)
+      if (!result)
         return res
           .status(401)
           .json({ message: 'Cập nhật công việc thành công!', statusCode: 401 });

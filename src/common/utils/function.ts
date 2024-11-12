@@ -73,16 +73,16 @@ export const filterUndefinedValues = <T extends object>(
   }, {} as Partial<T>);
 };
 
-export const getItemsDiff = (params: {
+export const getItemsDiff = <T, ST extends Record<string, any>>(params: {
   items: {
     key?: string;
-    data: any[];
+    data: T[];
   };
   storedItems: {
     key: string;
-    data: any[];
+    data: ST[];
   };
-}): { itemsToAdd: any[]; itemsToRemove: any[]; itemToUpdate: any[] } => {
+}): { itemsToAdd: T[]; itemsToRemove: ST[]; itemToUpdate: T[] } => {
   const { items, storedItems } = params;
 
   const itemsToAdd = items.data.filter(

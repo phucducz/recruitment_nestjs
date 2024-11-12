@@ -32,6 +32,11 @@ interface IDelete<T> {
   transactionalEntityManager?: EntityManager;
 }
 
+interface IDeleteMany<T> {
+  variables: T[];
+  transactionalEntityManager?: EntityManager;
+}
+
 interface APIResponse {
   message: string;
   statusCode: 200 | 401 | 400;

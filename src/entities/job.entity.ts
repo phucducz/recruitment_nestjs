@@ -68,6 +68,10 @@ export class Job extends BaseEntity {
   @Column({ type: 'int', default: 1, nullable: true })
   quantity: number;
 
+  @Field()
+  @Column({ type: 'varchar', default: 'Đang tuyển' })
+  status: string;
+
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
   @JoinColumn({ name: 'job_categories_id', referencedColumnName: 'id' })
   jobCategory: JobCategory;
