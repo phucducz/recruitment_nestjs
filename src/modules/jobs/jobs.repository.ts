@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
 
+import { JobConverter } from 'src/common/converters/job.converter';
 import {
   ENTITIES,
   jobRelations,
@@ -27,6 +28,7 @@ export class JobsRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
     @InjectRepository(JobsPlacement)
     private readonly jobPlacementRepository: Repository<JobsPlacement>,
+    @Inject(JobConverter) private readonly jobConverter: JobConverter,
   ) {}
 
   private readonly logger = new Logger(JobsRepository.name);
@@ -98,6 +100,62 @@ export class JobsRepository {
       },
       order: { createAt: 'DESC' },
     });
+  }
+
+  async findAllForEmployer(
+    jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
+  ): Promise<[Job[], number]> {
+    const { applicationStatusId, title, usersId } = jobsQueries;
+    const { skip, take } = getPaginationParams({
+      page: +jobsQueries.page,
+      pageSize: +jobsQueries.pageSize,
+    });
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .select([
+        'job.title as job_title',
+        'job.createAt as job_create_at',
+        'job.updateAt as job_update_at',
+        'job.salaryMin as job_salary_min',
+        'job.salaryMax as job_salary_max',
+        'job.quantity as job_quantity',
+        'user.fullName as user_full_name',
+        'workType.title as work_type_title',
+        'jobCategory.name as job_category_name',
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang đánh giá' THEN 1 END) as evaluating_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang offer' THEN 1 END) as offering_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang phỏng vấn' THEN 1 END) as interviewing_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang tuyển' THEN 1 END) as recruiting_count",
+      ])
+      .leftJoin('job.user', 'user')
+      .leftJoin('job.workType', 'workType')
+      .leftJoin('job.jobCategory', 'jobCategory')
+      .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
+      .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
+      .where('job.users_id = :usersId', { usersId })
+      .groupBy(
+        'job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name',
+      );
+
+    if (jobsQueries.applicationStatusId)
+      queryBuilder.andWhere('applicationStatus.id = :applicationStatusId', {
+        applicationStatusId,
+      });
+    if (jobsQueries.title)
+      queryBuilder.andWhere('job.title = :title', {
+        title,
+      });
+    if (skip) queryBuilder.skip(skip);
+    if (take) queryBuilder.take(take);
+
+    const result = await Promise.all([
+      (await queryBuilder.getRawMany()).map((raw) =>
+        this.jobConverter.toCamelCase(raw as Job),
+      ),
+      queryBuilder.getCount(),
+    ]);
+
+    return result;
   }
 
   async findById(id: number) {

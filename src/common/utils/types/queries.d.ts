@@ -64,3 +64,8 @@ interface IFindUserForeignLanguagesQueries extends BaseQueries {
 interface IFindApplicationStatusQueries extends BaseQueries {
   statusId: string;
 }
+
+interface IFIndJobsForEmployerQueries extends BaseQueries {
+  title?: string;
+  applicationStatusId?: string;
+}

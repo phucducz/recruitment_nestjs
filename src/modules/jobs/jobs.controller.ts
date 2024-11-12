@@ -67,6 +67,39 @@ export class JobsController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/employer/all')
+  async findAllJobForEmployer(
+    @Query() jobQueries: IFIndJobsForEmployerQueries,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.jobsService.findAllForEmployer({
+        ...jobQueries,
+        usersId: request.user.userId,
+      });
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: jobQueries.page,
+            pageSize: jobQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({
+          statusCode: 500,
+          message: `Lấy danh sách công việc thất bại. ${error?.message ?? error}!`,
+        });
+    }
+  }
+
   @Get('?')
   async findOne(@Query('id') id: string) {
     return await this.jobsService.findById(+id);

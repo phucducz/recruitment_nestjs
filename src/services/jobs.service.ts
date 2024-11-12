@@ -56,6 +56,12 @@ export class JobsService {
     return await this.jobRepository.findAll(jobsQueries);
   }
 
+  async findAllForEmployer(
+    jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
+  ) {
+    return await this.jobRepository.findAllForEmployer(jobsQueries);
+  }
+
   async findById(id: number) {
     return await this.jobRepository.findById(id);
   }

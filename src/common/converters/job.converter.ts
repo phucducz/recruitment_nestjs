@@ -6,9 +6,10 @@ import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { User } from 'src/entities/user.entity';
 import { WorkType } from 'src/entities/work_type.entity';
+import { BaseConverter } from './base.converter';
 
 @Injectable()
-export class JobConverter {
+export class JobConverter extends BaseConverter {
   convert(job: any): Partial<Job> {
     return {
       id: job.j_id,
