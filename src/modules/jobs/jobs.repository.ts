@@ -1,7 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindManyOptions, Raw, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  FindManyOptions,
+  Raw,
+  Repository,
+} from 'typeorm';
 
+import { JobConverter } from 'src/common/converters/job.converter';
 import {
   ENTITIES,
   jobRelations,
@@ -9,11 +16,7 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
-import {
-  filterColumns,
-  filterUndefinedValues,
-  getPaginationParams,
-} from 'src/common/utils/function';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { Job } from 'src/entities/job.entity';
@@ -27,6 +30,7 @@ export class JobsRepository {
     @Inject(DataSource) private readonly dataSource: DataSource,
     @InjectRepository(JobsPlacement)
     private readonly jobPlacementRepository: Repository<JobsPlacement>,
+    @Inject(JobConverter) private readonly jobConverter: JobConverter,
   ) {}
 
   private readonly logger = new Logger(JobsRepository.name);
@@ -98,6 +102,63 @@ export class JobsRepository {
       },
       order: { createAt: 'DESC' },
     });
+  }
+
+  async findAllForEmployer(
+    jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
+  ): Promise<[Job[], number]> {
+    const { applicationStatusId, title, usersId } = jobsQueries;
+    const { skip, take } = getPaginationParams({
+      page: +jobsQueries.page,
+      pageSize: +jobsQueries.pageSize,
+    });
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .select([
+        'job.title as job_title',
+        'job.createAt as job_create_at',
+        'job.updateAt as job_update_at',
+        'job.salaryMin as job_salary_min',
+        'job.salaryMax as job_salary_max',
+        'job.quantity as job_quantity',
+        'user.fullName as user_full_name',
+        'workType.title as work_type_title',
+        'job.status as jobStatus',
+        'jobCategory.name as job_category_name',
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang đánh giá' THEN 1 END) as evaluating_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang offer' THEN 1 END) as offering_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang phỏng vấn' THEN 1 END) as interviewing_count",
+        "COUNT(CASE WHEN applicationStatus.title = 'Đang tuyển' THEN 1 END) as recruiting_count",
+      ])
+      .leftJoin('job.user', 'user')
+      .leftJoin('job.workType', 'workType')
+      .leftJoin('job.jobCategory', 'jobCategory')
+      .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
+      .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
+      .where('job.users_id = :usersId', { usersId })
+      .groupBy(
+        'job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
+      );
+
+    if (jobsQueries.applicationStatusId)
+      queryBuilder.andWhere('applicationStatus.id = :applicationStatusId', {
+        applicationStatusId,
+      });
+    if (jobsQueries.title)
+      queryBuilder.andWhere('job.title = :title', {
+        title,
+      });
+    if (skip) queryBuilder.skip(skip);
+    if (take) queryBuilder.take(take);
+
+    const result = await Promise.all([
+      (await queryBuilder.getRawMany()).map((raw) =>
+        this.jobConverter.toCamelCase(raw as Job),
+      ),
+      queryBuilder.getCount(),
+    ]);
+
+    return result;
   }
 
   async findById(id: number) {
@@ -182,69 +243,97 @@ export class JobsRepository {
         >
     >,
   ) {
-    try {
-      const { updateBy, variable } = updateJob;
+    const { updateBy, variable, transactionalEntityManager } = updateJob;
 
-      await this.dataSource.transaction(async (transactionalEntityManager) => {
-        const newVariables = filterUndefinedValues<Job>({
-          salaryMin: variable.salaryMin,
-          salaryMax: variable.salaryMax,
-          quantity: variable.quantity,
-          description: variable.description,
-          requirements: variable.requirements,
-          benefits: variable.benefits,
-          jobField: variable.jobField,
-          jobCategory: variable.jobCategory,
-          workType: variable.workType,
-          jobPosition: variable.jobPosition,
-          updateBy,
-          updateAt: new Date().toString(),
-        });
+    const variables = {
+      ...(variable.salaryMin && { salaryMin: variable.salaryMin }),
+      ...(variable.salaryMax && { salaryMax: variable.salaryMax }),
+      ...(variable.quantity && { quantity: variable.quantity }),
+      ...(variable.description && { description: variable.description }),
+      ...(variable.requirements && { requirements: variable.requirements }),
+      ...(variable.benefits && { benefits: variable.benefits }),
+      ...(variable.jobField && { jobField: variable.jobField }),
+      ...(variable.jobCategory && { jobCategory: variable.jobCategory }),
+      ...(variable.workType && { workType: variable.workType }),
+      ...(variable.jobPosition && { jobPosition: variable.jobPosition }),
+      ...(variable.status && { status: variable.status }),
+      updateBy,
+      updateAt: new Date().toString(),
+    };
 
-        console.log({
-          salaryMin: variable.salaryMin,
-          salaryMax: variable.salaryMax,
-          quantity: variable.quantity,
-          description: variable.description,
-          requirements: variable.requirements,
-          benefits: variable.benefits,
-          jobField: variable.jobField,
-          jobCategory: variable.jobCategory,
-          workType: variable.workType,
-          jobPosition: variable.jobPosition,
-          updateBy,
-          updateAt: new Date().toString(),
-        });
+    if (transactionalEntityManager) {
+      const result = await (transactionalEntityManager as EntityManager).update(
+        Job,
+        id,
+        variables,
+      );
 
-        await transactionalEntityManager.update(Job, id, newVariables);
-
-        if ((variable?.placementIds ?? []).length > 0) {
-          const currentJob = await this.findById(id);
-
-          await transactionalEntityManager.delete(JobsPlacement, {
-            jobsId: currentJob.id,
-          });
-
-          await Promise.all(
-            variable.placements.map(async (placement) => {
-              await transactionalEntityManager.save(
-                JobsPlacement,
-                this.jobPlacementRepository.create({
-                  job: currentJob,
-                  jobsId: id,
-                  placement: placement,
-                  placementsId: placement.id,
-                  createAt: new Date().toString(),
-                  createBy: updateBy,
-                }),
-              );
-            }),
-          );
-        }
-      });
-      return { isSuccess: true, message: '' };
-    } catch (error) {
-      return { isSuccess: true, message: error };
+      return result.affected > 0;
     }
+
+    return (await this.jobRepository.update(id, variables)).affected > 0;
   }
+
+  // async update(
+  //   id: number,
+  //   updateJob: IUpdate<
+  //     UpdateJobDto &
+  //       Partial<
+  //         Pick<Job, 'jobCategory' | 'jobPosition' | 'jobField' | 'workType'> & {
+  //           placements: Placement[];
+  //         }
+  //       >
+  //   >,
+  // ) {
+  //   try {
+  //     const { updateBy, variable } = updateJob;
+
+  //     await this.dataSource.transaction(async (transactionalEntityManager) => {
+  //       const newVariables = filterUndefinedValues<Job>({
+  //         salaryMin: variable.salaryMin,
+  //         salaryMax: variable.salaryMax,
+  //         quantity: variable.quantity,
+  //         description: variable.description,
+  //         requirements: variable.requirements,
+  //         benefits: variable.benefits,
+  //         jobField: variable.jobField,
+  //         jobCategory: variable.jobCategory,
+  //         workType: variable.workType,
+  //         jobPosition: variable.jobPosition,
+  //         updateBy,
+  //         updateAt: new Date().toString(),
+  //         status: variable.status,
+  //       });
+
+  //       await transactionalEntityManager.update(Job, id, newVariables);
+
+  //       if ((variable?.placementIds ?? []).length > 0) {
+  //         const currentJob = await this.findById(id);
+
+  //         await transactionalEntityManager.delete(JobsPlacement, {
+  //           jobsId: currentJob.id,
+  //         });
+
+  //         await Promise.all(
+  //           variable.placements.map(async (placement) => {
+  //             await transactionalEntityManager.save(
+  //               JobsPlacement,
+  //               this.jobPlacementRepository.create({
+  //                 job: currentJob,
+  //                 jobsId: id,
+  //                 placement: placement,
+  //                 placementsId: placement.id,
+  //                 createAt: new Date().toString(),
+  //                 createBy: updateBy,
+  //               }),
+  //             );
+  //           }),
+  //         );
+  //       }
+  //     });
+  //     return { isSuccess: true, message: '' };
+  //   } catch (error) {
+  //     return { isSuccess: true, message: error };
+  //   }
+  // }
 }

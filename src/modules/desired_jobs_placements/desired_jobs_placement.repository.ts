@@ -94,7 +94,7 @@ export class DesiredJobsPlacementRepository {
   ) {
     const { variable: variables, transactionalEntityManager } =
       removeDesiredJobsPlacementDto;
-
+      
     return await Promise.all(
       variables.map((variable) =>
         this.remove({ variable, transactionalEntityManager }),

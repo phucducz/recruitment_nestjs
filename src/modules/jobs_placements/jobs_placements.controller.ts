@@ -1,14 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
-  Post,
+  Patch
 } from '@nestjs/common';
 
-import { CreateJobsPlacementDto } from 'src/dto/jobs_placement/create-jobs_placement.dto';
 import { UpdateJobsPlacementDto } from 'src/dto/jobs_placement/update-jobs_placement.dto';
 import { JobsPlacementsService } from '../../services/jobs_placements.service';
 
@@ -16,10 +13,10 @@ import { JobsPlacementsService } from '../../services/jobs_placements.service';
 export class JobsPlacementsController {
   constructor(private readonly jobsPlacementsService: JobsPlacementsService) {}
 
-  @Post()
-  create(@Body() createJobsPlacementDto: CreateJobsPlacementDto) {
-    return this.jobsPlacementsService.create(createJobsPlacementDto);
-  }
+  // @Post()
+  // create(@Body() createJobsPlacementDto: CreateJobsPlacementDto) {
+  //   return this.jobsPlacementsService.create(createJobsPlacementDto);
+  // }
 
   @Get()
   findAll() {
@@ -39,8 +36,8 @@ export class JobsPlacementsController {
     return this.jobsPlacementsService.update(+id, updateJobsPlacementDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobsPlacementsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.jobsPlacementsService.remove(+id);
+  // }
 }
