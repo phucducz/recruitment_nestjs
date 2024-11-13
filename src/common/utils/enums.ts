@@ -29,3 +29,8 @@ export enum START_AFTER_OFFER_DESIRED_JOB {
   AFTERONEORTWOWEEK = '1-2 tuần',
   NOTIFYLATER = 'Sẽ thông báo khi có offer',
 }
+
+export enum APPLICANT_SOURCES {
+  ADDED_BY_EMPLOYEE = 'Thêm bởi thành viên',
+  APPLY = 'Ứng tuyển',
+}
