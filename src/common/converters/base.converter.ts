@@ -11,7 +11,9 @@ export class BaseConverter {
         const newKey = key.replace(/_([a-z])/g, (_: any, letter: string) =>
           letter.toUpperCase(),
         ) as CamelCase<typeof key>;
+
         (acc as Record<string, any>)[newKey] = obj[key];
+
         return acc;
       },
       {} as { [K in keyof T as CamelCase<K & string>]: T[K] },
