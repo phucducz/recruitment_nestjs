@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { ROLES } from 'src/common/utils/enums';
+import { APPLICANT_SOURCES, ROLES } from 'src/common/utils/enums';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { UsersJob } from 'src/entities/users_job.entity';
@@ -55,6 +55,16 @@ export class UsersJobsService {
   }
 
   async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
+    if (
+      findApplicantsForJob.source &&
+      !Object.values(APPLICANT_SOURCES).includes(
+        findApplicantsForJob.source as APPLICANT_SOURCES,
+      )
+    )
+      throw new Error(
+        `Nguồn không hợp lệ. Giá trị phải là một trong "${Object.values(APPLICANT_SOURCES).join(', ')}"`,
+      );
+
     return await this.usersJobRepository.findApplicantsForJob(
       findApplicantsForJob,
     );

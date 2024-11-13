@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, Raw, Repository } from 'typeorm';
 
 import {
   CVSelectColumns,
@@ -9,6 +9,7 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
+import { APPLICANT_SOURCES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
@@ -73,11 +74,26 @@ export class UsersJobRepository {
   }
 
   async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
-    const { usersId, page, pageSize } = findApplicantsForJob;
+    const { usersId, page, pageSize, applicantName, source } =
+      findApplicantsForJob;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.usersJobRepository.findAndCount({
-      where: { job: { user: usersId } as FindOptionsWhere<Job> },
+      where: {
+        job: { user: usersId } as FindOptionsWhere<Job>,
+        ...(applicantName && {
+          user: {
+            fullName: Raw((value) => `${value} ILIKE '%${applicantName}%'`),
+          },
+        }),
+        ...(source && {
+          referrerId: Raw((value) =>
+            source === APPLICANT_SOURCES.ADDED_BY_EMPLOYEE
+              ? `${value} IS NOT NULL`
+              : `${value} IS NULL`,
+          ),
+        }),
+      },
       relations: ['job', 'user', 'applicationStatus'],
       select: {
         user: { fullName: true, id: true },
