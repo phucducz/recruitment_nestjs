@@ -16,6 +16,7 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
+import { JOB_STATUS } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -47,6 +48,12 @@ export class JobsRepository {
     return {
       relations: jobRelations.entites,
       select: {
+        ...filterColumns(ENTITIES.FIELDS.JOB, [
+          'updateBy',
+          'createBy',
+          'deleteAt',
+          'deleteBy',
+        ]),
         ...jobSelectRelationColumns,
         jobsPlacements: {
           ...jobSelectRelationColumns.jobsPlacements,
@@ -77,6 +84,7 @@ export class JobsRepository {
     return await this.jobRepository.findAndCount({
       ...paginationParams,
       where: {
+        status: JOB_STATUS.ACTIVE,
         ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
         ...(salaryMin && {
           salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),
@@ -97,8 +105,9 @@ export class JobsRepository {
         ...this.generateJobRelationships().select,
         ...jobSelectColumns,
         createBy: false,
-        updateAt: false,
         updateBy: false,
+        deleteAt: false,
+        deleteBy: false,
       },
       order: { createAt: 'DESC' },
     });
@@ -115,6 +124,7 @@ export class JobsRepository {
     const queryBuilder = this.jobRepository
       .createQueryBuilder('job')
       .select([
+        'job.id as id',
         'job.title as job_title',
         'job.createAt as job_create_at',
         'job.updateAt as job_update_at',
@@ -136,8 +146,9 @@ export class JobsRepository {
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
       .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
       .where('job.users_id = :usersId', { usersId })
+      .andWhere('job.status = :status', { status: JOB_STATUS.ACTIVE })
       .groupBy(
-        'job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
+        'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
       );
 
     if (jobsQueries.applicationStatusId)
@@ -163,7 +174,7 @@ export class JobsRepository {
 
   async findById(id: number) {
     return await this.jobRepository.findOne({
-      where: { id: id },
+      where: { id: id, status: JOB_STATUS.ACTIVE },
       ...this.generateJobRelationships(),
     });
   }
@@ -235,8 +246,7 @@ export class JobsRepository {
   async update(
     id: number,
     updateJob: IUpdate<
-      UpdateJobDto &
-        Partial<
+      UpdateJobDto & { deleteAt?: string; deleteBy?: number } & Partial<
           Pick<Job, 'jobCategory' | 'jobPosition' | 'jobField' | 'workType'> & {
             placements: Placement[];
           }
@@ -257,9 +267,11 @@ export class JobsRepository {
       ...(variable.workType && { workType: variable.workType }),
       ...(variable.jobPosition && { jobPosition: variable.jobPosition }),
       ...(variable.status && { status: variable.status }),
+      ...(typeof variable.deleteAt !== 'undefined' && { deleteAt: null }),
+      ...(typeof variable.deleteBy !== 'undefined' && { deleteBy: null }),
       updateBy,
       updateAt: new Date().toString(),
-    };
+    } as Job;
 
     if (transactionalEntityManager) {
       const result = await (transactionalEntityManager as EntityManager).update(
@@ -274,66 +286,27 @@ export class JobsRepository {
     return (await this.jobRepository.update(id, variables)).affected > 0;
   }
 
-  // async update(
-  //   id: number,
-  //   updateJob: IUpdate<
-  //     UpdateJobDto &
-  //       Partial<
-  //         Pick<Job, 'jobCategory' | 'jobPosition' | 'jobField' | 'workType'> & {
-  //           placements: Placement[];
-  //         }
-  //       >
-  //   >,
-  // ) {
-  //   try {
-  //     const { updateBy, variable } = updateJob;
+  async delete(deleteJobDto: ISoftDelete<{ id: number }>) {
+    const { variable, transactionalEntityManager, deleteBy } = deleteJobDto;
 
-  //     await this.dataSource.transaction(async (transactionalEntityManager) => {
-  //       const newVariables = filterUndefinedValues<Job>({
-  //         salaryMin: variable.salaryMin,
-  //         salaryMax: variable.salaryMax,
-  //         quantity: variable.quantity,
-  //         description: variable.description,
-  //         requirements: variable.requirements,
-  //         benefits: variable.benefits,
-  //         jobField: variable.jobField,
-  //         jobCategory: variable.jobCategory,
-  //         workType: variable.workType,
-  //         jobPosition: variable.jobPosition,
-  //         updateBy,
-  //         updateAt: new Date().toString(),
-  //         status: variable.status,
-  //       });
+    const updateParams = {
+      deleteAt: new Date().toString(),
+      deleteBy,
+      status: JOB_STATUS.DELETED,
+    };
 
-  //       await transactionalEntityManager.update(Job, id, newVariables);
+    if (transactionalEntityManager) {
+      const result = await (transactionalEntityManager as EntityManager).update(
+        Job,
+        variable.id,
+        updateParams,
+      );
 
-  //       if ((variable?.placementIds ?? []).length > 0) {
-  //         const currentJob = await this.findById(id);
+      return result.affected > 0;
+    }
 
-  //         await transactionalEntityManager.delete(JobsPlacement, {
-  //           jobsId: currentJob.id,
-  //         });
-
-  //         await Promise.all(
-  //           variable.placements.map(async (placement) => {
-  //             await transactionalEntityManager.save(
-  //               JobsPlacement,
-  //               this.jobPlacementRepository.create({
-  //                 job: currentJob,
-  //                 jobsId: id,
-  //                 placement: placement,
-  //                 placementsId: placement.id,
-  //                 createAt: new Date().toString(),
-  //                 createBy: updateBy,
-  //               }),
-  //             );
-  //           }),
-  //         );
-  //       }
-  //     });
-  //     return { isSuccess: true, message: '' };
-  //   } catch (error) {
-  //     return { isSuccess: true, message: error };
-  //   }
-  // }
+    return (
+      (await this.jobRepository.update(variable.id, updateParams)).affected > 0
+    );
+  }
 }

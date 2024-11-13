@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
+import { JOB_STATUS } from 'src/common/utils/enums';
 import { BaseEntity } from 'src/entities/base.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -43,6 +44,18 @@ export class Job extends BaseEntity {
   @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
   applicationDeadline: Timestamp;
 
+  @Field()
+  @Column({ type: 'int', nullable: true, name: 'delete_by' })
+  deleteBy: number;
+
+  @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'delete_at',
+  })
+  deleteAt: Timestamp | string;
+
   @Column({
     type: 'varchar',
     length: 3,
@@ -69,7 +82,7 @@ export class Job extends BaseEntity {
   quantity: number;
 
   @Field()
-  @Column({ type: 'varchar', default: 'Đang tuyển' })
+  @Column({ type: 'varchar', enum: JOB_STATUS, default: JOB_STATUS.ACTIVE })
   status: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)

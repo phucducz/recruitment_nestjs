@@ -16,3 +16,9 @@ export enum ROLES {
   ADMIN = 'admin',
   EMPLOYER = 'employer',
 }
+
+export enum JOB_STATUS {
+  ACTIVE = 'Đang tuyển',
+  INACTIVE = 'Ngừng đăng tin',
+  DELETED = 'Đã xóa',
+}

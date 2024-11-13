@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { JOB_STATUS } from 'src/common/utils/enums';
 import { getItemsDiff } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -73,8 +74,22 @@ export class JobsService {
     return await this.jobRepository.findById(id);
   }
 
-  async update(id: number, updateJobDto: IUpdate<UpdateJobDto>) {
+  async update(
+    id: number,
+    updateJobDto: IUpdate<
+      UpdateJobDto & { deleteAt?: string; deleteBy?: number }
+    >,
+  ) {
     const { variable, updateBy } = updateJobDto;
+
+    if (
+      variable.status &&
+      !Object.values(JOB_STATUS).includes(variable.status as JOB_STATUS)
+    ) {
+      throw new Error(
+        `Trạng thái không hợp lệ. Trạng thái phải là một trong "${Object.values(JOB_STATUS).join(', ')}"`,
+      );
+    }
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
@@ -126,35 +141,7 @@ export class JobsService {
     );
   }
 
-  // async update(id: number, updateJobDto: IUpdate<UpdateJobDto>) {
-  //   const { variable } = updateJobDto;
-
-  //   return await this.jobRepository.update(id, {
-  //     ...updateJobDto,
-  //     variable: {
-  //       ...variable,
-  //       jobCategory: !variable.categoriesId
-  //         ? undefined
-  //         : await this.jobCategoryService.findById(variable.categoriesId),
-  //       jobPosition: !variable.positionsId
-  //         ? undefined
-  //         : await this.jobPositionService.findById(variable.positionsId),
-  //       jobField: !variable.fieldsId
-  //         ? undefined
-  //         : await this.jobFieldService.findById(variable.fieldsId),
-  //       workType: !variable.workTypesId
-  //         ? undefined
-  //         : await this.workTypeService.findById(variable.workTypesId),
-  //       placements: await Promise.all(
-  //         (variable?.placementIds ?? []).map(async (placement) => {
-  //           return await this.placementService.findById(placement);
-  //         }),
-  //       ),
-  //     },
-  //   });
-  // }
-
-  remove(id: number) {
-    return `This action removes a #${id} job`;
+  async remove(deleteJobDto: ISoftDelete<{ id: number }>) {
+    return await this.jobRepository.delete(deleteJobDto);
   }
 }

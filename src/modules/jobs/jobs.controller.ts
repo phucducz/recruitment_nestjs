@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { JOB_STATUS } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -118,9 +120,10 @@ export class JobsController {
       });
 
       if (!result)
-        return res
-          .status(401)
-          .json({ message: 'Cập nhật công việc thành công!', statusCode: 401 });
+        return res.status(401).json({
+          message: 'Cập nhật công việc không thành công!',
+          statusCode: 401,
+        });
 
       return res
         .status(200)
@@ -137,8 +140,63 @@ export class JobsController {
   //   return this.jobsService.update(+id, updateJobDto);
   // }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.jobsService.remove(+id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async remove(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.jobsService.remove({
+        deleteBy: request.user.userId,
+        variable: { id: +id },
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xóa công việc không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ message: 'Xóa công việc thành công!', statusCode: 200 });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Xóa công việc không thành công. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/restore/:id')
+  async restore(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.jobsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: { status: JOB_STATUS.ACTIVE, deleteAt: null, deleteBy: null },
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Khôi phục công việc không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ message: 'Khôi phục công việc thành công!', statusCode: 200 });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Khôi phục việc không thành công. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
+    }
+  }
 }

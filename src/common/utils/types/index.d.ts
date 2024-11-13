@@ -32,6 +32,10 @@ interface IDelete<T> {
   transactionalEntityManager?: EntityManager;
 }
 
+interface ISoftDelete<T> extends IDelete<T> {
+  deleteBy: number;
+}
+
 interface IDeleteMany<T> {
   variables: T[];
   transactionalEntityManager?: EntityManager;

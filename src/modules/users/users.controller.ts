@@ -20,7 +20,8 @@ import { Response } from 'express';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
-import { CloudinaryService } from 'src/services/cloudinary.service';
+import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
+import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
@@ -34,7 +35,6 @@ export class UsersController {
     private readonly authService: AuthService,
     @Inject(ResetPasswordService)
     private readonly resetPasswordService: ResetPasswordService,
-    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   // @Post()
@@ -171,7 +171,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
     @UploadedFile() file: Express.Multer.File,
-    @Body() updateAccountInfoDto: any,
+    @Body() updateAccountInfoDto: UpdateAccountInfoDto,
     @Res() res: Response,
     @Request() request: any,
   ) {
@@ -239,10 +239,12 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file'))
   async updatePersonalInfo(
     @UploadedFile('file') file: Express.Multer.File,
-    @Body() updatePersonalInfoDto: any,
+    @Body() updatePersonalInfoDto: UpdatePersonalInfoDto,
     @Res() res: Response,
     @Request() request: any,
   ) {
+    console.log(updatePersonalInfoDto);
+
     try {
       const result = await this.usersService.updatePersonalInfo({
         updateBy: request.user.userId,
