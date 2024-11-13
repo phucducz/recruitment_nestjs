@@ -22,3 +22,10 @@ export enum JOB_STATUS {
   INACTIVE = 'Ngừng đăng tin',
   DELETED = 'Đã xóa',
 }
+
+export enum START_AFTER_OFFER_DESIRED_JOB {
+  AFTERTHRIDTYDAYS = 'Sau 30 ngày',
+  NOW = 'Bắt đầu ngay',
+  AFTERONEORTWOWEEK = '1-2 tuần',
+  NOTIFYLATER = 'Sẽ thông báo khi có offer',
+}

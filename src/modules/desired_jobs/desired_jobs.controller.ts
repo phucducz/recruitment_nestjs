@@ -55,7 +55,7 @@ export class DesiredJobsController {
     }
   }
 
-  @Get()
+  @Get('/all')
   async findAll(
     @Query() desiredJobsQueries: IFindDesiredJobsQueries,
     @Res() res: Response,
@@ -80,9 +80,30 @@ export class DesiredJobsController {
     }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.desiredJobsService.findById(+id);
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async findOne(@Request() request: any, @Res() res: Response) {
+    try {
+      const result = await this.desiredJobsService.findOneBy({
+        where: { user: { id: request.user.userId } },
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Lấy thông tin công việc mong muốn thất bại!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Lấy thông tin công việc mong muốn thất bại. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
+    }
   }
 
   @UseGuards(JwtAuthGuard)

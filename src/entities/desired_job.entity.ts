@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
+import { START_AFTER_OFFER_DESIRED_JOB } from 'src/common/utils/enums';
 import { BaseEntity } from './base.entity';
 import { DesiredJobsPlacement } from './desired_jobs_placement.entity';
 import { DesiredJobsPosition } from './desired_jobs_position.entity';
@@ -21,7 +22,12 @@ export class DesiredJob extends BaseEntity {
   salarayExpectation: number;
 
   @Field()
-  @Column({ type: 'varchar', name: 'start_after_offer' })
+  @Column({
+    type: 'varchar',
+    name: 'start_after_offer',
+    enum: START_AFTER_OFFER_DESIRED_JOB,
+    default: START_AFTER_OFFER_DESIRED_JOB.NOW,
+  })
   startAfterOffer: string;
 
   @Field()

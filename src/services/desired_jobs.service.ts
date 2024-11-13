@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DataSource, FindOneOptions } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { START_AFTER_OFFER_DESIRED_JOB } from 'src/common/utils/enums';
 import { filterColumns, getItemsDiff } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
@@ -44,8 +45,24 @@ export class DesiredJobsService {
     @Inject(SkillsService) private readonly skillService: SkillsService,
   ) {}
 
+  checkValidStartAfterOfferField(startAfterOffer: string) {
+    if (
+      startAfterOffer &&
+      !Object.values(START_AFTER_OFFER_DESIRED_JOB).includes(
+        startAfterOffer as START_AFTER_OFFER_DESIRED_JOB,
+      )
+    )
+      throw new Error(
+        `Thời gian bắt đầu làm việc không hợp lệ. Giá trị phải là một trong "${Object.values(START_AFTER_OFFER_DESIRED_JOB).join(', ')}"`,
+      );
+
+    return true;
+  }
+
   async create(createDesiredJobDto: ICreate<CreateDesiredJobDto>) {
     const { createBy, variable } = createDesiredJobDto;
+
+    this.checkValidStartAfterOfferField(variable.startAfterOffer);
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
@@ -190,13 +207,13 @@ export class DesiredJobsService {
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
     const { updateBy, variable } = updateDesiredJobDto;
 
+    this.checkValidStartAfterOfferField(variable.startAfterOffer);
+
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
         const desiredJob = await this.desiredJobRepository.findById(id);
 
         if ((variable?.jobPositionIds ?? []).length > 0) {
-          console.log('updating positions');
-
           const {
             itemsToAdd: desiredJobPositionToAdd,
             itemsToRemove: desiredJobPositionToRemove,
@@ -236,8 +253,6 @@ export class DesiredJobsService {
         }
 
         if ((variable?.jobPlacementIds ?? []).length > 0) {
-          console.log('updating placements');
-
           const {
             itemsToAdd: desiredJobsPlacementToAdd,
             itemsToRemove: desiredJobsPlacementToRemove,
