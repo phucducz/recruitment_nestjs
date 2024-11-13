@@ -7,7 +7,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Request,
   Res,
   UseGuards,
@@ -56,34 +55,51 @@ export class AchivementsController {
     }
   }
 
-  @Get('all')
+  @Get('/all')
   findAll() {
     return this.achivementsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async findById(
-    @Query() achivementQueries: IFindAchivementQueries,
-    @Res() res: Response,
-  ) {
+  async findOne(@Request() request: any, @Res() res: Response) {
     try {
-      const result = await this.achivementsService.findById(
-        +achivementQueries.id,
-      );
+      const result = await this.achivementsService.findOne(request.user.userId);
 
-      if (!result)
-        return res.status(401).json({
-          message: 'Lấy thành tựu không thành công!',
-          statusCode: 401,
-        });
-
-      return res.status(200).json({ statusCode: 200, ...result });
+      return res.status(200).json({ statusCode: 200, result: result });
     } catch (error) {
       return res
         .status(500)
-        .json({ message: error?.message ?? error, statusCode: 500 });
+        .json({
+          message: `Lấy thành tựu thất bại ${error?.message ?? error}`,
+          statusCode: 500,
+        });
     }
   }
+
+  // @Get()
+  // async findById(
+  //   @Query() achivementQueries: IFindAchivementQueries,
+  //   @Res() res: Response,
+  // ) {
+  //   try {
+  //     const result = await this.achivementsService.findById(
+  //       +achivementQueries.id,
+  //     );
+
+  //     if (!result)
+  //       return res.status(401).json({
+  //         message: 'Lấy thành tựu không thành công!',
+  //         statusCode: 401,
+  //       });
+
+  //     return res.status(200).json({ statusCode: 200, ...result });
+  //   } catch (error) {
+  //     return res
+  //       .status(500)
+  //       .json({ message: error?.message ?? error, statusCode: 500 });
+  //   }
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
