@@ -69,3 +69,8 @@ interface IFIndJobsForEmployerQueries extends BaseQueries {
   title?: string;
   applicationStatusId?: string;
 }
+
+interface IFindApplicantDetailQueries {
+  usersId: string;
+  jobsId: string;
+}

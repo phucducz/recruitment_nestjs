@@ -1,10 +1,18 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { ApplicationStatus } from './application_status.entity';
 import { BaseEntityNotId } from './base.entity';
 import { CurriculumVitae } from './curriculum_vitae';
 import { Job } from './job.entity';
+import { Schedule } from './schedule.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_jobs' })
@@ -67,4 +75,7 @@ export class UsersJob extends BaseEntityNotId {
   )
   @JoinColumn({ name: 'application_status_id', referencedColumnName: 'id' })
   applicationStatus: ApplicationStatus;
+
+  @OneToMany(() => Schedule, (schedule) => schedule.usersJob)
+  schedules: Schedule[];
 }

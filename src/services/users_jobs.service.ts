@@ -70,12 +70,30 @@ export class UsersJobsService {
     );
   }
 
+  async findApplicantDetail(
+    findApplicantDetailQueries: IFindApplicantDetailQueries,
+  ) {
+    if (
+      !findApplicantDetailQueries.usersId ||
+      !findApplicantDetailQueries.jobsId
+    )
+      throw new Error('jobsId và usersId là bắt buộc!');
+
+    return await this.usersJobRepository.findApplicantDetail(
+      findApplicantDetailQueries,
+    );
+  }
+
   findAll() {
     return `This action returns all usersJobs`;
   }
 
   findOne(id: number) {
     return `This action returns a #${id} usersJob`;
+  }
+
+  async findByCompositePrKey(params: { usersId: number; jobsId: number }) {
+    return await this.usersJobRepository.findByCompositePrKey(params);
   }
 
   async update(updateUsersJobDto: IUpdate<UpdateUsersJobDto>) {

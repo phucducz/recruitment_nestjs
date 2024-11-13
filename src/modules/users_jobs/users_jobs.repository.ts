@@ -80,7 +80,7 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: {
-        job: { user: usersId } as FindOptionsWhere<Job>,
+        job: { user: { id: usersId } } as FindOptionsWhere<Job>,
         ...(applicantName && {
           user: {
             fullName: Raw((value) => `${value} ILIKE '%${applicantName}%'`),
@@ -94,7 +94,7 @@ export class UsersJobRepository {
           ),
         }),
       },
-      relations: ['job', 'user', 'applicationStatus'],
+      relations: ['job', 'user', 'applicationStatus', 'job.user'],
       select: {
         user: { fullName: true, id: true },
         job: { title: true, id: true },
@@ -106,6 +106,43 @@ export class UsersJobRepository {
         ),
       },
       ...paginationParams,
+    });
+  }
+
+  async findApplicantDetail(
+    findApplicantDetailQueries: IFindApplicantDetailQueries,
+  ) {
+    return await this.usersJobRepository.findOne({
+      where: {
+        usersId: +findApplicantDetailQueries.usersId,
+        jobsId: +findApplicantDetailQueries.jobsId,
+      },
+      relations: ['job', 'applicationStatus', 'curriculumVitae', 'schedules'],
+      select: {
+        createAt: true,
+        updateAt: true,
+        ...this.generateUsersJobSelect([
+          'cvViewedAt',
+          'referrerId',
+          'employerUpdateBy',
+        ]),
+        job: { title: true, id: true },
+        curriculumVitae: filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
+          ...removeColumns,
+          'isDeleted',
+        ]),
+        applicationStatus: filterColumns(
+          ENTITIES.FIELDS.APPLICATION_STATUS,
+          removeColumns,
+        ),
+        schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
+      },
+    });
+  }
+
+  async findByCompositePrKey(params: { usersId: number; jobsId: number }) {
+    return await this.usersJobRepository.findOne({
+      where: { usersId: params.usersId, jobsId: params.jobsId },
     });
   }
 

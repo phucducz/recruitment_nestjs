@@ -14,6 +14,7 @@ import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { Placement } from 'src/entities/placement.entity';
 import { Role } from 'src/entities/role.entity';
+import { Schedule } from 'src/entities/schedule.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
@@ -68,6 +69,7 @@ export const ENTITIES = {
     DESIRED_JOB: getEntityFields(DesiredJob),
     DESIRED_JOBS_PLACEMENT: getEntityFields(DesiredJobsPlacement),
     APPLICATION_STATUS: getEntityFields(ApplicationStatus),
+    SCHEDULE: getEntityFields(Schedule),
   },
 };
 
