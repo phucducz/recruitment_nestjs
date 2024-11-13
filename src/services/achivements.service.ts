@@ -33,6 +33,12 @@ export class AchivementsService {
     return await this.achivementRepository.findById(id);
   }
 
+  async findOne(userId: number) {
+    return await this.achivementRepository.findOne({
+      where: { user: { id: userId } },
+    });
+  }
+
   async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {
     return await this.achivementRepository.update(id, updateAchivementDto);
   }
