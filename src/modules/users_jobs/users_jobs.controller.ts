@@ -182,6 +182,24 @@ export class UsersJobsController {
     }
   }
 
+  @Get('applicants/detail')
+  async findApplicantDetail(
+    @Query() findApplicantDetailQueries: IFindApplicantDetailQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.usersJobsService.findApplicantDetail(
+        findApplicantDetailQueries,
+      );
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ statusCode: 500, message: `Lỗi. ${error?.message ?? error}` });
+    }
+  }
+
   @Get()
   findAll() {
     return this.usersJobsService.findAll();

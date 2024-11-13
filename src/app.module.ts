@@ -32,6 +32,7 @@ import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 import { ResetPasswordModule } from './modules/reset_password/reset_password.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { SchedulesModule } from './modules/schedules/schedules.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { UsersModule } from './modules/users/users.module';
 import { UsersForeignLanguagesModule } from './modules/users_foreign_languages/users_foreign_languages.module';
@@ -98,6 +99,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     DesiredJobsPlacementsModule,
     DesiredJobsPositionsModule,
     ApplicationStatusModule,
+    SchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
