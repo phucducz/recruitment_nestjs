@@ -48,12 +48,7 @@ export class JobsRepository {
     return {
       relations: jobRelations.entites,
       select: {
-        ...filterColumns(ENTITIES.FIELDS.JOB, [
-          'updateBy',
-          'createBy',
-          'deleteAt',
-          'deleteBy',
-        ]),
+        ...filterColumns(ENTITIES.FIELDS.JOB, removeColumns),
         ...jobSelectRelationColumns,
         jobsPlacements: {
           ...jobSelectRelationColumns.jobsPlacements,

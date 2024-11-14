@@ -104,10 +104,6 @@ export const jobRelations = {
 };
 
 export const jobSelectColumns = filterColumns(ENTITIES.FIELDS.JOB, [
-  'salaryMin',
-  'salaryMax',
-  'salaryMin',
-  'salaryMax',
   'maxExpYearRequired',
   'minExpYearRequired',
   'applicationDeadline',
