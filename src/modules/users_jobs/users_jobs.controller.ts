@@ -66,7 +66,7 @@ export class UsersJobsController {
   @UseInterceptors(FileInterceptor('file'))
   async applyForAJob(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createUsersJobDto: any,
+    @Body() createUsersJobDto: CreateUsersJobDto,
     @Res() res: Response,
     @Request() request: any,
   ) {

@@ -146,7 +146,7 @@ export class JobsRepository {
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
       .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('job.status = :status', { status: JOB_STATUS.ACTIVE })
+      .andWhere('job.status <> :status', { status: JOB_STATUS.DELETED })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
       );
