@@ -241,6 +241,26 @@ export class UsersJobsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('applicants/monthly-statistic')
+  async getMonthlyCandidateStatisticsByYear(
+    @Query() queries: { year: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const result =
+        await this.usersJobsService.getMonthlyCandidateStatisticsByYear(
+          queries.year,
+        );
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ statusCode: 500, message: error?.message ?? error });
+    }
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersJobsService.remove(+id);
