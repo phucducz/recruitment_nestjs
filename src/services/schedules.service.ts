@@ -21,10 +21,13 @@ export class SchedulesService {
       ...createScheduleDto,
       variable: {
         ...variable,
-        usersJob: await this.usersJobService.findByCompositePrKey({
-          usersId: variable.usersId,
-          jobsId: variable.jobsId,
-        }),
+        ...(variable.usersId &&
+          variable.jobsId && {
+            usersJob: await this.usersJobService.findByCompositePrKey({
+              usersId: variable.usersId,
+              jobsId: variable.jobsId,
+            }),
+          }),
       },
     });
   }

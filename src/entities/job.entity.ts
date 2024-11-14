@@ -13,6 +13,7 @@ import { BaseEntity } from 'src/entities/base.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
+import { JobRecomendation } from './job_recomendation.entity';
 import { JobsPlacement } from './jobs_placement.entity';
 import { User } from './user.entity';
 import { UsersJob } from './users_job.entity';
@@ -110,4 +111,7 @@ export class Job extends BaseEntity {
   @ManyToOne(() => WorkType, (workType) => workType.jobs)
   @JoinColumn({ name: 'work_types_id', referencedColumnName: 'id' })
   workType: WorkType;
+
+  @OneToMany(() => JobRecomendation, (jobRecomendation) => jobRecomendation.job)
+  jobRecomendations: JobRecomendation[];
 }

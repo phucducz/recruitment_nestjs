@@ -10,10 +10,10 @@ export class CreateScheduleDto {
   note: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   usersId: number;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   jobsId: number;
 }

@@ -23,6 +23,7 @@ import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_lang
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
 import { JobPositionsModule } from './modules/job_positions/job_positions.module';
+import { JobRecomendationsModule } from './modules/job_recomendations/job_recomendations.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
 import { MailModule } from './modules/mail/mail.module';
@@ -100,6 +101,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     DesiredJobsPositionsModule,
     ApplicationStatusModule,
     SchedulesModule,
+    JobRecomendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
