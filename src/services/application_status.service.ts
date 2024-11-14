@@ -23,6 +23,12 @@ export class ApplicationStatusService {
     return await this.applicationStatusRepository.findById(id);
   }
 
+  async findByTitle(
+    title: 'Đang đánh giá' | 'Đang phỏng vấn' | 'Đang tuyển' | 'Đang offer',
+  ) {
+    return await this.applicationStatusRepository.findByTitle(title);
+  }
+
   update(id: number, updateApplicationStatusDto: UpdateApplicationStatusDto) {
     return `This action updates a #${id} applicationStatus`;
   }

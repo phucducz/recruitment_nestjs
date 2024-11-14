@@ -13,7 +13,6 @@ import { APPLICANT_SOURCES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
-import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { Job } from 'src/entities/job.entity';
 import { UsersJob } from 'src/entities/users_job.entity';
 
@@ -30,7 +29,8 @@ export class UsersJobRepository {
 
   async create(
     createUsersJobDto: ICreate<
-      CreateUsersJobDto & { curriculumVitae: CurriculumVitae }
+      CreateUsersJobDto &
+        Pick<UsersJob, 'curriculumVitae' | 'applicationStatus'>
     >,
   ) {
     const { createBy, variable } = createUsersJobDto;
@@ -38,9 +38,10 @@ export class UsersJobRepository {
     return (await this.usersJobRepository.save({
       createAt: new Date().toString(),
       createBy,
-      jobsId: variable.jobsId,
+      jobsId: +variable.jobsId,
       usersId: createBy,
       curriculumVitae: variable.curriculumVitae,
+      applicationStatus: variable.applicationStatus,
     })) as UsersJob;
   }
 
@@ -74,7 +75,7 @@ export class UsersJobRepository {
   }
 
   async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
-    const { usersId, page, pageSize, applicantName, source } =
+    const { usersId, page, pageSize, applicantName, source, jobsId } =
       findApplicantsForJob;
     const paginationParams = getPaginationParams({ page, pageSize });
 
@@ -93,6 +94,7 @@ export class UsersJobRepository {
               : `${value} IS NULL`,
           ),
         }),
+        ...(jobsId && { jobsId: +jobsId }),
       },
       relations: ['job', 'user', 'applicationStatus', 'job.user'],
       select: {

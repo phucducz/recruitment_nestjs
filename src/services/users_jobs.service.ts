@@ -33,14 +33,20 @@ export class UsersJobsService {
   async aplly(createUsersJobDto: ICreate<CreateUsersJobDto>) {
     const { variable } = createUsersJobDto;
     const cv = await this.curriculumVitaesService.findById(
-      variable.curriculumVitaesId,
+      +variable.curriculumVitaesId,
     );
+    const applicationStatus =
+      await this.applicationStatusService.findByTitle('Đang đánh giá');
 
     if (!cv) throw new BadRequestException('Hãy cung cấp CV để ứng tuyển!');
 
     return await this.usersJobRepository.create({
       ...createUsersJobDto,
-      variable: { ...variable, curriculumVitae: cv },
+      variable: {
+        ...variable,
+        curriculumVitae: cv,
+        applicationStatus: applicationStatus,
+      },
     });
   }
 

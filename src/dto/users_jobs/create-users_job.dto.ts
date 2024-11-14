@@ -1,13 +1,13 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional } from 'class-validator';
 
 export class CreateUsersJobDto {
   @IsOptional()
-  @IsNumber()
-  jobsId?: number;
+  @IsNumberString()
+  jobsId?: number | string;
 
   @IsOptional()
-  @IsNumber()
-  curriculumVitaesId?: number;
+  @IsNumberString()
+  curriculumVitaesId?: number | string;
 
   @IsOptional()
   cvFile?: Express.Multer.File;

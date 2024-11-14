@@ -79,7 +79,7 @@ export class UsersJobsController {
       const createBy = request.user.userId;
 
       const isApplied = await this.usersJobsService.isApplied({
-        jobsId: data.jobsId,
+        jobsId: +data.jobsId,
         usersId: createBy,
       });
 
