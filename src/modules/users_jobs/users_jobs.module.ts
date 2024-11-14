@@ -7,6 +7,7 @@ import { ApplicationStatusModule } from '../application_status/application_statu
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { CurriculumVitaesModule } from '../curriculum_vitaes/curriculum_vitaes.module';
+import { JobRecomendationsModule } from '../job_recomendations/job_recomendations.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsersModule } from '../users/users.module';
@@ -22,6 +23,7 @@ import { UsersJobRepository } from './users_jobs.repository';
     ApplicationStatusModule,
     RolesModule,
     UsersModule,
+    JobRecomendationsModule,
     forwardRef(() => CurriculumVitaesModule),
   ],
   controllers: [UsersJobsController],

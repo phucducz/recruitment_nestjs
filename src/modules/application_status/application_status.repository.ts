@@ -31,4 +31,8 @@ export class ApplicationStatusRepository {
   async findById(id: number) {
     return await this.applicationStatusRepository.findOneBy({ id });
   }
+
+  async findByTitle(title: string) {
+    return await this.applicationStatusRepository.findOneBy({ title });
+  }
 }

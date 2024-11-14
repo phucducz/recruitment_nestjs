@@ -18,10 +18,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
+import { CreateJobRecommendationDto } from 'src/dto/job_recomendations/create-job_recomendation.dto';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
+import { JobRecommendationsService } from 'src/services/job_recomendations.service';
 import { UsersJobsService } from '../../services/users_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -31,6 +33,7 @@ export class UsersJobsController {
     private readonly usersJobsService: UsersJobsService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly curriculumVitaesService: CurriculumVitaesService,
+    private readonly jobRecomendationsService: JobRecommendationsService,
   ) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -126,6 +129,41 @@ export class UsersJobsController {
       return res
         .status(500)
         .json({ message: error?.message ?? error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/recommendation-candidate')
+  @UseInterceptors(FileInterceptor('file'))
+  async recomendationCandidate(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createJobRecomendationDto: CreateJobRecommendationDto,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      if (!file) throw new Error('Vui lòng cung cấp CV của ứng viên');
+
+      const result = await this.jobRecomendationsService.create({
+        createBy: request.user.userId,
+        variable: { ...createJobRecomendationDto, file },
+      });
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Thêm ứng viên không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Thêm ứng viên thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Thêm ứng viên không thành công. ${error?.message ?? error}!`,
+      });
     }
   }
 

@@ -1,27 +1,13 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
+import { UpdateJobRecommendationDto } from 'src/dto/job_recomendations/update-job_recomendation.dto';
 
-import { CreateJobRecomendationDto } from 'src/dto/job_recomendations/create-job_recomendation.dto';
-import { UpdateJobRecomendationDto } from 'src/dto/job_recomendations/update-job_recomendation.dto';
-import { JobRecomendationsService } from 'src/services/job_recomendations.service';
+import { JobRecommendationsService } from 'src/services/job_recomendations.service';
 
-@Controller('job-recomendations')
+@Controller('job-recommendations')
 export class JobRecomendationsController {
   constructor(
-    private readonly jobRecomendationsService: JobRecomendationsService,
+    private readonly jobRecomendationsService: JobRecommendationsService,
   ) {}
-
-  @Post()
-  create(@Body() createJobRecomendationDto: CreateJobRecomendationDto) {
-    return this.jobRecomendationsService.create(createJobRecomendationDto);
-  }
 
   @Get()
   findAll() {
@@ -36,7 +22,7 @@ export class JobRecomendationsController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateJobRecomendationDto: UpdateJobRecomendationDto,
+    @Body() updateJobRecomendationDto: UpdateJobRecommendationDto,
   ) {
     return this.jobRecomendationsService.update(+id, updateJobRecomendationDto);
   }
