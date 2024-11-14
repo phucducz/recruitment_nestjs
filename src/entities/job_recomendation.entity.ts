@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, Timestamp } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { ApplicationStatus } from './application_status.entity';
@@ -9,7 +9,7 @@ import { JobPosition } from './job_position.entity';
 @Entity({ name: 'job_recommendations' })
 export class JobRecommendation extends BaseEntity {
   @Field()
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', name: 'full_name' })
   fullName: string;
 
   @Field()
@@ -27,6 +27,34 @@ export class JobRecommendation extends BaseEntity {
   @Field()
   @Column({ type: 'varchar', name: 'cv_url' })
   cvUrl: string;
+
+  @Field()
+  @Column({ type: 'int', name: 'referrer_id', nullable: true })
+  referrerId: number;
+
+  @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'cv_viewed_at',
+  })
+  cvViewedAt: Timestamp | string;
+
+  @Field()
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'employer_update_by',
+  })
+  employerUpdateBy: number;
+
+  @Field()
+  @Column({
+    type: 'timestamp without time zone',
+    nullable: true,
+    name: 'employer_update_at',
+  })
+  employerUpdateAt: string;
 
   @ManyToOne(() => Job, (job) => job.jobRecomendations)
   @JoinColumn({ name: 'jobs_id', referencedColumnName: 'id' })

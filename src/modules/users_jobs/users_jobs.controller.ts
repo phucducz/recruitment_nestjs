@@ -207,8 +207,8 @@ export class UsersJobsController {
         statusCode: 200,
         ...rtPageInfoAndItems(
           {
-            page: applicantsQueries.page,
-            pageSize: applicantsQueries.pageSize,
+            page: applicantsQueries?.page,
+            pageSize: applicantsQueries?.pageSize,
           },
           result,
         ),

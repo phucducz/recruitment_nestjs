@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UsersJobConverter } from 'src/common/converters/users_jobs.converter';
 import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobsService } from '../../services/users_jobs.service';
 import { ApplicationStatusModule } from '../application_status/application_status.module';
@@ -27,7 +28,7 @@ import { UsersJobRepository } from './users_jobs.repository';
     forwardRef(() => CurriculumVitaesModule),
   ],
   controllers: [UsersJobsController],
-  providers: [UsersJobsService, UsersJobRepository],
+  providers: [UsersJobsService, UsersJobRepository, UsersJobConverter],
   exports: [UsersJobsService],
 })
 export class UsersJobsModule {}
