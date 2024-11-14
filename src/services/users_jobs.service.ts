@@ -136,6 +136,12 @@ export class UsersJobsService {
     });
   }
 
+  async getMonthlyCandidateStatisticsByYear(year: string) {
+    return await this.usersJobRepository.getMonthlyCandidateStatisticsByYear(
+      year,
+    );
+  }
+
   remove(id: number) {
     return `This action removes a #${id} usersJob`;
   }

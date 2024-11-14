@@ -7,6 +7,7 @@ import {
   ENTITIES,
   jobSelectColumns,
   jobSelectRelationColumns,
+  months,
   removeColumns,
 } from 'src/common/utils/constants';
 import { APPLICANT_SOURCES } from 'src/common/utils/enums';
@@ -171,5 +172,21 @@ export class UsersJobRepository {
     });
 
     return result.affected > 0;
+  }
+
+  async getMonthlyCandidateStatisticsByYear(year: string) {
+    return await this.usersJobRepository
+      .createQueryBuilder('uj')
+      .select(
+        months
+          .number()
+          .map(
+            (month, index) =>
+              `COUNT(CASE WHEN EXTRACT(MONTH FROM create_at) = ${month} THEN 1 END) as ${months.name[index].toLowerCase()}`,
+          )
+          .join(', '),
+      )
+      .where('EXTRACT(YEAR FROM create_at) = :year', { year: year })
+      .getRawOne();
   }
 }

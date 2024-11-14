@@ -134,3 +134,25 @@ export const usersJobColumns = filterColumns(
   ENTITIES.FIELDS.USERS_JOB_FIELD,
   removeColumns,
 );
+
+export const months = {
+  name: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+  number: (): number[] => {
+    const monthNumber = [];
+    for (let i = 1; i <= 12; i++) monthNumber.push(i);
+    return monthNumber;
+  },
+};
