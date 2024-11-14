@@ -10,18 +10,32 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobCategoryDto } from 'src/dto/job_categories/create-job_category.dto';
+import { OTPService } from 'src/services/otp.service';
 import { JobCategoriesService } from '../../services/job_categories.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('job-categories')
 export class JobCategoriesController {
-  constructor(private readonly jobCategoriesService: JobCategoriesService) {}
+  constructor(
+    private readonly jobCategoriesService: JobCategoriesService,
+    private readonly otpService: OTPService,
+  ) {}
 
-  @Get('/all')
-  async findAll(@Body() pagination: PaginationDto) {
-    return await this.jobCategoriesService.findAll(pagination);
+  @Get('/all?')
+  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
+    this.otpService.log();
+
+    const paginationParams = {
+      page: +pagination.page,
+      pageSize: +pagination.pageSize,
+    };
+    const result = await this.jobCategoriesService.findAll(paginationParams);
+
+    return res
+      .status(200)
+      .json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @Get('?')
@@ -49,13 +63,11 @@ export class JobCategoriesController {
           record: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Tạo không thành công!',
-          record: null,
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Tạo không thành công!',
+        record: null,
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
@@ -81,13 +93,11 @@ export class JobCategoriesController {
           records: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Tạo không thành công!',
-          records: [],
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Tạo không thành công!',
+        records: [],
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }

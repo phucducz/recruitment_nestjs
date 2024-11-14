@@ -7,12 +7,14 @@ import { AuthModule } from '../auth/auth.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { JobCategoriesController } from './job_categories.controller';
 import { JobCategoriesRepository } from './job_categories.repository';
+import { OTPModule } from '../otp/otp.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([JobCategory]),
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
+    OTPModule,
   ],
   controllers: [JobCategoriesController],
   providers: [JobCategoriesService, JobCategoriesRepository],

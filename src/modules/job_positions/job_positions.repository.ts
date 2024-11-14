@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
+import { getPaginationParams } from 'src/common/utils/function';
 import { CreateJobPositionDto } from 'src/dto/job_positions/create-job_position.dto';
 import { JobPosition } from 'src/entities/job_position.entity';
 
@@ -14,7 +15,9 @@ export class JobPositionsRepository {
   ) {}
 
   async findAll(pagination: IPagination) {
-    return await this.jobPositionRepository.find(pagination);
+    const paginationParams = getPaginationParams(pagination);
+
+    return await this.jobPositionRepository.findAndCount(paginationParams);
   }
 
   async findById(id: number): Promise<JobPosition> {
@@ -23,6 +26,10 @@ export class JobPositionsRepository {
         id: id,
       },
     });
+  }
+
+  async findByIds(ids: number[]) {
+    return await Promise.all(ids.map((id) => this.findById(id)));
   }
 
   async create(createJobPosition: ICreate<CreateJobPositionDto>) {

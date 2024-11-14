@@ -1,10 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
+import { Field } from 'src/common/decorators/field.decorator';
+import { BaseEntityNotId } from './base.entity';
 import { Job } from './job.entity';
 import { Placement } from './placement.entity';
 
 @Entity({ name: 'jobs_placements' })
-export class JobsPlacement {
+export class JobsPlacement extends BaseEntityNotId {
+  @Field()
   @PrimaryColumn({ name: 'jobs_id', type: 'int' })
   jobsId: number;
 
@@ -12,6 +15,7 @@ export class JobsPlacement {
   @JoinColumn([{ name: 'jobs_id', referencedColumnName: 'id' }])
   job: Job;
 
+  @Field()
   @PrimaryColumn({ name: 'placements_id', type: 'int' })
   placementsId: number;
 
@@ -19,9 +23,4 @@ export class JobsPlacement {
   @JoinColumn([{ name: 'placements_id', referencedColumnName: 'id' }])
   placement: Placement;
 
-  @Column({ type: 'varchar', length: 500, name: 'detail_address' })
-  detailAddress: string;
-
-  @Column({ type: 'int' })
-  amount: number;
 }

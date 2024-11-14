@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreatePlacementDto } from 'src/dto/placements/create-placement.dto';
 import { PlacementsService } from '../../services/placements.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 @Controller('placements')
 export class PlacementsController {
@@ -39,21 +39,27 @@ export class PlacementsController {
           records: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Tạo không thành công!',
-          records: [],
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Tạo không thành công!',
+        records: [],
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
   }
 
-  @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.placementsService.findAll(pagination);
+  @Get('/all?')
+  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
+    const paginationParams = {
+      page: +pagination.page,
+      pageSize: +pagination.pageSize,
+    };
+    const result = await this.placementsService.findAll(paginationParams);
+
+    return res
+      .status(200)
+      .json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @Get('/all')

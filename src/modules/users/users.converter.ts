@@ -4,7 +4,7 @@ export class UsersConverter {
   entityToBasicInfo(user: User | null) {
     if (!user) return null;
 
-    const { achivements, jobPosition, jobs, password, role, ...others } = user;
+    const { achivement, jobPosition, jobs, password, role, ...others } = user;
 
     return {
       ...others,

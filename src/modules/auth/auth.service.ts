@@ -1,8 +1,16 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { LogOutDto } from 'src/dto/auth/log-out.dto';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
 import { RolesService } from 'src/services/roles.service';
@@ -16,7 +24,8 @@ export class AuthService {
 
   constructor(
     @Inject(JwtService) private jwtService: JwtService,
-    @Inject(UsersService) private readonly userService: UsersService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     @Inject(UsersConverter) private readonly userConverter: UsersConverter,
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(forwardRef(() => RefreshTokenService))
@@ -35,10 +44,22 @@ export class AuthService {
     return await this.jwtService.decode(accessToken);
   }
 
+  async compareToken(accessToken: string, refreshToken: string) {
+    const access = await this.getByToken(accessToken);
+    const refresh = await this.getByToken(refreshToken);
+
+    if (access.userId !== refresh.userId)
+      throw new UnauthorizedException(
+        UNAUTHORIZED_EXCEPTION_MESSAGE.INVALID_TOKEN,
+      );
+
+    return true;
+  }
+
   async generateToken(id: number, email: string, fullName: string) {
     return await this.jwtService.signAsync(
-      { id, email, fullName },
-      { expiresIn: '1m' },
+      { userId: id, email, fullName },
+      { expiresIn: '15m' },
     );
   }
 
@@ -58,13 +79,21 @@ export class AuthService {
     this.logger.log(this.signIn.name);
     const { type } = signInDto;
 
-    try {
-      const currentUser = await this.userService.findByEmail(signInDto.email);
-      const { refreshToken } = await this.refreshTokenService.create({
+    const currentUser = await this.userService.findByEmail(signInDto.email, {
+      hasPassword: true,
+      hasRelations: false,
+    });
+
+    let refreshToken = null;
+    let userInfo = null;
+
+    if (currentUser) {
+      const rf = await this.refreshTokenService.create({
         userId: currentUser.id,
       });
+      refreshToken = rf.refreshToken;
 
-      const userInfo = {
+      userInfo = {
         ...this.userConverter.entityToBasicInfo(currentUser),
         accessToken: currentUser
           ? await this.generateToken(
@@ -75,47 +104,54 @@ export class AuthService {
           : null,
         refreshToken: refreshToken,
       };
+    }
 
-      if (type === 'google') {
-        if (!currentUser) {
-          const role = await this.roleService.findByTitle('user');
+    if (type === 'google') {
+      if (!currentUser) {
+        const role = await this.roleService.findByTitle('user');
 
-          if (!role) return null;
+        if (!role) return null;
 
-          const result = await this.register({
-            email: signInDto.email,
-            password: undefined,
-            fullName: signInDto.fullName,
-            roleId: role.id,
-          });
+        const result = await this.register({
+          email: signInDto.email,
+          password: undefined,
+          fullName: signInDto.fullName,
+          roleId: role.id,
+          avatarURL: signInDto.avatarURL,
+        });
+        const { refreshToken: rf } = await this.refreshTokenService.create({
+          userId: result.id,
+        });
 
-          return {
-            ...this.userConverter.entityToBasicInfo(
-              await this.userService.findByEmail(result.email),
-            ),
-            accessToken: await this.generateToken(
-              result.id,
-              result.email,
-              result.fullName,
-            ),
-            refreshToken: refreshToken,
-          };
-        }
-
-        return userInfo;
+        return {
+          ...this.userConverter.entityToBasicInfo(
+            await this.userService.findByEmail(result.email),
+          ),
+          accessToken: await this.generateToken(
+            result.id,
+            result.email,
+            result.fullName,
+          ),
+          refreshToken: rf,
+        };
       }
 
-      if (
-        !currentUser ||
-        !(await this.comparePassword(signInDto.password, currentUser.password))
-      )
-        return null;
-
       return userInfo;
-    } catch (error) {
-      this.logger.log(`signIn: ${error}`);
-      return null;
     }
+
+    if (!signInDto.password)
+      throw new BadRequestException('Vui lòng cung cấp mật khẩu!');
+    if (!currentUser) throw new NotFoundException('Không tìm thấy người dùng!');
+    if (!currentUser?.password)
+      throw new BadRequestException('Hãy đặt mật khẩu cho tài khoản của bạn!');
+
+    if (
+      !currentUser ||
+      !(await this.comparePassword(signInDto.password, currentUser?.password))
+    )
+      return null;
+
+    return userInfo;
   }
 
   async register(registerDto: RegisterDto) {
@@ -127,7 +163,9 @@ export class AuthService {
     });
   }
 
-  async logout(logoutDto: LogOutDto) {
-    return await this.refreshTokenService.update(logoutDto);
+  async logout(refreshToken: string) {
+    return await this.refreshTokenService.updateStatusByRefreshToken(
+      refreshToken,
+    );
   }
 }

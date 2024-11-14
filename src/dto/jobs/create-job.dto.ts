@@ -29,27 +29,31 @@ export class CreateJobDto {
 
   @IsArray()
   @IsNotEmpty()
-  placements: {
-    id: number;
-    amount: number;
-    detailAddress: string;
-  }[];
+  placementIds: number[];
+
+  @IsNumber()
+  @IsNotEmpty()
+  quantity: number;
 
   @IsNumber()
   @IsOptional()
-  endPrice: number;
+  salaryMin: number;
 
   @IsNumber()
   @IsOptional()
-  startPrice: number;
+  salaryMax: number;
+
+  @IsString()
+  @IsOptional()
+  salaryCurrency?: TSalaryCurrency;
 
   @IsNumber()
   @IsOptional()
-  endExpYearRequired: number;
+  minExpYearRequired: number;
 
   @IsNumber()
   @IsOptional()
-  startExpYearRequired: number;
+  maxExpYearRequired: number;
 
   @IsString()
   @IsNotEmpty()
@@ -57,17 +61,13 @@ export class CreateJobDto {
 
   @IsString()
   @IsNotEmpty()
-  requirement: string;
+  requirements: string;
 
   @IsString()
   @IsNotEmpty()
-  whyLoveWorkingHere: string;
+  benefits: string;
 
   @IsString()
   @IsNotEmpty()
   deadline: string;
-
-  @IsString()
-  @IsNotEmpty()
-  workTime: string;
 }

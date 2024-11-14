@@ -1,0 +1,1 @@
+interface IResetPassword extends IPendingVerification {}

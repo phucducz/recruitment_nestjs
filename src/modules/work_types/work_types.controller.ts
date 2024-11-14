@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateWorkTypeDto } from 'src/dto/work_types/create-work_type.dto';
 import { WorkTypesService } from '../../services/work_types.service';
@@ -39,13 +40,11 @@ export class WorkTypesController {
           record: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          record: null,
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        record: null,
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
@@ -71,21 +70,25 @@ export class WorkTypesController {
           records: result,
         });
 
-      return res
-        .status(401)
-        .json({
-          statusCode: 401,
-          message: 'Thêm mới không thành công!',
-          records: [],
-        });
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Thêm mới không thành công!',
+        records: [],
+      });
     } catch (error) {
       return res.status(500).json({ stautsCode: 500, message: error });
     }
   }
 
-  @Get('/all')
-  findAll(@Body() pagination: PaginationDto) {
-    return this.workTypesService.findAll(pagination);
+  @Get('/all?')
+  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
+    const paginationParams = {
+      page: +pagination.page,
+      pageSize: +pagination.pageSize,
+    };
+    const result = await this.workTypesService.findAll(paginationParams);
+
+    return res.status(200).json({ ...rtPageInfoAndItems(paginationParams, result) });
   }
 
   @Get('?')

@@ -6,8 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateSkillDto } from 'src/dto/skills/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skills/update-skill.dto';
 import { SkillsService } from '../../services/skills.service';
@@ -21,9 +25,23 @@ export class SkillsController {
     return this.skillsService.create(createSkillDto);
   }
 
-  @Get()
-  findAll() {
-    return this.skillsService.findAll();
+  @Get('/all?')
+  async findAll(@Query() skillQueries: ISkillQueries, @Res() res: Response) {
+    try {
+      const result = await this.skillsService.findAll(skillQueries);
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          { page: +skillQueries.page, pageSize: +skillQueries.pageSize },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
   }
 
   @Get(':id')

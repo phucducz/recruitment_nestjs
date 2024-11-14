@@ -10,8 +10,9 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
-import { getCookieValue } from 'src/common/utils/cookie.utils';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
+import { AuthService } from './auth.service';
+import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -20,6 +21,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     private configService: ConfigService,
     @Inject(RefreshTokenService)
     private readonly refreshTokenService: RefreshTokenService,
+    @Inject(AuthService)
+    private readonly authService: AuthService,
   ) {
     super();
   }
@@ -28,20 +31,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
-      const canActivateResult = (await super.canActivate(context)) as boolean;
-
-      if (!canActivateResult) throw new UnauthorizedException();
-
       const request = context.switchToHttp().getRequest();
-      const token = this.extractTokenFromHeader(request);
-      const refreshToken = getCookieValue(
-        request.headers['set-cookie'][0],
-        'refreshToken=',
-      );
+      const token = this.extractTokenFromRequest(request);
+      const refreshToken = this.extractRefreshTokenFromCookie(request);
 
-      await this.refreshTokenService.verifyRefreshToken(refreshToken);
-
-      if (!token) throw new UnauthorizedException();
+      if (!token)
+        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.NO_PROVIDED_TOKEN);
 
       try {
         const payload = await this.jwtService.verifyAsync(token, {
@@ -50,18 +45,29 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         request['user'] = payload;
       } catch {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.TOKEN_EXPIRED);
       }
+
+      await this.authService.compareToken(token, refreshToken);
+      await this.refreshTokenService.verifyRefreshToken(refreshToken);
 
       return true;
     } catch (error) {
-      this.logger.log(error);
-      throw new UnauthorizedException();
+      this.logger.error(error);
+      throw new UnauthorizedException(error);
     }
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
+  private extractTokenFromRequest(request: Request): string | undefined {
+    const cookieToken = request.cookies['jwt'];
+
+    if (cookieToken) return cookieToken;
+
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
+  }
+
+  private extractRefreshTokenFromCookie(request: any): string | undefined {
+    return request.headers.cookies;
   }
 }
