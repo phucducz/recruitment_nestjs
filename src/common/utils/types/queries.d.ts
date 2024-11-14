@@ -30,7 +30,7 @@ interface IAppliedJobQueries extends BaseQueries {
 
 interface IFindApplicantsQueries extends BaseQueries {
   usersId?: number;
-  jobTitle?: string;
+  jobsId?: string;
   applicantName?: string;
   source?: string;
   applyDate?: string;
