@@ -2,6 +2,8 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
+import { Job } from './job.entity';
+import { Schedule } from './schedule.entity';
 import { StatusType } from './status_type.entity';
 import { UsersJob } from './users_job.entity';
 
@@ -17,4 +19,10 @@ export class Status extends BaseEntity {
 
   @OneToMany(() => UsersJob, (usersJob) => usersJob.status)
   usesJobs: UsersJob[];
+
+  @OneToMany(() => Job, (job) => job.status)
+  jobs: Job[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.status)
+  schedules: Schedule[];
 }

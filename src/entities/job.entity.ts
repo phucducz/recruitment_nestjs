@@ -8,12 +8,12 @@ import {
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
-import { JOB_STATUS } from 'src/common/utils/enums';
 import { BaseEntity } from 'src/entities/base.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from './jobs_placement.entity';
+import { Status } from './status.entity';
 import { User } from './user.entity';
 import { UsersJob } from './users_job.entity';
 import { WorkType } from './work_type.entity';
@@ -81,9 +81,9 @@ export class Job extends BaseEntity {
   @Column({ type: 'int', default: 1, nullable: true })
   quantity: number;
 
-  @Field()
-  @Column({ type: 'varchar', enum: JOB_STATUS, default: JOB_STATUS.ACTIVE })
-  status: string;
+  // @Field()
+  // @Column({ type: 'varchar', enum: JOB_STATUS, default: JOB_STATUS.ACTIVE })
+  // status: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
   @JoinColumn({ name: 'job_categories_id', referencedColumnName: 'id' })
@@ -110,4 +110,8 @@ export class Job extends BaseEntity {
   @ManyToOne(() => WorkType, (workType) => workType.jobs)
   @JoinColumn({ name: 'work_types_id', referencedColumnName: 'id' })
   workType: WorkType;
+
+  @ManyToOne(() => Status, (status) => status.jobs)
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  status: Status;
 }
