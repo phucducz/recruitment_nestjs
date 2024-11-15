@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { STATUS_TITLES } from 'src/common/utils/enums';
+import { STATUS_TITLES, STATUS_TYPE_TITLES } from 'src/common/utils/enums';
 import { CreateStatusDto } from 'src/dto/status/create-status.dto';
 import { UpdateStatusDto } from 'src/dto/status/update-status.dto';
 import { StatusRepository } from 'src/modules/status/status.repository';
@@ -24,8 +24,12 @@ export class StatusService {
     return await this.statusRepository.findById(id);
   }
 
-  findAll() {
-    return `This action returns all status`;
+  async findByType(type: STATUS_TYPE_TITLES) {
+    return await this.statusRepository.findByType(type);
+  }
+
+  async findAll(findStatusQueries: IFindStatusQueries) {
+    return await this.statusRepository.findAll(findStatusQueries);
   }
 
   findOne(id: number) {
