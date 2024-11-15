@@ -135,6 +135,7 @@ export class JobsRepository {
         'workType.title as work_type_title',
         'job.status as jobStatus',
         'jobCategory.name as job_category_name',
+        'status.title as status',
         ...(status &&
           status.map(
             (status) =>
@@ -145,11 +146,11 @@ export class JobsRepository {
       .leftJoin('job.workType', 'workType')
       .leftJoin('job.jobCategory', 'jobCategory')
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
-      .leftJoin('usersJobs.status', 'status')
+      .leftJoin('job.status', 'status')
       .where('job.users_id = :usersId', { usersId })
       .andWhere('status.title <> :status', { status: JOB_STATUS.DELETED })
       .groupBy(
-        'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
+        'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title',
       );
 
     if (jobsQueries.applicationStatusId)
