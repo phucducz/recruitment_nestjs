@@ -51,11 +51,11 @@ export class SchedulesService {
     return `This action returns a #${id} schedule`;
   }
 
-  update(id: number, updateScheduleDto: UpdateScheduleDto) {
-    return `This action updates a #${id} schedule`;
+  async update(id: number, updateScheduleDto: IUpdate<UpdateScheduleDto>) {
+    return await this.scheduleRepository.update(id, updateScheduleDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} schedule`;
+  async remove(id: number) {
+    return await this.scheduleRepository.remove({ variable: { id } });
   }
 }

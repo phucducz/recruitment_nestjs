@@ -29,6 +29,16 @@ export class StatusService {
   }
 
   async findAll(findStatusQueries: IFindStatusQueries) {
+    if (
+      findStatusQueries.type &&
+      !Object.values(STATUS_TYPE_TITLES).includes(
+        findStatusQueries.type as STATUS_TYPE_TITLES,
+      )
+    )
+      throw new Error(
+        `Loại trạng thái không hợp lệ. Giá trị phải là một trong "${Object.values(STATUS_TYPE_TITLES).join(', ')}"`,
+      );
+
     return await this.statusRepository.findAll(findStatusQueries);
   }
 

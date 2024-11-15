@@ -52,6 +52,62 @@ export class SchedulesController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateScheduleDto: UpdateScheduleDto,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.schedulesService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateScheduleDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Chỉnh sửa lịch phỏng vấn không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Chỉnh sửa lịch phỏng vấn thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Chỉnh sửa lịch phỏng vấn không thành công. ${error?.message ?? error}!`,
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.schedulesService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Xóa lịch phỏng vấn không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Xóa lịch phỏng vấn thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Xóa lịch phỏng vấn không thành công. ${error?.message ?? error}!`,
+      });
+    }
+  }
+
   @Get()
   findAll() {
     return this.schedulesService.findAll();
@@ -60,18 +116,5 @@ export class SchedulesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.schedulesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateScheduleDto: UpdateScheduleDto,
-  ) {
-    return this.schedulesService.update(+id, updateScheduleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.schedulesService.remove(+id);
   }
 }
