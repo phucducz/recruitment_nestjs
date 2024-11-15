@@ -89,7 +89,13 @@ export class JobsService {
   async findAllForEmployer(
     jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
   ) {
-    return await this.jobRepository.findAllForEmployer(jobsQueries);
+    const status = await this.statusService.findByType(
+      STATUS_TYPE_TITLES.INTERVIEW,
+    );
+    return await this.jobRepository.findAllForEmployer({
+      ...jobsQueries,
+      status,
+    });
   }
 
   async findById(id: number) {

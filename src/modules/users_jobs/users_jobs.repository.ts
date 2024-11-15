@@ -55,7 +55,7 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: ['curriculumVitae', 'job', 'status', 'job.user'],
+      relations: ['curriculumVitae', 'job', 'status'],
       select: {
         job: {
           ...jobSelectRelationColumns,
@@ -97,7 +97,7 @@ export class UsersJobRepository {
         }),
         ...(jobsId && { jobsId: +jobsId }),
       },
-      relations: ['job', 'user', 'status', 'job.user'],
+      relations: ['job', 'user', 'status'],
       select: {
         user: { fullName: true, id: true },
         job: { title: true, id: true },
@@ -157,7 +157,7 @@ export class UsersJobRepository {
         'employerUpdateAt',
         'updateBy',
         'updateAt',
-        'applicationStatus',
+        'status',
       ].reduce((acc, key) => {
         if (variable[key]) acc[key] = variable[key];
 

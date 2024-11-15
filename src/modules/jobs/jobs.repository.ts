@@ -23,6 +23,7 @@ import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { Placement } from 'src/entities/placement.entity';
+import { Status } from 'src/entities/status.entity';
 
 @Injectable()
 export class JobsRepository {
@@ -109,13 +110,17 @@ export class JobsRepository {
   }
 
   async findAllForEmployer(
-    jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
+    jobsQueries: IFIndJobsForEmployerQueries & {
+      usersId: number;
+      status?: Status[];
+    },
   ): Promise<[Job[], number]> {
-    const { applicationStatusId, title, usersId } = jobsQueries;
+    const { applicationStatusId, title, usersId, status } = jobsQueries;
     const { skip, take } = getPaginationParams({
       page: +jobsQueries.page,
       pageSize: +jobsQueries.pageSize,
     });
+
     const queryBuilder = this.jobRepository
       .createQueryBuilder('job')
       .select([
@@ -130,18 +135,19 @@ export class JobsRepository {
         'workType.title as work_type_title',
         'job.status as jobStatus',
         'jobCategory.name as job_category_name',
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang đánh giá' THEN 1 END) as evaluating_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang offer' THEN 1 END) as offering_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang phỏng vấn' THEN 1 END) as interviewing_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang tuyển' THEN 1 END) as recruiting_count",
+        ...(status &&
+          status.map(
+            (status) =>
+              `COUNT(CASE WHEN status.title = '${status.title}' THEN 1 END) as ${status.code}_count`,
+          )),
       ])
       .leftJoin('job.user', 'user')
       .leftJoin('job.workType', 'workType')
       .leftJoin('job.jobCategory', 'jobCategory')
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
-      .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
+      .leftJoin('usersJobs.status', 'status')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('job.status <> :status', { status: JOB_STATUS.DELETED })
+      .andWhere('status.title <> :status', { status: JOB_STATUS.DELETED })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
       );
