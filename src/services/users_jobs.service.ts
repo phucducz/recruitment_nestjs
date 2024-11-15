@@ -5,14 +5,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { APPLICANT_SOURCES, ROLES } from 'src/common/utils/enums';
+import {
+  APPLICANT_SOURCES,
+  ROLES,
+  STATUS_TITLES,
+  STATUS_TYPE_TITLES,
+} from 'src/common/utils/enums';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobRepository } from 'src/modules/users_jobs/users_jobs.repository';
-import { ApplicationStatusService } from './application_status.service';
 import { CurriculumVitaesService } from './curriculum_vitaes.service';
 import { RolesService } from './roles.service';
+import { StatusService } from './status.service';
+import { StatusTypesService } from './status_types.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -22,12 +28,14 @@ export class UsersJobsService {
     private readonly usersJobRepository: UsersJobRepository,
     @Inject(CurriculumVitaesService)
     private readonly curriculumVitaesService: CurriculumVitaesService,
-    @Inject(ApplicationStatusService)
-    private readonly applicationStatusService: ApplicationStatusService,
     @Inject(RolesService)
     private readonly roleService: RolesService,
     @Inject(UsersService)
     private readonly userService: UsersService,
+    @Inject(StatusService)
+    private readonly statusService: StatusService,
+    @Inject(StatusTypesService)
+    private readonly statusTypesService: StatusTypesService,
   ) {}
 
   async aplly(createUsersJobDto: ICreate<CreateUsersJobDto>) {
@@ -35,8 +43,13 @@ export class UsersJobsService {
     const cv = await this.curriculumVitaesService.findById(
       +variable.curriculumVitaesId,
     );
-    const applicationStatus =
-      await this.applicationStatusService.findByTitle('Đang đánh giá');
+    const statusType = await this.statusTypesService.findByTitle(
+      STATUS_TYPE_TITLES.INTERVIEW,
+    );
+    const status = await this.statusService.findByTitle(
+      STATUS_TITLES.APPLICATION_EVALUATING,
+      statusType.id,
+    );
 
     if (!cv) throw new BadRequestException('Hãy cung cấp CV để ứng tuyển!');
 
@@ -45,7 +58,7 @@ export class UsersJobsService {
       variable: {
         ...variable,
         curriculumVitae: cv,
-        applicationStatus: applicationStatus,
+        status,
       },
     });
   }
@@ -127,9 +140,7 @@ export class UsersJobsService {
           : {
               employerUpdateAt: nowDate,
               employerUpdateBy: updateBy,
-              applicationStatus: await this.applicationStatusService.findById(
-                variable.statusId,
-              ),
+              status: await this.statusService.findById(variable.statusId),
             }) as Partial<UsersJob>),
       },
       queries: { jobsId: variable.jobsId, usersId: variable.usersId },

@@ -30,8 +30,7 @@ export class UsersJobRepository {
 
   async create(
     createUsersJobDto: ICreate<
-      CreateUsersJobDto &
-        Pick<UsersJob, 'curriculumVitae' | 'applicationStatus'>
+      CreateUsersJobDto & Pick<UsersJob, 'curriculumVitae' | 'status'>
     >,
   ) {
     const { createBy, variable } = createUsersJobDto;
@@ -42,7 +41,7 @@ export class UsersJobRepository {
       jobsId: +variable.jobsId,
       usersId: createBy,
       curriculumVitae: variable.curriculumVitae,
-      applicationStatus: variable.applicationStatus,
+      status: variable.status,
     })) as UsersJob;
   }
 
@@ -56,7 +55,7 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: ['curriculumVitae', 'job', 'job.user'],
+      relations: ['curriculumVitae', 'job', 'status', 'job.user'],
       select: {
         job: {
           ...jobSelectRelationColumns,
@@ -65,6 +64,7 @@ export class UsersJobRepository {
           createBy: false,
           updateAt: false,
           updateBy: false,
+          status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
         },
         ...this.generateUsersJobSelect(removeColumns),
         createAt: true,
@@ -97,16 +97,13 @@ export class UsersJobRepository {
         }),
         ...(jobsId && { jobsId: +jobsId }),
       },
-      relations: ['job', 'user', 'applicationStatus', 'job.user'],
+      relations: ['job', 'user', 'status', 'job.user'],
       select: {
         user: { fullName: true, id: true },
         job: { title: true, id: true },
         ...this.generateUsersJobSelect([]),
         createAt: true,
-        applicationStatus: filterColumns(
-          ENTITIES.FIELDS.APPLICATION_STATUS,
-          removeColumns,
-        ),
+        status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
       },
       ...paginationParams,
     });
@@ -120,7 +117,7 @@ export class UsersJobRepository {
         usersId: +findApplicantDetailQueries.usersId,
         jobsId: +findApplicantDetailQueries.jobsId,
       },
-      relations: ['job', 'applicationStatus', 'curriculumVitae', 'schedules'],
+      relations: ['job', 'status', 'curriculumVitae', 'schedules'],
       select: {
         createAt: true,
         updateAt: true,
@@ -134,10 +131,7 @@ export class UsersJobRepository {
           ...removeColumns,
           'isDeleted',
         ]),
-        applicationStatus: filterColumns(
-          ENTITIES.FIELDS.APPLICATION_STATUS,
-          removeColumns,
-        ),
+        status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
         schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
       },
     });

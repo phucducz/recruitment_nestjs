@@ -42,7 +42,7 @@ export class Job extends BaseEntity {
 
   @Field()
   @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
-  applicationDeadline: Timestamp;
+  applicationDeadline: Timestamp | string;
 
   @Field()
   @Column({ type: 'int', nullable: true, name: 'delete_by' })

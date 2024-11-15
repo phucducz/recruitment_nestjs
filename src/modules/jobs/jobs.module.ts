@@ -17,6 +17,8 @@ import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { JobsPlacementsModule } from '../jobs_placements/jobs_placements.module';
 import { PlacementsModule } from '../placements/placements.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
+import { StatusModule } from '../status/status.module';
+import { StatusTypesModule } from '../status_types/status_types.module';
 import { UsersModule } from '../users/users.module';
 import { WorkTypesModule } from '../work_types/work_types.module';
 import { JobsController } from './jobs.controller';
@@ -40,6 +42,8 @@ import { JobsRepository } from './jobs.repository';
     WorkTypesModule,
     PlacementsModule,
     JobsPlacementsModule,
+    StatusModule,
+    StatusTypesModule,
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
   ],

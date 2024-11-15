@@ -87,6 +87,7 @@ export const jobRelations = {
     'jobsPlacements',
     'workType',
     'jobCategory',
+    'status',
     'jobsPlacements.placement',
   ],
   fields: [
@@ -100,6 +101,7 @@ export const jobRelations = {
     filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
     filterColumns(ENTITIES.FIELDS.WORK_TYPE, removeColumns),
     filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
+    filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
   ],
 };
 

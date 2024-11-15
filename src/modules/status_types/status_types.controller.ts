@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { StatusTypesService } from '../services/status_types.service';
-import { CreateStatusTypeDto } from './dto/create-status_type.dto';
-import { UpdateStatusTypeDto } from './dto/update-status_type.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { CreateStatusTypeDto } from 'src/dto/status_types/create-status_type.dto';
+import { UpdateStatusTypeDto } from 'src/dto/status_types/update-status_type.dto';
+import { StatusTypesService } from 'src/services/status_types.service';
 
 @Controller('status-types')
 export class StatusTypesController {
@@ -23,7 +32,10 @@ export class StatusTypesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStatusTypeDto: UpdateStatusTypeDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateStatusTypeDto: UpdateStatusTypeDto,
+  ) {
     return this.statusTypesService.update(+id, updateStatusTypeDto);
   }
 

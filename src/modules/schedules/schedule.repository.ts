@@ -13,7 +13,9 @@ export class ScheduleRepository {
   ) {}
 
   async create(
-    createScheduleDto: ICreate<CreateScheduleDto & Pick<Schedule, 'usersJob'>>,
+    createScheduleDto: ICreate<
+      CreateScheduleDto & Pick<Schedule, 'usersJob' | 'status'>
+    >,
   ): Promise<Schedule> {
     const { createBy, variable, transactionalEntityManager } =
       createScheduleDto;
@@ -21,6 +23,7 @@ export class ScheduleRepository {
       createAt: new Date().toString(),
       createBy,
       date: variable.date,
+      status: variable.status,
       ...(variable.note && { note: variable.note }),
       usersJob: variable.usersJob,
     } as Schedule;
