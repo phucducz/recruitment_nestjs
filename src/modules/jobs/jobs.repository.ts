@@ -16,7 +16,7 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
-import { JOB_STATUS, STATUS_TITLES } from 'src/common/utils/enums';
+import { STATUS_TITLES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -115,7 +115,7 @@ export class JobsRepository {
       status?: Status[];
     },
   ): Promise<[Job[], number]> {
-    const { applicationStatusId, title, usersId, status } = jobsQueries;
+    const { title, usersId, status } = jobsQueries;
     const { skip, take } = getPaginationParams({
       page: +jobsQueries.page,
       pageSize: +jobsQueries.pageSize,
@@ -148,19 +148,15 @@ export class JobsRepository {
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
       .leftJoin('job.status', 'status')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('status.title <> :status', { status: JOB_STATUS.DELETED })
+      .andWhere('status.id = :statusId', {
+        statusId: +(jobsQueries.statusId ?? '5'),
+      })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title',
       );
 
-    if (jobsQueries.applicationStatusId)
-      queryBuilder.andWhere('applicationStatus.id = :applicationStatusId', {
-        applicationStatusId,
-      });
     if (jobsQueries.title)
-      queryBuilder.andWhere('job.title = :title', {
-        title,
-      });
+      queryBuilder.andWhere('job.title = :title', { title });
     if (skip) queryBuilder.skip(skip);
     if (take) queryBuilder.take(take);
 

@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { STATUS_TITLES, STATUS_TYPE_TITLES } from 'src/common/utils/enums';
 import { CreateScheduleDto } from 'src/dto/schedules/create-schedule.dto';
 import { UpdateScheduleDto } from 'src/dto/schedules/update-schedule.dto';
 import { ScheduleRepository } from 'src/modules/schedules/schedule.repository';
@@ -23,18 +22,12 @@ export class SchedulesService {
 
   async create(createScheduleDto: ICreate<CreateScheduleDto>) {
     const { variable } = createScheduleDto;
-    const statusType = await this.statusTypesService.findByTitle(
-      STATUS_TYPE_TITLES.SCHEDULE,
-    );
 
     return await this.scheduleRepository.create({
       ...createScheduleDto,
       variable: {
         ...variable,
-        status: await this.statusService.findByTitle(
-          STATUS_TITLES.SCHEDULE_INTERVIEW,
-          statusType.id,
-        ),
+        status: await this.statusService.findById(variable.statusId),
         usersJob: await this.usersJobService.findByCompositePrKey({
           usersId: variable.usersId,
           jobsId: variable.jobsId,
