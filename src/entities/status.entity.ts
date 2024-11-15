@@ -13,6 +13,10 @@ export class Status extends BaseEntity {
   @Column({ type: 'varchar' })
   title: string;
 
+  @Field()
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  code: string;
+
   @ManyToOne(() => StatusType, (statusType) => statusType)
   @JoinColumn({ name: 'status_types_id', referencedColumnName: 'id' })
   statusType: StatusType;

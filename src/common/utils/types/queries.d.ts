@@ -74,3 +74,7 @@ interface IFindApplicantDetailQueries {
   usersId: string;
   jobsId: string;
 }
+
+interface IFindStatusQueries extends BaseQueries {
+  type?: string;
+}
