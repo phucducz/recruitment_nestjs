@@ -13,16 +13,22 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
-import { JOB_STATUS } from 'src/common/utils/enums';
+import { STATUS_TITLES, STATUS_TYPE_TITLES } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
+import { StatusService } from 'src/services/status.service';
 import { JobsService } from '../../services/jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StatusTypesService } from 'src/services/status_types.service';
 
 @Controller('jobs')
 export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(
+    private readonly jobsService: JobsService,
+    private readonly statusService: StatusService,
+    private readonly statusTypesService: StatusTypesService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -178,9 +184,20 @@ export class JobsController {
     @Request() request: any,
   ) {
     try {
+      const statusType = await this.statusTypesService.findByTitle(
+        STATUS_TYPE_TITLES.JOB,
+      );
+      const status = await this.statusService.findByTitle(
+        STATUS_TITLES.JOB_ACTIVE,
+        statusType.id,
+      );
       const result = await this.jobsService.update(+id, {
         updateBy: request.user.userId,
-        variable: { status: JOB_STATUS.ACTIVE, deleteAt: null, deleteBy: null },
+        variable: {
+          statusId: status.id,
+          deleteAt: null,
+          deleteBy: null,
+        },
       });
 
       if (!result)

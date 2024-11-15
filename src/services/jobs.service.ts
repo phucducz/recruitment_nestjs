@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { JOB_STATUS } from 'src/common/utils/enums';
+import { STATUS_TITLES, STATUS_TYPE_TITLES } from 'src/common/utils/enums';
 import { getItemsDiff } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -10,7 +10,8 @@ import { JobCategoriesService } from './job_categories.service';
 import { JobFieldsService } from './job_fields.service';
 import { JobPositionsService } from './job_positions.service';
 import { JobsPlacementsService } from './jobs_placements.service';
-import { PlacementsService } from './placements.service';
+import { StatusService } from './status.service';
+import { StatusTypesService } from './status_types.service';
 import { UsersService } from './users.service';
 import { WorkTypesService } from './work_types.service';
 
@@ -27,37 +28,58 @@ export class JobsService {
     @Inject(UsersService) private readonly userService: UsersService,
     @Inject(WorkTypesService)
     private readonly workTypeService: WorkTypesService,
-    @Inject(PlacementsService)
-    private readonly placementService: PlacementsService,
     @Inject(JobsPlacementsService)
     private readonly jobsPlacementsService: JobsPlacementsService,
+    @Inject(StatusService)
+    private readonly statusService: StatusService,
+    @Inject(StatusTypesService)
+    private readonly statusTypesService: StatusTypesService,
     @Inject(DataSource)
     private readonly dataSource: DataSource,
   ) {}
 
   async create(createJob: ICreate<CreateJobDto>) {
     const { variable, createBy } = createJob;
+    const statusType = await this.statusTypesService.findByTitle(
+      STATUS_TYPE_TITLES.JOB,
+    );
 
-    return this.jobRepository.create({
-      ...createJob,
-      variable: {
-        ...variable,
-        jobCategory: await this.jobCategoryService.findById(
-          variable.categoriesId,
-        ),
-        jobPosition: await this.jobPositionService.findById(
-          variable.positionsId,
-        ),
-        jobField: await this.jobFieldService.findById(variable.fieldsId),
-        user: await this.userService.findById(createBy),
-        workType: await this.workTypeService.findById(variable.workTypesId),
-        placements: await Promise.all(
-          variable.placementIds.map(async (placement) => {
-            return await this.placementService.findById(placement);
-          }),
-        ),
+    return await this.dataSource.manager.transaction(
+      async (transactionalEntityManager) => {
+        const newJob = await this.jobRepository.create({
+          ...createJob,
+          variable: {
+            ...variable,
+            status: await this.statusService.findByTitle(
+              STATUS_TITLES.JOB_ACTIVE,
+              statusType.id,
+            ),
+            jobCategory: await this.jobCategoryService.findById(
+              variable.categoriesId,
+            ),
+            jobPosition: await this.jobPositionService.findById(
+              variable.positionsId,
+            ),
+            jobField: await this.jobFieldService.findById(variable.fieldsId),
+            user: await this.userService.findById(createBy),
+            workType: await this.workTypeService.findById(variable.workTypesId),
+          },
+          transactionalEntityManager,
+        });
+
+        await this.jobsPlacementsService.create({
+          createBy,
+          variable: {
+            job: newJob,
+            jobsId: newJob.id,
+            placementIds: variable.placementIds,
+          },
+          transactionalEntityManager,
+        });
+
+        return newJob;
       },
-    });
+    );
   }
 
   async findAll(jobsQueries: IJobQueries) {
@@ -67,7 +89,13 @@ export class JobsService {
   async findAllForEmployer(
     jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
   ) {
-    return await this.jobRepository.findAllForEmployer(jobsQueries);
+    const status = await this.statusService.findByType(
+      STATUS_TYPE_TITLES.INTERVIEW,
+    );
+    return await this.jobRepository.findAllForEmployer({
+      ...jobsQueries,
+      status,
+    });
   }
 
   async findById(id: number) {
@@ -82,15 +110,6 @@ export class JobsService {
   ) {
     const { variable, updateBy } = updateJobDto;
 
-    if (
-      variable.status &&
-      !Object.values(JOB_STATUS).includes(variable.status as JOB_STATUS)
-    ) {
-      throw new Error(
-        `Trạng thái không hợp lệ. Trạng thái phải là một trong "${Object.values(JOB_STATUS).join(', ')}"`,
-      );
-    }
-
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
         if ((variable?.placementIds ?? []).length > 0) {
@@ -104,6 +123,16 @@ export class JobsService {
               key: 'placements_id',
             },
           });
+
+          console.log(
+            'item',
+            {
+              itemsToRemove: jobPlacementsToRemove,
+              itemsToAdd: jobPlacementsToAdd,
+            },
+            'jobsId: ',
+            id,
+          );
 
           if (jobPlacementsToRemove.length > 0)
             await this.jobsPlacementsService.removeMany({
@@ -125,15 +154,40 @@ export class JobsService {
         return await this.jobRepository.update(id, {
           ...updateJobDto,
           variable: {
-            ...variable,
-            jobCategory: await this.jobCategoryService.findById(
-              variable.categoriesId,
-            ),
-            jobPosition: await this.jobPositionService.findById(
-              variable.positionsId,
-            ),
-            jobField: await this.jobFieldService.findById(variable.fieldsId),
-            workType: await this.workTypeService.findById(variable.workTypesId),
+            ...(variable.salaryMin && { salaryMin: variable.salaryMin }),
+            ...(variable.salaryMax && { salaryMax: variable.salaryMax }),
+            ...(variable.quantity && { quantity: variable.quantity }),
+            ...(variable.description && { description: variable.description }),
+            ...(variable.requirements && {
+              requirements: variable.requirements,
+            }),
+            ...(variable.benefits && { benefits: variable.benefits }),
+            ...(variable.fieldsId && {
+              jobField: await this.jobFieldService.findById(variable.fieldsId),
+            }),
+            ...(variable.categoriesId && {
+              jobCategory: await this.jobCategoryService.findById(
+                variable.categoriesId,
+              ),
+            }),
+            ...(variable.workTypesId && {
+              workType: await this.workTypeService.findById(
+                variable.workTypesId,
+              ),
+            }),
+            ...(variable.statusId && {
+              status: await this.statusService.findById(variable.statusId),
+            }),
+            ...(variable.positionsId && {
+              jobPosition: await this.jobPositionService.findById(
+                variable.positionsId,
+              ),
+            }),
+            ...(typeof variable.deleteAt !== 'undefined' && { deleteAt: null }),
+            ...(typeof variable.deleteBy !== 'undefined' && { deleteBy: null }),
+            ...(variable.statusId && {
+              status: await this.statusService.findById(variable.statusId),
+            }),
           },
           transactionalEntityManager,
         });
@@ -142,6 +196,20 @@ export class JobsService {
   }
 
   async remove(deleteJobDto: ISoftDelete<{ id: number }>) {
-    return await this.jobRepository.delete(deleteJobDto);
+    const { variable } = deleteJobDto;
+    const statusType = await this.statusTypesService.findByTitle(
+      STATUS_TYPE_TITLES.JOB,
+    );
+
+    return await this.jobRepository.delete({
+      ...deleteJobDto,
+      variable: {
+        ...variable,
+        status: await this.statusService.findByTitle(
+          STATUS_TITLES.JOB_DELETED,
+          statusType.id,
+        ),
+      },
+    });
   }
 }

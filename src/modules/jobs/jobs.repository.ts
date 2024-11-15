@@ -16,13 +16,14 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
-import { JOB_STATUS } from 'src/common/utils/enums';
+import { JOB_STATUS, STATUS_TITLES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { Job } from 'src/entities/job.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
 import { Placement } from 'src/entities/placement.entity';
+import { Status } from 'src/entities/status.entity';
 
 @Injectable()
 export class JobsRepository {
@@ -79,7 +80,7 @@ export class JobsRepository {
     return await this.jobRepository.findAndCount({
       ...paginationParams,
       where: {
-        status: JOB_STATUS.ACTIVE,
+        status: { title: STATUS_TITLES.JOB_ACTIVE },
         ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
         ...(salaryMin && {
           salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),
@@ -109,13 +110,17 @@ export class JobsRepository {
   }
 
   async findAllForEmployer(
-    jobsQueries: IFIndJobsForEmployerQueries & { usersId: number },
+    jobsQueries: IFIndJobsForEmployerQueries & {
+      usersId: number;
+      status?: Status[];
+    },
   ): Promise<[Job[], number]> {
-    const { applicationStatusId, title, usersId } = jobsQueries;
+    const { applicationStatusId, title, usersId, status } = jobsQueries;
     const { skip, take } = getPaginationParams({
       page: +jobsQueries.page,
       pageSize: +jobsQueries.pageSize,
     });
+
     const queryBuilder = this.jobRepository
       .createQueryBuilder('job')
       .select([
@@ -130,18 +135,19 @@ export class JobsRepository {
         'workType.title as work_type_title',
         'job.status as jobStatus',
         'jobCategory.name as job_category_name',
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang đánh giá' THEN 1 END) as evaluating_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang offer' THEN 1 END) as offering_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang phỏng vấn' THEN 1 END) as interviewing_count",
-        "COUNT(CASE WHEN applicationStatus.title = 'Đang tuyển' THEN 1 END) as recruiting_count",
+        ...(status &&
+          status.map(
+            (status) =>
+              `COUNT(CASE WHEN status.title = '${status.title}' THEN 1 END) as ${status.code}_count`,
+          )),
       ])
       .leftJoin('job.user', 'user')
       .leftJoin('job.workType', 'workType')
       .leftJoin('job.jobCategory', 'jobCategory')
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
-      .leftJoin('usersJobs.applicationStatus', 'applicationStatus')
+      .leftJoin('usersJobs.status', 'status')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('job.status <> :status', { status: JOB_STATUS.DELETED })
+      .andWhere('status.title <> :status', { status: JOB_STATUS.DELETED })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status',
       );
@@ -169,7 +175,7 @@ export class JobsRepository {
 
   async findById(id: number) {
     return await this.jobRepository.findOne({
-      where: { id: id, status: JOB_STATUS.ACTIVE },
+      where: { id: id, status: { title: STATUS_TITLES.JOB_ACTIVE } },
       ...this.generateJobRelationships(),
     });
   }
@@ -179,70 +185,124 @@ export class JobsRepository {
       CreateJobDto &
         Pick<
           Job,
-          'jobCategory' | 'jobPosition' | 'jobField' | 'user' | 'workType'
-        > & { placements: Placement[] }
+          | 'jobCategory'
+          | 'jobPosition'
+          | 'jobField'
+          | 'user'
+          | 'workType'
+          | 'status'
+        >
     >,
-  ) {
-    try {
-      const { createBy, variable } = createJob;
-      let newJobRecord: Job | null = null;
+  ): Promise<Job> {
+    const { createBy, variable, transactionalEntityManager } = createJob;
+    const createParams = {
+      applicationDeadline: variable.deadline,
+      description: variable.description,
+      minExpYearRequired: variable.minExpYearRequired,
+      salaryMax: variable.salaryMax,
+      requirements: variable.requirements,
+      maxExpYearRequired: variable.maxExpYearRequired,
+      salaryMin: variable.salaryMin,
+      title: variable.title,
+      benefits: variable.benefits,
+      salaryCurrency: variable.salaryCurrency,
+      quantity: variable.quantity,
+      jobCategory: variable.jobCategory,
+      jobPosition: variable.jobPosition,
+      jobField: variable.jobField,
+      user: variable.user,
+      workType: variable.workType,
+      status: variable.status,
+      createBy,
+      createAt: new Date().toString(),
+    } as Partial<Job>;
 
-      await this.dataSource.manager.transaction(
-        async (transactionalEntityManager) => {
-          newJobRecord = await transactionalEntityManager.save(
-            Job,
-            this.jobRepository.create({
-              applicationDeadline: variable.deadline,
-              createAt: new Date().toString(),
-              createBy,
-              description: variable.description,
-              minExpYearRequired: variable.minExpYearRequired,
-              salaryMax: variable.salaryMax,
-              requirements: variable.requirements,
-              maxExpYearRequired: variable.maxExpYearRequired,
-              salaryMin: variable.salaryMin,
-              title: variable.title,
-              benefits: variable.benefits,
-              salaryCurrency: variable.salaryCurrency,
-              quantity: variable.quantity,
-              jobCategory: variable.jobCategory,
-              jobPosition: variable.jobPosition,
-              jobField: variable.jobField,
-              user: variable.user,
-              workType: variable.workType,
-            }),
-          );
-
-          await Promise.all(
-            variable.placements.map((placement) => {
-              transactionalEntityManager.save(
-                JobsPlacement,
-                this.jobPlacementRepository.create({
-                  job: newJobRecord,
-                  jobsId: newJobRecord.id,
-                  placement: placement,
-                  placementsId: placement.id,
-                  createAt: new Date().toString(),
-                  createBy,
-                }),
-              );
-            }),
-          );
-        },
+    if (transactionalEntityManager)
+      return await (transactionalEntityManager as EntityManager).save(
+        Job,
+        createParams,
       );
 
-      return newJobRecord;
-    } catch (error) {
-      this.logger.log(error);
-      return null;
-    }
+    return await this.jobRepository.save(createParams);
   }
+
+  // async create(
+  //   createJob: ICreate<
+  //     CreateJobDto &
+  //       Pick<
+  //         Job,
+  //         | 'jobCategory'
+  //         | 'jobPosition'
+  //         | 'jobField'
+  //         | 'user'
+  //         | 'workType'
+  //         | 'status'
+  //       > & { placements: Placement[] }
+  //   >,
+  // ) {
+  //   try {
+  //     const { createBy, variable } = createJob;
+  //     let newJobRecord: Job | null = null;
+
+  //     await this.dataSource.manager.transaction(
+  //       async (transactionalEntityManager) => {
+  //         newJobRecord = await transactionalEntityManager.save(
+  //           Job,
+  //           this.jobRepository.create({
+  //   applicationDeadline: variable.deadline,
+  //   createAt: new Date().toString(),
+  //   createBy,
+  //   description: variable.description,
+  //   minExpYearRequired: variable.minExpYearRequired,
+  //   salaryMax: variable.salaryMax,
+  //   requirements: variable.requirements,
+  //   maxExpYearRequired: variable.maxExpYearRequired,
+  //   salaryMin: variable.salaryMin,
+  //   title: variable.title,
+  //   benefits: variable.benefits,
+  //   salaryCurrency: variable.salaryCurrency,
+  //   quantity: variable.quantity,
+  //   jobCategory: variable.jobCategory,
+  //   jobPosition: variable.jobPosition,
+  //   jobField: variable.jobField,
+  //   user: variable.user,
+  //   workType: variable.workType,
+  // }),
+  //         );
+
+  //         await Promise.all(
+  //           variable.placements.map((placement) => {
+  //             transactionalEntityManager.save(
+  //               JobsPlacement,
+  //               this.jobPlacementRepository.create({
+  //                 job: newJobRecord,
+  //                 jobsId: newJobRecord.id,
+  //                 placement: placement,
+  //                 placementsId: placement.id,
+  //                 createAt: new Date().toString(),
+  //                 createBy,
+  //               }),
+  //             );
+  //           }),
+  //         );
+  //       },
+  //     );
+
+  //     return newJobRecord;
+  //   } catch (error) {
+  //     this.logger.log(error);
+  //     return null;
+  //   }
+  // }
 
   async update(
     id: number,
     updateJob: IUpdate<
       UpdateJobDto & { deleteAt?: string; deleteBy?: number } & Partial<
-          Pick<Job, 'jobCategory' | 'jobPosition' | 'jobField' | 'workType'> & {
+          Pick<
+            Job,
+            'jobCategory' | 'jobPosition' | 'jobField' | 'workType' | 'status'
+          > & {
             placements: Placement[];
           }
         >
@@ -251,19 +311,7 @@ export class JobsRepository {
     const { updateBy, variable, transactionalEntityManager } = updateJob;
 
     const variables = {
-      ...(variable.salaryMin && { salaryMin: variable.salaryMin }),
-      ...(variable.salaryMax && { salaryMax: variable.salaryMax }),
-      ...(variable.quantity && { quantity: variable.quantity }),
-      ...(variable.description && { description: variable.description }),
-      ...(variable.requirements && { requirements: variable.requirements }),
-      ...(variable.benefits && { benefits: variable.benefits }),
-      ...(variable.jobField && { jobField: variable.jobField }),
-      ...(variable.jobCategory && { jobCategory: variable.jobCategory }),
-      ...(variable.workType && { workType: variable.workType }),
-      ...(variable.jobPosition && { jobPosition: variable.jobPosition }),
-      ...(variable.status && { status: variable.status }),
-      ...(typeof variable.deleteAt !== 'undefined' && { deleteAt: null }),
-      ...(typeof variable.deleteBy !== 'undefined' && { deleteBy: null }),
+      ...variable,
       updateBy,
       updateAt: new Date().toString(),
     } as Job;
@@ -281,14 +329,16 @@ export class JobsRepository {
     return (await this.jobRepository.update(id, variables)).affected > 0;
   }
 
-  async delete(deleteJobDto: ISoftDelete<{ id: number }>) {
+  async delete(
+    deleteJobDto: ISoftDelete<{ id: number } & Pick<Job, 'status'>>,
+  ) {
     const { variable, transactionalEntityManager, deleteBy } = deleteJobDto;
 
     const updateParams = {
       deleteAt: new Date().toString(),
       deleteBy,
-      status: JOB_STATUS.DELETED,
-    };
+      status: variable.status,
+    } as Partial<Job>;
 
     if (transactionalEntityManager) {
       const result = await (transactionalEntityManager as EntityManager).update(

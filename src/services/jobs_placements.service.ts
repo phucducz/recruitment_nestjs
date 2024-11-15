@@ -38,20 +38,40 @@ export class JobsPlacementsService {
     return `This action updates a #${id} jobsPlacement`;
   }
 
-  async create(createJobsPlacementDto: ICreate<CreateJobsPlacementDto>) {
+  async create(
+    createJobsPlacementDto: ICreate<
+      CreateJobsPlacementDto & Partial<Pick<JobsPlacement, 'job'>>
+    >,
+  ) {
     const { variable } = createJobsPlacementDto;
 
     return await this.jobsPlacementRepository.create({
       ...createJobsPlacementDto,
       variable: {
         ...variable,
-        job: await this.jobsService.findById(variable.jobsId),
+        ...(variable.job && { job: variable.job }),
+        ...(variable.jobsId && {
+          job: await this.jobsService.findById(variable.jobsId),
+        }),
         placements: await this.placementsService.findByIds(
           variable.placementIds,
         ),
       },
     });
   }
+
+  // async createMany(
+  //   createManyJobsPlacementDto: ICreateMany<CreateJobsPlacementDto>,
+  // ) {
+  //   const { variables, transactionalEntityManager, createBy } =
+  //     createManyJobsPlacementDto;
+
+  //   return await Promise.all(
+  //     variables.map((variable) =>
+  //       this.create({ createBy, variable, transactionalEntityManager }),
+  //     ),
+  //   );
+  // }
 
   async remove(
     removeJobPlacementDTO: IDelete<
