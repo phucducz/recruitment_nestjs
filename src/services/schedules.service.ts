@@ -51,4 +51,12 @@ export class SchedulesService {
   async remove(id: number) {
     return await this.scheduleRepository.remove({ variable: { id } });
   }
+
+  async findInterviewSchedules(
+    findInterviewScheduleDto: IFindInterviewSchedules,
+  ) {
+    return await this.scheduleRepository.findInterviewSchedules(
+      findInterviewScheduleDto,
+    );
+  }
 }

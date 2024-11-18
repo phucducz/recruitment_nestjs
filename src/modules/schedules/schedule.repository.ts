@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsSelect, Repository } from 'typeorm';
 
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
+import { STATUS_TITLES } from 'src/common/utils/enums';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateScheduleDto } from 'src/dto/schedules/create-schedule.dto';
 import { UpdateScheduleDto } from 'src/dto/schedules/update-schedule.dto';
 import { Schedule } from 'src/entities/schedule.entity';
@@ -77,5 +80,28 @@ export class ScheduleRepository {
     }
 
     return (await this.scheduleRepository.delete(variable.id)).affected > 0;
+  }
+
+  async findInterviewSchedules(
+    findInterviewScheduleDto: IFindInterviewSchedules,
+  ) {
+    const { jobsId, usersId } = findInterviewScheduleDto;
+    const paginationParams = getPaginationParams({
+      page: +findInterviewScheduleDto.page,
+      pageSize: +findInterviewScheduleDto.pageSize,
+    });
+
+    return await this.scheduleRepository.findAndCount({
+      where: {
+        usersJob: { usersId: +usersId, jobsId: +jobsId },
+        status: { title: STATUS_TITLES.SCHEDULE_INTERVIEW },
+      },
+      relations: ['status'],
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
+        status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
+      } as FindOptionsSelect<Schedule>,
+      ...paginationParams,
+    });
   }
 }

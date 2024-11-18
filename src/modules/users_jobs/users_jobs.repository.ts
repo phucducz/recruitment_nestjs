@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Raw, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindOptionsWhere,
+  Raw,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 
 import {
   CVSelectColumns,
@@ -117,13 +123,7 @@ export class UsersJobRepository {
         usersId: +findApplicantDetailQueries.usersId,
         jobsId: +findApplicantDetailQueries.jobsId,
       },
-      relations: [
-        'job',
-        'status',
-        'curriculumVitae',
-        'schedules',
-        'schedules.status',
-      ],
+      relations: ['job', 'user', 'status', 'curriculumVitae'],
       select: {
         createAt: true,
         updateAt: true,
@@ -132,16 +132,13 @@ export class UsersJobRepository {
           'referrerId',
           'employerUpdateBy',
         ]),
+        user: { id: true, fullName: true },
         job: { title: true, id: true },
         curriculumVitae: filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
           ...removeColumns,
           'isDeleted',
         ]),
         status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
-        schedules: {
-          ...filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
-          status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
-        },
       },
     });
   }
@@ -158,23 +155,36 @@ export class UsersJobRepository {
       { jobsId: number; usersId: number }
     >,
   ) {
-    const { variable, queries } = updateUsersJobDto;
-
-    const result = await this.usersJobRepository.update(queries, {
+    const { variable, queries, transactionalEntityManager } = updateUsersJobDto;
+    const updateParams = {
       ...[
         'employerUpdateBy',
         'employerUpdateAt',
         'updateBy',
         'updateAt',
         'status',
+        'cvViewedAt',
       ].reduce((acc, key) => {
         if (variable[key]) acc[key] = variable[key];
 
         return acc;
       }, {} as UsersJob),
-    });
+    };
+    let updateResult = { affected: 0 } as UpdateResult;
 
-    return result.affected > 0;
+    if (transactionalEntityManager)
+      updateResult = await (transactionalEntityManager as EntityManager).update(
+        UsersJob,
+        queries,
+        updateParams,
+      );
+    else
+      updateResult = await this.usersJobRepository.update(
+        queries,
+        updateParams,
+      );
+
+    return updateResult.affected > 0;
   }
 
   async getMonthlyCandidateStatisticsByYear(year: string) {

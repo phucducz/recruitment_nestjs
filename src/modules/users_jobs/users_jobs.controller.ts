@@ -182,15 +182,18 @@ export class UsersJobsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('applicants/detail')
   async findApplicantDetail(
     @Query() findApplicantDetailQueries: IFindApplicantDetailQueries,
     @Res() res: Response,
+    @Request() request: any,
   ) {
     try {
-      const result = await this.usersJobsService.findApplicantDetail(
-        findApplicantDetailQueries,
-      );
+      const result = await this.usersJobsService.findApplicantDetail({
+        ...findApplicantDetailQueries,
+        updateBy: +request.user.userId,
+      });
 
       return res.status(200).json({ statusCode: 200, ...result });
     } catch (error) {

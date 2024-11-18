@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateScheduleDto } from 'src/dto/schedules/create-schedule.dto';
 import { UpdateScheduleDto } from 'src/dto/schedules/update-schedule.dto';
 import { SchedulesService } from '../../services/schedules.service';
@@ -113,8 +115,31 @@ export class SchedulesController {
     return this.schedulesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.schedulesService.findOne(+id);
+  @Get('interview')
+  async findInterviewSchedules(
+    @Query() findInterviewSchedules: IFindInterviewSchedules,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.schedulesService.findInterviewSchedules(
+        findInterviewSchedules,
+      );
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            page: +findInterviewSchedules.page,
+            pageSize: +findInterviewSchedules.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Lấy danh sách lịch phỏng vấn không thành công. ${error?.message ?? error}!`,
+      });
+    }
   }
 }
