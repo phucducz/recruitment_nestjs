@@ -142,4 +142,36 @@ export class SchedulesController {
       });
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('upcoming')
+  async findUpcomingSchedules(
+    @Query() findUpcomingInterviewQueries: IFindUpcomingScheduleQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.schedulesService.findUpcomingSchedules(
+        findUpcomingInterviewQueries,
+      );
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems(
+          {
+            ...(findUpcomingInterviewQueries?.page && {
+              page: +findUpcomingInterviewQueries.page,
+            }),
+            ...(findUpcomingInterviewQueries?.pageSize && {
+              pageSize: +findUpcomingInterviewQueries.pageSize,
+            }),
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ statusCode: 500, message: error?.message ?? error });
+    }
+  }
 }
