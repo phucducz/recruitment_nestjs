@@ -203,16 +203,6 @@ export class UsersJobsController {
     }
   }
 
-  @Get()
-  findAll() {
-    return this.usersJobsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersJobsService.findOne(+id);
-  }
-
   @UseGuards(JwtAuthGuard)
   @Patch()
   async update(
