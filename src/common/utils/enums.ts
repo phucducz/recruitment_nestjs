@@ -40,11 +40,11 @@ export enum STATUS_TITLES {
   JOB_INACTIVE = 'Ngừng đăng tin',
   JOB_DELETED = 'Đã xóa',
   APPLICATION_EVALUATING = 'Đang đánh giá',
-  APPLICATION_INTERVIEWING = 'Đang phỏng vấn',
-  APPLICATION_RECRUITING = 'Đang tuyển',
+  APPLICATION_INTERVIEWING = 'Phỏng vấn',
+  APPLICATION_RECRUITING = 'Đã tuyển',
   APPLICATION_OFFERING = 'Đang offer',
-  SCHEDULE_INTERVIEW = 'Phỏng vấn',
-  SCHEDULE_START_WORK = 'Bắt đầu đi làm',
+  SCHEDULE_INTERVIEWING = 'Phỏng vấn',
+  SCHEDULE_START_WORKING = 'Bắt đầu đi làm',
 }
 
 export enum STATUS_TYPE_TITLES {
