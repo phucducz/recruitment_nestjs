@@ -15,6 +15,7 @@ import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobRepository } from 'src/modules/users_jobs/users_jobs.repository';
+import { DataSource } from 'typeorm';
 import { CurriculumVitaesService } from './curriculum_vitaes.service';
 import { RolesService } from './roles.service';
 import { StatusService } from './status.service';
@@ -36,6 +37,7 @@ export class UsersJobsService {
     private readonly statusService: StatusService,
     @Inject(StatusTypesService)
     private readonly statusTypesService: StatusTypesService,
+    @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
   async aplly(createUsersJobDto: ICreate<CreateUsersJobDto>) {
@@ -90,13 +92,24 @@ export class UsersJobsService {
   }
 
   async findApplicantDetail(
-    findApplicantDetailQueries: IFindApplicantDetailQueries,
+    findApplicantDetailQueries: IFindApplicantDetailQueries & {
+      updateBy: number;
+    },
   ) {
     if (
       !findApplicantDetailQueries.usersId ||
       !findApplicantDetailQueries.jobsId
     )
       throw new Error('jobsId và usersId là bắt buộc!');
+
+    await this.usersJobRepository.update({
+      queries: {
+        usersId: +findApplicantDetailQueries.usersId,
+        jobsId: +findApplicantDetailQueries.jobsId,
+      },
+      updateBy: findApplicantDetailQueries.updateBy,
+      variable: { cvViewedAt: new Date().toString() },
+    });
 
     return await this.usersJobRepository.findApplicantDetail(
       findApplicantDetailQueries,

@@ -20,6 +20,7 @@ interface IUpdateMTM<T, QT> {
   variable: T;
   updateBy: number;
   queries: QT;
+  transactionalEntityManager?: EntityManager;
 }
 
 interface IUpdateMany<T> {
