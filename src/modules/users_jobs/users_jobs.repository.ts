@@ -117,13 +117,7 @@ export class UsersJobRepository {
         usersId: +findApplicantDetailQueries.usersId,
         jobsId: +findApplicantDetailQueries.jobsId,
       },
-      relations: [
-        'job',
-        'status',
-        'curriculumVitae',
-        'schedules',
-        'schedules.status',
-      ],
+      relations: ['job', 'user', 'status', 'curriculumVitae'],
       select: {
         createAt: true,
         updateAt: true,
@@ -132,16 +126,13 @@ export class UsersJobRepository {
           'referrerId',
           'employerUpdateBy',
         ]),
+        user: { id: true, fullName: true },
         job: { title: true, id: true },
         curriculumVitae: filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
           ...removeColumns,
           'isDeleted',
         ]),
         status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
-        schedules: {
-          ...filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
-          status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
-        },
       },
     });
   }
