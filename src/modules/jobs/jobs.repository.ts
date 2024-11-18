@@ -139,7 +139,7 @@ export class JobsRepository {
         ...(status &&
           status.map(
             (status) =>
-              `COUNT(CASE WHEN status.title = '${status.title}' THEN 1 END) as ${status.code}_count`,
+              `COUNT(CASE WHEN uj_status.title = '${status.title}' THEN 1 END) as ${status.code}_count`,
           )),
       ])
       .leftJoin('job.user', 'user')
@@ -147,12 +147,13 @@ export class JobsRepository {
       .leftJoin('job.jobCategory', 'jobCategory')
       .leftJoin('job.usersJobs', 'usersJobs', 'job.id = usersJobs.jobsId')
       .leftJoin('job.status', 'status')
+      .leftJoin('usersJobs.status', 'uj_status')
       .where('job.users_id = :usersId', { usersId })
       .andWhere('status.id = :statusId', {
         statusId: +(jobsQueries.statusId ?? '5'),
       })
       .groupBy(
-        'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title',
+        'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title, status.id',
       );
 
     if (jobsQueries.title)
