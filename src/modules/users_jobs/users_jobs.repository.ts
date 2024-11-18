@@ -163,6 +163,7 @@ export class UsersJobRepository {
         'updateBy',
         'updateAt',
         'status',
+        'cvViewedAt',
       ].reduce((acc, key) => {
         if (variable[key]) acc[key] = variable[key];
 
