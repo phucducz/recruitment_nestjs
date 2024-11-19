@@ -133,9 +133,14 @@ export class ScheduleRepository {
               : STATUS_TITLES.SCHEDULE_START_WORKING,
         },
       },
-      relations: ['usersJob'],
+      relations: ['usersJob', 'usersJob.user', 'usersJob.job'],
       select: {
-        usersJob: filterColumns(ENTITIES.FIELDS.USERS_JOB, removeColumns),
+        usersJob: {
+          usersId: true,
+          jobsId: true,
+          user: { id: true, fullName: true },
+          job: { id: true, title: true },
+        },
         ...filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
       },
       ...paginationParams,
