@@ -34,6 +34,7 @@ interface IFindApplicantsQueries extends BaseQueries {
   applicantName?: string;
   source?: string;
   applyDate?: string;
+  statusId?: string;
 }
 
 interface IFindDesiredJobsQueries extends BaseQueries {

@@ -82,7 +82,7 @@ export class UsersJobRepository {
   }
 
   async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
-    const { usersId, page, pageSize, applicantName, source, jobsId } =
+    const { usersId, page, pageSize, applicantName, source, jobsId, statusId } =
       findApplicantsForJob;
     const paginationParams = getPaginationParams({ page, pageSize });
 
@@ -102,6 +102,7 @@ export class UsersJobRepository {
           ),
         }),
         ...(jobsId && { jobsId: +jobsId }),
+        ...(statusId && { status: { id: +statusId } }),
       },
       relations: ['job', 'user', 'status'],
       select: {

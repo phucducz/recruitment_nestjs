@@ -43,6 +43,7 @@ export enum STATUS_TITLES {
   APPLICATION_INTERVIEWING = 'Phỏng vấn',
   APPLICATION_RECRUITING = 'Đã tuyển',
   APPLICATION_OFFERING = 'Đang offer',
+  APPLICATION_REJECTED = 'Đã từ chối',
   SCHEDULE_INTERVIEWING = 'Phỏng vấn',
   SCHEDULE_START_WORKING = 'Bắt đầu đi làm',
 }
