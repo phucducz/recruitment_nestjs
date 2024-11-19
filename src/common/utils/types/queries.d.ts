@@ -35,6 +35,7 @@ interface IFindApplicantsQueries extends BaseQueries {
   source?: string;
   applyDate?: string;
   statusId?: string;
+  type?: 'default' | 'new';
 }
 
 interface IFindDesiredJobsQueries extends BaseQueries {
