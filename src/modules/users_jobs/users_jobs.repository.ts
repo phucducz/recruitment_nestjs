@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Between,
   EntityManager,
   FindOptionsWhere,
   Raw,
@@ -8,6 +9,7 @@ import {
   UpdateResult,
 } from 'typeorm';
 
+import dayjs from 'dayjs';
 import {
   CVSelectColumns,
   ENTITIES,
@@ -85,6 +87,11 @@ export class UsersJobRepository {
     const { usersId, page, pageSize, applicantName, source, jobsId, statusId } =
       findApplicantsForJob;
     const paginationParams = getPaginationParams({ page, pageSize });
+    const sevenDaysAgo = dayjs()
+      .subtract(7, 'day')
+      .startOf('day')
+      .format('YYYY-MM-DD HH:mm:ss');
+    const today = dayjs().endOf('day').format('YYYY-MM-DD HH:mm:ss');
 
     return await this.usersJobRepository.findAndCount({
       where: {
@@ -103,6 +110,10 @@ export class UsersJobRepository {
         }),
         ...(jobsId && { jobsId: +jobsId }),
         ...(statusId && { status: { id: +statusId } }),
+        ...(findApplicantsForJob.type &&
+          findApplicantsForJob.type === 'new' && {
+            createAt: Between(sevenDaysAgo, today),
+          }),
       },
       relations: ['job', 'user', 'status'],
       select: {
