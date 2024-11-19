@@ -130,7 +130,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('applied-jobs')
+  @Get('/applied-jobs')
   async findAppliedJobs(
     @Query() appliedJobQueries: IAppliedJobQueries,
     @Request() request: any,
@@ -153,7 +153,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('applicants')
+  @Get('/applicants')
   async findApplicantsForJob(
     @Query() applicantsQueries: Omit<IFindApplicantsQueries, 'usersId'>,
     @Res() res: Response,
@@ -183,7 +183,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('applicants/detail')
+  @Get('/applicants/detail')
   async findApplicantDetail(
     @Query() findApplicantDetailQueries: IFindApplicantDetailQueries,
     @Res() res: Response,
@@ -235,7 +235,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('applicants/monthly-statistic')
+  @Get('/applicants/monthly-statistic')
   async getMonthlyCandidateStatisticsByYear(
     @Query() queries: { year: string },
     @Res() res: Response,
