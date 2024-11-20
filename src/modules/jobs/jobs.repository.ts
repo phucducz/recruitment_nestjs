@@ -71,6 +71,7 @@ export class JobsRepository {
       title,
       workTypesId,
       usersId,
+      statusId,
     } = jobsQueries;
     const paginationParams = getPaginationParams({
       page: +page,
@@ -80,7 +81,7 @@ export class JobsRepository {
     return await this.jobRepository.findAndCount({
       ...paginationParams,
       where: {
-        status: { title: STATUS_TITLES.JOB_ACTIVE },
+        ...(statusId && { status: { id: +statusId } }),
         ...(title && { title: Raw((value) => `${value} ILIKE '%${title}%'`) }),
         ...(salaryMin && {
           salaryMin: Raw((value) => `${value} >= ${+salaryMin}`),

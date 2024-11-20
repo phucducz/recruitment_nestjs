@@ -9,6 +9,7 @@ interface IJobQueries extends BaseQueries {
   categoriesId?: string;
   jobFieldsId?: string;
   usersId?: string;
+  statusId?: string;
 }
 
 interface ISkillQueries extends BaseQueries {
