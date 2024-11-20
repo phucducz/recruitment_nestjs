@@ -71,7 +71,7 @@ export class JobsService {
           createBy,
           variable: {
             job: newJob,
-            jobsId: newJob.id,
+            jobsId: undefined,
             placementIds: variable.placementIds,
           },
           transactionalEntityManager,
