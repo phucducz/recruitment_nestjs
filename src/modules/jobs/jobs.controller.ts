@@ -18,9 +18,9 @@ import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
 import { StatusService } from 'src/services/status.service';
+import { StatusTypesService } from 'src/services/status_types.service';
 import { JobsService } from '../../services/jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { StatusTypesService } from 'src/services/status_types.service';
 
 @Controller('jobs')
 export class JobsController {
