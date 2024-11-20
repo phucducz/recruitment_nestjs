@@ -125,7 +125,6 @@ export const jobSelectRelationColumns = jobRelations.entites.reduce(
 ) as any;
 
 export const CVSelectColumns = filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
-  ...removeColumns,
   'isDeleted',
 ]) as FindOptionsSelect<CurriculumVitae>;
 
