@@ -4,6 +4,7 @@ import {
   DataSource,
   EntityManager,
   FindManyOptions,
+  In,
   Raw,
   Repository,
 } from 'typeorm';
@@ -59,26 +60,29 @@ export class JobsRepository {
     };
   }
 
-  async findAll(jobsQueries: IJobQueries) {
+  async findAll(jobsQueries: IJobQueries): Promise<[Job[], number]> {
     const {
       categoriesId,
       jobFieldsId,
       page,
       pageSize,
-      placementsId,
       salaryMax,
       salaryMin,
       title,
       workTypesId,
       usersId,
       statusId,
+      jobsId,
     } = jobsQueries;
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
     });
+    const placementIds = jobsQueries?.placementIds
+      ? jobsQueries.placementIds.split(',')
+      : [];
 
-    return await this.jobRepository.findAndCount({
+    const [jobs, totalItems] = await this.jobRepository.findAndCount({
       ...paginationParams,
       where: {
         ...(statusId && { status: { id: +statusId } }),
@@ -91,12 +95,22 @@ export class JobsRepository {
         }),
         ...(categoriesId && { jobCategory: { id: +categoriesId } }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
-        ...(placementsId && {
-          jobsPlacements: { placementsId: +placementsId },
+        ...(placementIds?.length > 0 && {
+          jobsPlacements: {
+            placementsId: In(
+              placementIds.map((placement) => +placement.trim()),
+            ),
+          },
         }),
         ...(workTypesId && { workType: { id: +workTypesId } }),
         ...(usersId && { user: { id: +usersId } }),
+        ...(jobsId && { id: +jobsId }),
       },
+      select: { id: true },
+    });
+
+    const result = await this.jobRepository.find({
+      where: { id: In(jobs.map((job) => job.id)) },
       relations: this.generateJobRelationships().relations,
       select: {
         ...this.generateJobRelationships().select,
@@ -106,8 +120,10 @@ export class JobsRepository {
         deleteAt: false,
         deleteBy: false,
       },
-      order: { createAt: 'DESC' },
+      order: { id: 'ASC' },
     });
+
+    return [result, totalItems];
   }
 
   async findAllForEmployer(

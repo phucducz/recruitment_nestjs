@@ -62,17 +62,26 @@ export class JobsController {
 
   @Get('/all?')
   async findAll(@Query() jobQueries: IJobQueries, @Res() res: Response) {
-    const result = await this.jobsService.findAll(jobQueries);
+    try {
+      const result = await this.jobsService.findAll(jobQueries);
 
-    return res.status(200).json({
-      ...rtPageInfoAndItems(
-        {
-          page: +jobQueries.page,
-          pageSize: +jobQueries.pageSize,
-        },
-        result,
-      ),
-    });
+      return res.status(200).json({
+        ...rtPageInfoAndItems(
+          {
+            page: +jobQueries.page,
+            pageSize: +jobQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res
+        .status(200)
+        .json({
+          statusCode: 200,
+          message: `Lỗi khi lấy danh sách công việc. ${error.message ?? error}`,
+        });
+    }
   }
 
   @UseGuards(JwtAuthGuard)
