@@ -2,7 +2,7 @@ interface BaseQueries extends IPagination {}
 
 interface IJobQueries extends BaseQueries {
   title?: string;
-  placementsId?: string;
+  placementIds?: string;
   salaryMin?: string;
   salaryMax?: string;
   workTypesId?: string;
@@ -10,6 +10,7 @@ interface IJobQueries extends BaseQueries {
   jobFieldsId?: string;
   usersId?: string;
   statusId?: string;
+  jobsId?: string;
 }
 
 interface ISkillQueries extends BaseQueries {
