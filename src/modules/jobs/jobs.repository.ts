@@ -17,7 +17,6 @@ import {
   jobSelectRelationColumns,
   removeColumns,
 } from 'src/common/utils/constants';
-import { STATUS_TITLES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateJobDto } from 'src/dto/jobs/create-job.dto';
 import { UpdateJobDto } from 'src/dto/jobs/update-job.dto';
@@ -190,7 +189,7 @@ export class JobsRepository {
 
   async findById(id: number) {
     return await this.jobRepository.findOne({
-      where: { id: id, status: { title: STATUS_TITLES.JOB_ACTIVE } },
+      where: { id: id },
       ...this.generateJobRelationships(),
     });
   }

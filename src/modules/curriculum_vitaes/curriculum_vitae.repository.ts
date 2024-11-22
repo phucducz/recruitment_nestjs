@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import {
-  CVSelectColumns,
-  ENTITIES,
-  removeColumns,
-} from 'src/common/utils/constants';
-import { filterColumns } from 'src/common/utils/function';
+import { CVSelectColumns } from 'src/common/utils/constants';
 import { CreateCurriculumVitaeDto } from 'src/dto/curriculum_vitae/create-curriculum-vitae.dto';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { User } from 'src/entities/user.entity';
@@ -64,5 +59,9 @@ export class CurriculumVitaesRepository {
 
   async findById(id: number) {
     return await this.curriculumVitaeRepository.findOneBy({ id });
+  }
+
+  async remove(id: number) {
+    return (await this.curriculumVitaeRepository.delete(id)).affected > 0;
   }
 }
