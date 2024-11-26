@@ -63,7 +63,7 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: ['curriculumVitae', 'job', 'status'],
+      relations: ['curriculumVitae', 'job', 'status', 'job.user'],
       select: {
         job: {
           ...jobSelectRelationColumns,
@@ -73,6 +73,10 @@ export class UsersJobRepository {
           updateAt: false,
           updateBy: false,
           status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
+          user: filterColumns(ENTITIES.FIELDS.USER, [
+            ...removeColumns,
+            'password',
+          ]),
         },
         ...this.generateUsersJobSelect(removeColumns),
         createAt: true,

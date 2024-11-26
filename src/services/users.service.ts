@@ -137,7 +137,10 @@ export class UsersService {
 
   async updateAccountInfo(
     updateAccountInfoDto: IUpdate<
-      UpdateAccountInfoDto & { file: Express.Multer.File }
+      Omit<UpdateAccountInfoDto, 'isChangePassword'> & {
+        file: Express.Multer.File;
+        isChangePassword: boolean;
+      }
     >,
   ) {
     const { updateBy, variable } = updateAccountInfoDto;
