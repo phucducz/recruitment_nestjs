@@ -14,12 +14,12 @@ import { UsersForeignLanguagesController } from './users_foreign_languages.contr
   imports: [
     TypeOrmModule.forFeature([UsersForeignLanguage]),
     ForeignLanguagesModule,
-    UsersModule,
-    RefreshTokenModule,
+    forwardRef(() => RefreshTokenModule),
+    forwardRef(() => UsersModule),
     forwardRef(() => AuthModule),
   ],
   controllers: [UsersForeignLanguagesController],
   providers: [UsersForeignLanguagesService, UsersForeignLanguagesRepository],
-  exports: [UsersForeignLanguagesService],
+  exports: [UsersForeignLanguagesService, UsersForeignLanguagesRepository],
 })
 export class UsersForeignLanguagesModule {}

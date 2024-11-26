@@ -1,4 +1,12 @@
-import { Controller, Get, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
@@ -23,6 +31,33 @@ export class CurriculumVitaesController {
       return res
         .status(500)
         .json({ message: error?.message ?? error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async remove(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.curriculumVitaesService.remove(+id);
+
+      if(!result)
+        return res
+        .status(401)
+        .json({ message: 'Xóa CV không thành công!', statusCode: 401 });
+
+      return res
+        .status(200)
+        .json({ message: 'Xóa CV thành công!', statusCode: 200 });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({
+          message: `Xóa CV không thành công. ${error?.message ?? error}!`,
+          statusCode: 500,
+        });
     }
   }
 }

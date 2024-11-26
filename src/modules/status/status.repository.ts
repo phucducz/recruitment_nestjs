@@ -36,7 +36,7 @@ export class StatusRepository {
     });
 
     return await this.statusRepository.findAndCount({
-      where: { statusType: { title: type } },
+      where: { statusType: { code: type } },
       relations: ['statusType'],
       select: {
         ...filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),

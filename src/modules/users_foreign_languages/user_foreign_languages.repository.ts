@@ -1,23 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { EntityManager, FindOptionsSelect, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/create-users_foreign_language.dto';
 import { UpdateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/update-users_foreign_language.dto';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
-import { ForeignLanguagesService } from 'src/services/foreign_languages.service';
-import { UsersService } from 'src/services/users.service';
 
 @Injectable()
 export class UsersForeignLanguagesRepository {
   constructor(
     @InjectRepository(UsersForeignLanguage)
     private readonly usersForeignLanguageRepository: Repository<UsersForeignLanguage>,
-    @Inject(ForeignLanguagesService)
-    private readonly foreignLanguagesService: ForeignLanguagesService,
-    @Inject(UsersService) private readonly usersService: UsersService,
   ) {}
 
   async findByCompositePrKey(params: {
@@ -28,23 +23,43 @@ export class UsersForeignLanguagesRepository {
   }
 
   async create(
-    createUsersForeignLanguageDto: ICreate<CreateUsersForeignLanguageDto>,
+    createUsersForeignLanguageDto: ICreate<
+      CreateUsersForeignLanguageDto &
+        Pick<UsersForeignLanguage, 'user' | 'foreignLanguage'>
+    >,
   ) {
-    const { createBy, variable } = createUsersForeignLanguageDto;
-    const foreignLanguage = await this.foreignLanguagesService.findById(
-      variable.foreignLanguagesId,
-    );
-    const user = await this.usersService.findById(createBy);
-
-    return (await this.usersForeignLanguageRepository.save({
-      foreignLanguage,
-      foreignLanguagesId: foreignLanguage.id,
+    const { createBy, variable, transactionalEntityManager } =
+      createUsersForeignLanguageDto;
+    const createParams = {
+      foreignLanguage: variable.foreignLanguage,
       level: variable.level,
-      user,
-      usersId: user.id,
+      user: variable.user,
       createAt: new Date().toString(),
       createBy,
-    })) as UsersForeignLanguage;
+    } as UsersForeignLanguage;
+
+    if (transactionalEntityManager)
+      return await (transactionalEntityManager as EntityManager).save(
+        createParams,
+      );
+
+    return await this.usersForeignLanguageRepository.save(createParams);
+  }
+
+  async createMany(
+    createUsersForeignLanguageDto: ICreateMany<
+      CreateUsersForeignLanguageDto &
+        Pick<UsersForeignLanguage, 'user' | 'foreignLanguage'>
+    >,
+  ) {
+    const { createBy, variables, transactionalEntityManager } =
+      createUsersForeignLanguageDto;
+
+    return await Promise.all(
+      variables.map((variable) =>
+        this.create({ createBy, variable, transactionalEntityManager }),
+      ),
+    );
   }
 
   async update(
@@ -53,21 +68,50 @@ export class UsersForeignLanguagesRepository {
       { foreignLanguagesId: number; usersId: number }
     >,
   ) {
-    const { updateBy, variable, queries } = updateUsersForeignLanguageDto;
-
-    const result = await this.usersForeignLanguageRepository.update(queries, {
+    const { updateBy, variable, queries, transactionalEntityManager } =
+      updateUsersForeignLanguageDto;
+    const updateParams = {
       level: variable.level,
       updateAt: new Date().toString(),
       updateBy,
-    });
+    };
 
-    return result.affected > 0;
+    if (transactionalEntityManager) {
+      return (
+        (
+          await this.usersForeignLanguageRepository.update(
+            queries,
+            updateParams,
+          )
+        ).affected > 0
+      );
+    }
+
+    return (
+      (await this.usersForeignLanguageRepository.update(queries, updateParams))
+        .affected > 0
+    );
+  }
+
+  async updateMany(
+    updateUsersForeignLanguageDto: IUpdateMTM<
+      UpdateUsersForeignLanguageDto,
+      { foreignLanguagesId: number; usersId: number }
+    >[],
+  ) {
+    return await Promise.all(
+      updateUsersForeignLanguageDto.map((dto) => this.update(dto)),
+    );
   }
 
   async remove(params: { foreignLanguagesId: number; usersId: number }) {
     const result = await this.usersForeignLanguageRepository.delete(params);
 
     return result.affected > 0;
+  }
+
+  async removeMany(params: { foreignLanguagesId: number; usersId: number }[]) {
+    return await Promise.all(params.map((param) => this.remove(param)));
   }
 
   async findBy(userForeignLanguageQueries: IFindUserForeignLanguagesQueries) {

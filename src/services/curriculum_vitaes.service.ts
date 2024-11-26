@@ -43,4 +43,8 @@ export class CurriculumVitaesService {
   async findById(id: number) {
     return await this.curriculumVitaesRepository.findById(id);
   }
+
+  async remove(id: number) {
+    return await this.curriculumVitaesRepository.remove(id);
+  }
 }
