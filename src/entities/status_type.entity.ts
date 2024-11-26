@@ -12,7 +12,7 @@ export class StatusType extends BaseEntity {
   title: string;
 
   @Field()
-  @Column({ type: 'varchar', enum: STATUS_TYPE_CODES })
+  @Column({ type: 'varchar', enum: STATUS_TYPE_CODES, nullable: true })
   code: string;
 
   @OneToMany(() => Status, (status) => status.statusType)
