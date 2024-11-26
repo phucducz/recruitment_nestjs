@@ -176,9 +176,18 @@ export class UsersController {
     @Request() request: any,
   ) {
     try {
+      const isChangePassword = updateAccountInfoDto.isChangePassword;
+
       const result = await this.usersService.updateAccountInfo({
         updateBy: request.user.userId,
-        variable: { ...updateAccountInfoDto, file },
+        variable: {
+          ...updateAccountInfoDto,
+          file,
+          isChangePassword:
+            typeof isChangePassword === 'boolean'
+              ? isChangePassword
+              : isChangePassword === 'true',
+        },
       });
 
       if (!result)

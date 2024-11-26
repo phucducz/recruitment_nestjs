@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsOptional, IsString } from 'class-validator';
 import { ChangePasswordDto } from './change-password.dto';
 
 export class UpdateAccountInfoDto extends PartialType(ChangePasswordDto) {
@@ -8,6 +8,6 @@ export class UpdateAccountInfoDto extends PartialType(ChangePasswordDto) {
   fullName?: string;
 
   @IsOptional()
-  @IsBoolean()
-  isChangePassword?: boolean;
+  @IsBooleanString()
+  isChangePassword?: boolean | string;
 }

@@ -310,7 +310,10 @@ export class UsersRepository {
 
   async updateAccountInfo(
     updateAccountInfoDto: IUpdate<
-      UpdateAccountInfoDto & { avatarUrl: string | null }
+      Omit<UpdateAccountInfoDto, 'isChangePassword'> & {
+        avatarUrl: string | null;
+        isChangePassword: boolean;
+      }
     >,
   ) {
     const { updateBy, variable, transactionalEntityManager } =
