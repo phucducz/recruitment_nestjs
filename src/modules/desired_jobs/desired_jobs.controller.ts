@@ -88,12 +88,6 @@ export class DesiredJobsController {
         where: { user: { id: request.user.userId } },
       });
 
-      if (!result)
-        return res.status(401).json({
-          message: 'Lấy thông tin công việc mong muốn thất bại!',
-          statusCode: 401,
-        });
-
       return res.status(200).json({
         statusCode: 200,
         ...result,
