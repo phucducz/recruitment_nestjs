@@ -259,15 +259,6 @@ export class UsersController {
         updateBy: request.user.userId,
         variable: {
           ...updatePersonalInfoDto,
-          totalYearExperience:
-            updatePersonalInfoDto?.totalYearExperience &&
-            +updatePersonalInfoDto?.totalYearExperience,
-          jobPositionsId:
-            updatePersonalInfoDto?.jobPositionsId &&
-            +updatePersonalInfoDto?.jobPositionsId,
-          placementsId:
-            updatePersonalInfoDto?.placementsId &&
-            +updatePersonalInfoDto?.placementsId,
           file,
         },
       });

@@ -1,9 +1,9 @@
 import {
-  IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
   MaxLength,
-  MinLength
+  MinLength,
 } from 'class-validator';
 
 export class UpdatePersonalInfoDto {
@@ -11,17 +11,17 @@ export class UpdatePersonalInfoDto {
   @IsOptional()
   fullName: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  jobPositionsId?: number;
+  jobPositionsId?: number | string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  totalYearExperience: number;
+  totalYearExperience: number | string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
-  placementsId?: number;
+  placementsId?: number | string;
 
   @IsString()
   @IsOptional()
