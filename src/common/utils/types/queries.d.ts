@@ -61,8 +61,8 @@ interface IFindUserSkillsQueries extends BaseQueries {
 }
 
 interface IFindUserForeignLanguagesQueries extends BaseQueries {
-  foreignLanguagesId?: string;
-  usersId?: string;
+  foreignLanguagesId?: string | number;
+  usersId?: string | number;
 }
 
 interface IFindApplicationStatusQueries extends BaseQueries {
