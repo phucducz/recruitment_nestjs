@@ -92,3 +92,7 @@ interface IFindInterviewSchedules extends BaseQueries {
 interface IFindUpcomingScheduleQueries extends BaseQueries {
   type: 'interviewing' | 'start_working';
 }
+
+interface IFindRoleQueries extends BaseQueries {
+  id?: string;
+}

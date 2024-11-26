@@ -29,10 +29,18 @@ export class RolesRepository {
     });
   }
 
-  async findAll(pagination: IPagination) {
-    const paginationParams = getPaginationParams(pagination);
+  async findAll(findAllQueries: IFindRoleQueries) {
+    const paginationParams = getPaginationParams({
+      page: +findAllQueries.page,
+      pageSize: +findAllQueries.pageSize,
+    });
 
-    return await this.rolesRepository.findAndCount(paginationParams);
+    return await this.rolesRepository.findAndCount({
+      where: {
+        ...(findAllQueries?.id && { id: +findAllQueries.id }),
+      },
+      ...paginationParams,
+    });
   }
 
   async create(createRole: ICreate<CreateRoleDto>) {

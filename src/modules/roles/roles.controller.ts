@@ -11,7 +11,6 @@ import {
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
-import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesService } from 'src/services/roles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -28,8 +27,6 @@ export class RolesController {
     @Res() res: Response,
   ) {
     try {
-      console.log(request.user);
-
       const result = await this.rolesService.create({
         createBy: request.user.userId,
         variable: createRoleDto,
@@ -83,14 +80,21 @@ export class RolesController {
   }
 
   @Get('/all?')
-  async findAll(@Query() pagination: IPagination, @Res() res: Response) {
-    const paginationParams = {
-      page: +pagination.page,
-      pageSize: +pagination.pageSize,
-    };
-    const result = await this.rolesService.findAll(paginationParams);
+  async findAll(
+    @Query() findAllQueries: IFindRoleQueries,
+    @Res() res: Response,
+  ) {
+    const result = await this.rolesService.findAll(findAllQueries);
 
-    return res.status(200).json({ ...rtPageInfoAndItems(paginationParams, result) });
+    return res.status(200).json({
+      ...rtPageInfoAndItems(
+        {
+          page: +findAllQueries.page,
+          pageSize: +findAllQueries.pageSize,
+        },
+        result,
+      ),
+    });
   }
 
   @Get('?')
