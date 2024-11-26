@@ -205,7 +205,7 @@ export class UsersService {
         if (desiredJob)
           await this.desiredJobService.update(desiredJob.id, {
             updateBy,
-            variable: { totalYearExperience: variable.totalYearExperience },
+            variable: { totalYearExperience: +variable.totalYearExperience },
             transactionalEntityManager,
           });
 
@@ -221,12 +221,12 @@ export class UsersService {
           fullName: variable.fullName,
           ...(variable.jobPositionsId && {
             jobPosition: await this.jobPositionService.findById(
-              variable.jobPositionsId,
+              +variable.jobPositionsId,
             ),
           }),
           ...(variable.placementsId && {
             placement: await this.placementsService.findById(
-              variable.placementsId,
+              +variable.placementsId,
             ),
           }),
           ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
@@ -242,12 +242,12 @@ export class UsersService {
             fullName: variable.fullName,
             ...(variable.jobPositionsId && {
               jobPosition: await this.jobPositionService.findById(
-                variable.jobPositionsId,
+                +variable.jobPositionsId,
               ),
             }),
             ...(variable.placementsId && {
               placement: await this.placementsService.findById(
-                variable.placementsId,
+                +variable.placementsId,
               ),
             }),
             ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
