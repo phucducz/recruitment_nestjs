@@ -33,6 +33,7 @@ import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 import { ResetPasswordModule } from './modules/reset_password/reset_password.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { RolesFunctionalsModule } from './modules/roles_functionals/roles_functionals.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { StatusModule } from './modules/status/status.module';
@@ -106,6 +107,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     StatusTypesModule,
     FunctionalGroupsModule,
     FunctionalsModule,
+    RolesFunctionalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
