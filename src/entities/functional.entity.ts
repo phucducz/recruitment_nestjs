@@ -19,7 +19,7 @@ export class Functional extends BaseEntity {
     () => FunctionalGroup,
     (functionalGroup) => functionalGroup.functionals,
   )
-  @JoinColumn({ name: 'functional_groups_id', foreignKeyConstraintName: 'id' })
+  @JoinColumn({ name: 'functional_groups_id', referencedColumnName: 'id' })
   functionalGroup: FunctionalGroup;
 
   @OneToMany(

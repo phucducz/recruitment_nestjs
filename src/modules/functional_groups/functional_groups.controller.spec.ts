@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { FunctionalGroupsService } from 'src/services/functional_groups.service';
 import { FunctionalGroupsController } from './functional_groups.controller';
-import { FunctionalGroupsService } from '../services/functional_groups.service';
 
 describe('FunctionalGroupsController', () => {
   let controller: FunctionalGroupsController;
@@ -11,7 +12,9 @@ describe('FunctionalGroupsController', () => {
       providers: [FunctionalGroupsService],
     }).compile();
 
-    controller = module.get<FunctionalGroupsController>(FunctionalGroupsController);
+    controller = module.get<FunctionalGroupsController>(
+      FunctionalGroupsController,
+    );
   });
 
   it('should be defined', () => {

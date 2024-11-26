@@ -7,9 +7,9 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { CreateFunctionalGroupDto } from 'src/dto/functional_groups/create-functional_group.dto';
+import { UpdateFunctionalGroupDto } from 'src/dto/functional_groups/update-functional_group.dto';
 
-import { CreateFunctionalGroupDto } from 'src/dto/functionals/create-functional_group.dto';
-import { UpdateFunctionalGroupDto } from 'src/dto/functionals/update-functional_group.dto';
 import { FunctionalGroupsService } from 'src/services/functional_groups.service';
 
 @Controller('functional-groups')

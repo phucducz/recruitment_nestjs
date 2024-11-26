@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FunctionalGroupsService } from '../services/functional_groups.service';
+
+import { FunctionalGroupsService } from 'src/services/functional_groups.service';
 
 describe('FunctionalGroupsService', () => {
   let service: FunctionalGroupsService;
