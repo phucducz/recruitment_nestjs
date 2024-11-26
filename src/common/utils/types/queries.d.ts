@@ -11,6 +11,7 @@ interface IJobQueries extends BaseQueries {
   usersId?: string;
   statusId?: string;
   jobsId?: string;
+  type?: 'less' | 'more';
 }
 
 interface ISkillQueries extends BaseQueries {

@@ -72,6 +72,7 @@ export class JobsRepository {
       usersId,
       statusId,
       jobsId,
+      type = 'less',
     } = jobsQueries;
     const paginationParams = getPaginationParams({
       page: +page,
@@ -110,15 +111,23 @@ export class JobsRepository {
 
     const result = await this.jobRepository.find({
       where: { id: In(jobs.map((job) => job.id)) },
-      relations: this.generateJobRelationships().relations,
-      select: {
-        ...this.generateJobRelationships().select,
-        ...jobSelectColumns,
-        createBy: false,
-        updateBy: false,
-        deleteAt: false,
-        deleteBy: false,
-      },
+      relations:
+        type === 'more' ? this.generateJobRelationships().relations : ['user'],
+      select:
+        type === 'more'
+          ? {
+              ...this.generateJobRelationships().select,
+              ...jobSelectColumns,
+              createBy: false,
+              updateBy: false,
+              deleteAt: false,
+              deleteBy: false,
+            }
+          : {
+              id: true,
+              title: true,
+              user: { id: true, fullName: true, companyName: true },
+            },
       order: { id: 'ASC' },
     });
 
