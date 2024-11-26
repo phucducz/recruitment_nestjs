@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { STATUS_TITLES, STATUS_TYPE_TITLES } from 'src/common/utils/enums';
+import {
+  STATUS_TITLES,
+  STATUS_TYPE_CODES,
+  STATUS_TYPE_TITLES,
+} from 'src/common/utils/enums';
 import { CreateStatusDto } from 'src/dto/status/create-status.dto';
 import { UpdateStatusDto } from 'src/dto/status/update-status.dto';
 import { StatusRepository } from 'src/modules/status/status.repository';
@@ -31,12 +35,12 @@ export class StatusService {
   async findAll(findStatusQueries: IFindStatusQueries) {
     if (
       findStatusQueries.type &&
-      !Object.values(STATUS_TYPE_TITLES).includes(
-        findStatusQueries.type as STATUS_TYPE_TITLES,
+      !Object.values(STATUS_TYPE_CODES).includes(
+        findStatusQueries.type as STATUS_TYPE_CODES,
       )
     )
       throw new Error(
-        `Loại trạng thái không hợp lệ. Giá trị phải là một trong "${Object.values(STATUS_TYPE_TITLES).join(', ')}"`,
+        `Loại trạng thái không hợp lệ. Giá trị phải là một trong "${Object.values(STATUS_TYPE_CODES).join(', ')}"`,
       );
 
     return await this.statusRepository.findAll(findStatusQueries);

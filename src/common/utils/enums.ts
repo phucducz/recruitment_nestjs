@@ -53,3 +53,9 @@ export enum STATUS_TYPE_TITLES {
   JOB = 'Công việc',
   SCHEDULE = 'Lịch trình',
 }
+
+export enum STATUS_TYPE_CODES {
+  INTERVIEW = 'interview',
+  JOB = 'job',
+  SCHEDULE = 'schedule',
+}
