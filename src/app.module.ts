@@ -19,6 +19,8 @@ import { DesiredJobsModule } from './modules/desired_jobs/desired_jobs.module';
 import { DesiredJobsPlacementsModule } from './modules/desired_jobs_placements/desired_jobs_placements.module';
 import { DesiredJobsPositionsModule } from './modules/desired_jobs_positions/desired_jobs_positions.module';
 import { ForeignLanguagesModule } from './modules/foreign_languages/foreign_languages.module';
+import { FunctionalGroupsModule } from './modules/functional_groups/functional_groups.module';
+import { FunctionalsModule } from './modules/functionals/functionals.module';
 import { JobCategoriesModule } from './modules/job_categories/job_categories.module';
 import { JobFieldsModule } from './modules/job_fields/job_fields.module';
 import { JobPositionsModule } from './modules/job_positions/job_positions.module';
@@ -31,6 +33,7 @@ import { ProvincesModule } from './modules/provinces/provinces.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 import { ResetPasswordModule } from './modules/reset_password/reset_password.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { RolesFunctionalsModule } from './modules/roles_functionals/roles_functionals.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { SkillsModule } from './modules/skills/skills.module';
 import { StatusModule } from './modules/status/status.module';
@@ -102,6 +105,9 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     SchedulesModule,
     StatusModule,
     StatusTypesModule,
+    FunctionalGroupsModule,
+    FunctionalsModule,
+    RolesFunctionalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
