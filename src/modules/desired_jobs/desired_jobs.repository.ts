@@ -32,10 +32,12 @@ export class DesiredJobsRepository {
       'desiredJobsPlacement',
       'desiredJobsPosition',
       'jobField',
-      'user.achivement',
       'user.curriculumVitae',
       'desiredJobsPlacement.placement',
       'desiredJobsPosition.jobPosition',
+      'user.achivement',
+      'user.userLanguages',
+      'user.userLanguages.foreignLanguage',
     ],
     select: {
       ...this.desiredJobSelect,
@@ -46,6 +48,13 @@ export class DesiredJobsRepository {
           ENTITIES.FIELDS.CURRICULUM_VITAE,
           removeColumns,
         ),
+        userLanguages: {
+          usersId: true,
+          foreignLanguage: filterColumns(
+            ENTITIES.FIELDS.FOREIGN_LANGUAGE,
+            removeColumns,
+          ),
+        },
       },
       desiredJobsPlacement: {
         desiredJobsId: true,
