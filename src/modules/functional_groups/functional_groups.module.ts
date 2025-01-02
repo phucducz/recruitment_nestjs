@@ -3,11 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FunctionalGroup } from 'src/entities/functional_group.entity';
 import { FunctionalGroupsService } from 'src/services/functional_groups.service';
+import { FunctionalsModule } from '../functionals/functionals.module';
 import { FunctionalGroupsController } from './functional_groups.controller';
 import { FunctionalGroupRepository } from './functional_groups.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FunctionalGroup])],
+  imports: [TypeOrmModule.forFeature([FunctionalGroup]), FunctionalsModule],
   controllers: [FunctionalGroupsController],
   providers: [FunctionalGroupsService, FunctionalGroupRepository],
   exports: [FunctionalGroupsService, FunctionalGroupRepository],

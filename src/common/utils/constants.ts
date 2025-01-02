@@ -6,6 +6,8 @@ import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
+import { Functional } from 'src/entities/functional.entity';
+import { FunctionalGroup } from 'src/entities/functional_group.entity';
 import { Job } from 'src/entities/job.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -72,6 +74,8 @@ export const ENTITIES = {
     STATUS: getEntityFields(Status),
     SCHEDULE: getEntityFields(Schedule),
     STATUS_TYPE: getEntityFields(StatusType),
+    FUNCTIONAL: getEntityFields(Functional),
+    FUNCTIONAL_GROUP: getEntityFields(FunctionalGroup),
   },
 };
 
