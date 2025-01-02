@@ -9,13 +9,15 @@ import {
   Query,
   Request,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { rtPageInfoAndItems } from 'src/common/utils/function';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateFunctionalGroupDto } from 'src/dto/functional_groups/create-functional_group.dto';
 import { UpdateFunctionalGroupDto } from 'src/dto/functional_groups/update-functional_group.dto';
 import { FunctionalGroupsService } from 'src/services/functional_groups.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('functional-groups')
 export class FunctionalGroupsController {
@@ -23,6 +25,7 @@ export class FunctionalGroupsController {
     private readonly functionalGroupsService: FunctionalGroupsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createFunctionalGroupDto: CreateFunctionalGroupDto,
