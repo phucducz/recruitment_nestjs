@@ -22,9 +22,8 @@ export class FunctionalsService {
     return `This action returns a #${id} functional`;
   }
 
-  update(id: number, updateFunctionalDto: UpdateFunctionalDto) {
-    console.log(updateFunctionalDto);
-    return `This action updates a #${id} functional`;
+  async update(id: number, updateFunctionalDto: IUpdate<UpdateFunctionalDto>) {
+    return await this.functionalRepository.update(id, updateFunctionalDto);
   }
 
   remove(id: number) {

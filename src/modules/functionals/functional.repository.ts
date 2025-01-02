@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsSelect, In, Repository } from 'typeorm';
+import { EntityManager, FindOptionsSelect, In, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateFunctionalDto } from 'src/dto/functionals/create-functional.dto';
+import { UpdateFunctionalDto } from 'src/dto/functionals/update-functional.dto';
 import { Functional } from 'src/entities/functional.entity';
 
 @Injectable()
@@ -46,5 +47,31 @@ export class FunctionalRepository {
       return await transactionalEntityManager.save(Functional, createParams);
 
     return await this.functionalRepository.save(createParams);
+  }
+
+  async update(id: number, updateFunctionalDto: IUpdate<UpdateFunctionalDto>) {
+    const { variable, updateBy, transactionalEntityManager } =
+      updateFunctionalDto;
+    const updateParams = {
+      ...(variable.code && { code: variable.code }),
+      ...(variable.title && { title: variable.title }),
+      updateAt: new Date().toString(),
+      updateBy,
+    };
+
+    if (transactionalEntityManager)
+      return (
+        (
+          await (transactionalEntityManager as EntityManager).update(
+            Functional,
+            id,
+            updateParams,
+          )
+        ).affected > 0
+      );
+
+    return (
+      (await this.functionalRepository.update(id, updateParams)).affected > 0
+    );
   }
 }
