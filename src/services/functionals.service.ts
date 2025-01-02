@@ -10,9 +10,8 @@ export class FunctionalsService {
     @Inject() private readonly functionalRepository: FunctionalRepository,
   ) {}
 
-  create(createFunctionalDto: CreateFunctionalDto) {
-    console.log(createFunctionalDto);
-    return 'This action adds a new functional';
+  async create(createFunctionalDto: ICreate<CreateFunctionalDto>) {
+    return await this.functionalRepository.create(createFunctionalDto);
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
