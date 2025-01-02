@@ -6,8 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateFunctionalDto } from 'src/dto/functionals/create-functional.dto';
 import { UpdateFunctionalDto } from 'src/dto/functionals/update-functional.dto';
 import { FunctionalsService } from 'src/services/functionals.service';
@@ -21,9 +24,18 @@ export class FunctionalsController {
     return this.functionalsService.create(createFunctionalDto);
   }
 
-  @Get()
-  findAll() {
-    return this.functionalsService.findAll();
+  @Get('/all')
+  async findAll(
+    @Body() functionalQueries: FunctionalQueries,
+    @Res() res: Response,
+  ) {
+    const { page, pageSize } = functionalQueries;
+    const result = await this.functionalsService.findAll(functionalQueries);
+
+    return res.status(200).json({
+      statusCode: 200,
+      ...rtPageInfoAndItems({ page, pageSize }, result),
+    });
   }
 
   @Get(':id')

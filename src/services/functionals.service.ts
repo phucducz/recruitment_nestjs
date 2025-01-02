@@ -1,16 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateFunctionalDto } from 'src/dto/functionals/create-functional.dto';
 import { UpdateFunctionalDto } from 'src/dto/functionals/update-functional.dto';
+import { FunctionalRepository } from 'src/modules/functionals/functional.repository';
 
 @Injectable()
 export class FunctionalsService {
+  constructor(
+    @Inject() private readonly functionalRepository: FunctionalRepository,
+  ) {}
+
   create(createFunctionalDto: CreateFunctionalDto) {
+    console.log(createFunctionalDto);
     return 'This action adds a new functional';
   }
 
-  findAll() {
-    return `This action returns all functionals`;
+  async findAll(functionalQueries: FunctionalQueries) {
+    return await this.functionalRepository.findAll(functionalQueries);
   }
 
   findOne(id: number) {
@@ -18,6 +24,7 @@ export class FunctionalsService {
   }
 
   update(id: number, updateFunctionalDto: UpdateFunctionalDto) {
+    console.log(updateFunctionalDto);
     return `This action updates a #${id} functional`;
   }
 
