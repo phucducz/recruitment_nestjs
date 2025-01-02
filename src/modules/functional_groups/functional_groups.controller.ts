@@ -76,12 +76,36 @@ export class FunctionalGroupsController {
     return this.functionalGroupsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateFunctionalGroupDto: UpdateFunctionalGroupDto,
+    @Res() res: Response,
+    @Request() request: any,
   ) {
-    return this.functionalGroupsService.update(+id, updateFunctionalGroupDto);
+    try {
+      const result = await this.functionalGroupsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateFunctionalGroupDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật nhóm chức năng không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Cập nhật nhóm chức năng thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật nhóm chức năng không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
   @Delete(':id')
