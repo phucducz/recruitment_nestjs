@@ -1,4 +1,4 @@
-interface BaseQueries extends IPagination {}
+type BaseQueries = IPagination;
 
 interface IJobQueries extends BaseQueries {
   title?: string;
@@ -94,5 +94,9 @@ interface IFindUpcomingScheduleQueries extends BaseQueries {
 }
 
 interface IFindRoleQueries extends BaseQueries {
+  id?: string;
+}
+
+interface FunctionalGroupQueries extends BaseQueries {
   id?: string;
 }

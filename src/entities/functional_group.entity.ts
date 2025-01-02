@@ -11,7 +11,7 @@ export class FunctionalGroup extends BaseEntity {
   title: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   description: string;
 
   @OneToMany(() => Functional, (functional) => functional.functionalGroup)

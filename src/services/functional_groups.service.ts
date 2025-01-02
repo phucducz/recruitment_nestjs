@@ -1,16 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateFunctionalGroupDto } from 'src/dto/functional_groups/create-functional_group.dto';
 import { UpdateFunctionalGroupDto } from 'src/dto/functional_groups/update-functional_group.dto';
+import { FunctionalGroupRepository } from 'src/modules/functional_groups/functional_groups.repository';
+import { FunctionalRepository } from 'src/modules/functionals/functional.repository';
 
 @Injectable()
 export class FunctionalGroupsService {
-  create(createFunctionalGroupDto: CreateFunctionalGroupDto) {
-    return 'This action adds a new functionalGroup';
+  constructor(
+    @Inject()
+    private readonly functionalGroupRepository: FunctionalGroupRepository,
+    @Inject() private readonly functionalRepository: FunctionalRepository,
+  ) {}
+
+  async create(createFunctionalGroupDto: ICreate<CreateFunctionalGroupDto>) {
+    const { variable } = createFunctionalGroupDto;
+
+    return await this.functionalGroupRepository.create({
+      ...createFunctionalGroupDto,
+      variable: {
+        ...variable,
+        functionals: await this.functionalRepository.findByIds(
+          variable.functionalIds,
+        ),
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all functionalGroups`;
+  async findAll(functionalGroupQueries: FunctionalGroupQueries) {
+    return await this.functionalGroupRepository.findAll(functionalGroupQueries);
   }
 
   findOne(id: number) {
@@ -18,6 +36,7 @@ export class FunctionalGroupsService {
   }
 
   update(id: number, updateFunctionalGroupDto: UpdateFunctionalGroupDto) {
+    console.log(updateFunctionalGroupDto);
     return `This action updates a #${id} functionalGroup`;
   }
 

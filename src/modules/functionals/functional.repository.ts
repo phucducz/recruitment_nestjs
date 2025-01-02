@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Functional } from 'src/entities/functional.entity';
 
@@ -10,4 +10,8 @@ export class FunctionalRepository {
     @InjectRepository(Functional)
     private readonly functionalRepository: Repository<Functional>,
   ) {}
+
+  async findByIds(ids: number[]) {
+    return await this.functionalRepository.findBy({ id: In(ids) });
+  }
 }
