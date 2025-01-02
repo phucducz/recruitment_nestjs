@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsSelect, In, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindOneOptions,
+  FindOptionsSelect,
+  In,
+  Repository,
+} from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
@@ -29,6 +35,15 @@ export class FunctionalRepository {
         ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       } as FindOptionsSelect<Functional>,
       order: { id: 'DESC' },
+    });
+  }
+
+  async find(options: FindOneOptions<Functional>) {
+    return await this.functionalRepository.find({
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
+      } as FindOptionsSelect<Functional>,
+      ...options,
     });
   }
 
