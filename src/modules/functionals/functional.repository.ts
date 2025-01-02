@@ -28,6 +28,7 @@ export class FunctionalRepository {
       select: {
         ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       } as FindOptionsSelect<Functional>,
+      order: { id: 'DESC' },
     });
   }
 
