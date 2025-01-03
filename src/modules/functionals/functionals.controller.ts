@@ -103,8 +103,26 @@ export class FunctionalsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.functionalsService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.functionalsService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xoá chức năng không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ statusCode: 200, message: 'Xoá chức năng thành công!' });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Xoá chức năng không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 }

@@ -90,4 +90,8 @@ export class FunctionalRepository {
       (await this.functionalRepository.update(id, updateParams)).affected > 0
     );
   }
+
+  async remove(id: number) {
+    return (await this.functionalRepository.delete(id)).affected > 0;
+  }
 }

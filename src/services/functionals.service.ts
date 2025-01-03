@@ -26,7 +26,7 @@ export class FunctionalsService {
     return await this.functionalRepository.update(id, updateFunctionalDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} functional`;
+  async remove(id: number) {
+    return await this.functionalRepository.remove(id);
   }
 }

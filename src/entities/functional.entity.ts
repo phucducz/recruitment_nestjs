@@ -18,6 +18,7 @@ export class Functional extends BaseEntity {
   @ManyToOne(
     () => FunctionalGroup,
     (functionalGroup) => functionalGroup.functionals,
+    { nullable: true, onDelete: 'SET NULL' },
   )
   @JoinColumn({ name: 'functional_groups_id', referencedColumnName: 'id' })
   functionalGroup: FunctionalGroup;
