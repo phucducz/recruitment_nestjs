@@ -5,6 +5,7 @@ import {
   FindOneOptions,
   FindOptionsSelect,
   In,
+  Raw,
   Repository,
 } from 'typeorm';
 
@@ -30,7 +31,7 @@ export class FunctionalRepository {
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
-    const { page, pageSize, rolesId } = functionalQueries;
+    const { page, pageSize, rolesId, code, title } = functionalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalRepository.findAndCount({
@@ -39,6 +40,14 @@ export class FunctionalRepository {
           rolesFunctionals: {
             role: { id: +rolesId },
           },
+        }),
+        ...(title && {
+          title: Raw((value) => `${value} ILIKE :title`, {
+            title: `%${title}%`,
+          }),
+        }),
+        ...(code && {
+          code: Raw((value) => `${value} ILIKE :code`, { code: `%${code}%` }),
         }),
       },
       ...paginationParams,
