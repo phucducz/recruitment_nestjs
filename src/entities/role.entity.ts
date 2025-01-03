@@ -18,6 +18,8 @@ export class Role extends BaseEntity {
   @OneToMany(() => User, (user) => user.role)
   users: User[];
 
-  @OneToMany(() => RolesFunctional, (rolesFunctional) => rolesFunctional.role)
+  @OneToMany(() => RolesFunctional, (rolesFunctional) => rolesFunctional.role, {
+    onDelete: 'CASCADE',
+  })
   rolesFunctionals: RolesFunctional[];
 }

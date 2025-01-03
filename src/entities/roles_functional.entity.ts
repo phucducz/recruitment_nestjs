@@ -9,7 +9,7 @@ import { Role } from './role.entity';
 export class RolesFunctional extends BaseEntityNotId {
   @Field()
   @PrimaryColumn({ name: 'roles_id', type: 'int' })
-  roles_id: number;
+  rolesId: number;
 
   @ManyToOne(() => Role, (role) => role.rolesFunctionals)
   @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
@@ -17,7 +17,7 @@ export class RolesFunctional extends BaseEntityNotId {
 
   @Field()
   @PrimaryColumn({ name: 'functionals_id', type: 'int' })
-  functionals_id: number;
+  functionalsId: number;
 
   @ManyToOne(() => Functional, (functional) => functional.rolesFunctionals)
   @JoinColumn({ name: 'functionals_id', referencedColumnName: 'id' })
