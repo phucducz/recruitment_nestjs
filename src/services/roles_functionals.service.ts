@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
 import { CreateRolesFunctionalDto } from 'src/dto/roles_functionals/create-roles_functional.dto';
 import { UpdateRolesFunctionalDto } from 'src/dto/roles_functionals/update-roles_functional.dto';
@@ -9,11 +9,11 @@ import { RolesService } from './roles.service';
 @Injectable()
 export class RolesFunctionalsService {
   constructor(
-    @Inject()
+    @Inject(RolesFunctionalRepository)
     private readonly rolesFunctionalRepository: RolesFunctionalRepository,
-    @Inject()
+    @Inject(forwardRef(() => RolesService))
     private readonly roleService: RolesService,
-    @Inject()
+    @Inject(FunctionalsService)
     private readonly functionalService: FunctionalsService,
   ) {}
 
