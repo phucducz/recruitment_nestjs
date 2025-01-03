@@ -10,12 +10,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { CreateRolesFunctionalDto } from 'src/dto/roles_functionals/create-roles_functional.dto';
 import { UpdateRolesFunctionalDto } from 'src/dto/roles_functionals/update-roles_functional.dto';
 import { RolesFunctionalsService } from 'src/services/roles_functionals.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Response } from 'express';
 
 @Controller('roles-functionals')
 export class RolesFunctionalsController {

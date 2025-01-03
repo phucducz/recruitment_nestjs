@@ -6,6 +6,7 @@ import { CreateRolesFunctionalDto } from 'src/dto/roles_functionals/create-roles
 import { Functional } from 'src/entities/functional.entity';
 import { Role } from 'src/entities/role.entity';
 import { RolesFunctional } from 'src/entities/roles_functional.entity';
+import { getPaginationParams } from 'src/common/utils/function';
 
 @Injectable()
 export class RolesFunctionalRepository {
@@ -39,5 +40,14 @@ export class RolesFunctionalRepository {
 
   async remove(id: number) {
     return (await this.rolesFunctionalRepository.delete(id)).affected > 0;
+  }
+
+  async findAll(rolesFunctionalQueries: RolesFunctionalQueries) {
+    const { page, pageSize } = rolesFunctionalQueries;
+    const paginationParams = getPaginationParams({ page, pageSize });
+
+    return await this.rolesFunctionalRepository.findAndCount({
+      ...paginationParams,
+    });
   }
 }
