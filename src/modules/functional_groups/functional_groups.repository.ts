@@ -28,7 +28,7 @@ export class FunctionalGroupRepository {
       ...paginationParams,
       relations: ['functionals'],
       select: {
-        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
+        // ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
       order: { id: 'DESC' },

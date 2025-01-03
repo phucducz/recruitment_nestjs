@@ -42,9 +42,9 @@ export class FunctionalRepository {
         }),
       },
       ...paginationParams,
-      select: {
-        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
-      } as FindOptionsSelect<Functional>,
+      // select: {
+      //   ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
+      // } as FindOptionsSelect<Functional>,
       order: { id: 'DESC' },
     });
   }
