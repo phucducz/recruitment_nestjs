@@ -55,7 +55,7 @@ export class FunctionalGroupsService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} functionalGroup`;
+  async remove(id: number) {
+    return await this.functionalGroupRepository.remove(id);
   }
 }

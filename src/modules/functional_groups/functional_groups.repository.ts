@@ -118,4 +118,8 @@ export class FunctionalGroupRepository {
 
     return this.functionalGroupRepository.update(id, updateParams);
   }
+
+  async remove(id: number) {
+    return await this.functionalGroupRepository.delete(id);
+  }
 }
