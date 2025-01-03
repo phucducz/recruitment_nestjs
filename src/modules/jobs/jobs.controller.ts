@@ -75,12 +75,10 @@ export class JobsController {
         ),
       });
     } catch (error) {
-      return res
-        .status(200)
-        .json({
-          statusCode: 200,
-          message: `Lỗi khi lấy danh sách công việc. ${error.message ?? error}`,
-        });
+      return res.status(200).json({
+        statusCode: 200,
+        message: `Lỗi khi lấy danh sách công việc. ${error.message ?? error}`,
+      });
     }
   }
 

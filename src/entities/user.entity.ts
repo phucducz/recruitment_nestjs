@@ -113,4 +113,12 @@ export class User extends BaseEntity {
   @ManyToOne(() => Placement, (placement) => placement.users)
   @JoinColumn({ name: 'placements_id', referencedColumnName: 'id' })
   placement: Placement;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

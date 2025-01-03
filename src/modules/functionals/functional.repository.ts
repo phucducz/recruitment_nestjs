@@ -51,9 +51,12 @@ export class FunctionalRepository {
         }),
       },
       ...paginationParams,
-      // select: {
-      //   ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
-      // } as FindOptionsSelect<Functional>,
+      relations: ['creator', 'updater'],
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, ['createBy', 'updateBy']),
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
+      } as FindOptionsSelect<Functional>,
       order: { id: 'DESC' },
     });
   }

@@ -4,6 +4,7 @@ import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
 import { FunctionalGroup } from './functional_group.entity';
 import { RolesFunctional } from './roles_functional.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'functionals' })
 export class Functional extends BaseEntity {
@@ -29,4 +30,12 @@ export class Functional extends BaseEntity {
     { onDelete: 'CASCADE' },
   )
   rolesFunctionals: RolesFunctional[];
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

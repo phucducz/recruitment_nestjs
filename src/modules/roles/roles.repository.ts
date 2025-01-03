@@ -48,11 +48,15 @@ export class RolesRepository {
         ...(findAllQueries?.id && { id: +findAllQueries.id }),
       },
       relations: [
+        'creator',
+        'updater',
         'rolesFunctionals',
         'rolesFunctionals.role',
         'rolesFunctionals.functional',
       ],
       select: {
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
         rolesFunctionals: {
           ...filterColumns(ENTITIES.FIELDS.ROLES_FUNCTIONAL, removeColumns),
           role: filterColumns(ENTITIES.FIELDS.ROLE, removeColumns),
