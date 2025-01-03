@@ -21,6 +21,10 @@ export class FunctionalRepository {
     private readonly functionalRepository: Repository<Functional>,
   ) {}
 
+  async findById(id: number) {
+    return await this.functionalRepository.findOneBy({ id });
+  }
+
   async findByIds(ids: number[]) {
     return await this.functionalRepository.findBy({ id: In(ids) });
   }
