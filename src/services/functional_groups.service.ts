@@ -35,12 +35,27 @@ export class FunctionalGroupsService {
     return `This action returns a #${id} functionalGroup`;
   }
 
-  update(id: number, updateFunctionalGroupDto: UpdateFunctionalGroupDto) {
-    console.log(updateFunctionalGroupDto);
-    return `This action updates a #${id} functionalGroup`;
+  async update(
+    id: number,
+    updateFunctionalGroupDto: IUpdate<UpdateFunctionalGroupDto>,
+  ) {
+    const { variable } = updateFunctionalGroupDto;
+
+    return await this.functionalGroupRepository.update(id, {
+      ...updateFunctionalGroupDto,
+      variable: {
+        ...variable,
+        functionals: await this.functionalRepository.findByIds(
+          variable.functionalIds,
+        ),
+        storedFunctionals: await this.functionalRepository.find({
+          where: { functionalGroup: { id } },
+        }),
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} functionalGroup`;
+  async remove(id: number) {
+    return await this.functionalGroupRepository.remove(id);
   }
 }

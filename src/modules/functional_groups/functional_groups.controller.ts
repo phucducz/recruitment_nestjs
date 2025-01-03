@@ -9,13 +9,15 @@ import {
   Query,
   Request,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { rtPageInfoAndItems } from 'src/common/utils/function';
 
+import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateFunctionalGroupDto } from 'src/dto/functional_groups/create-functional_group.dto';
 import { UpdateFunctionalGroupDto } from 'src/dto/functional_groups/update-functional_group.dto';
 import { FunctionalGroupsService } from 'src/services/functional_groups.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('functional-groups')
 export class FunctionalGroupsController {
@@ -23,6 +25,7 @@ export class FunctionalGroupsController {
     private readonly functionalGroupsService: FunctionalGroupsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createFunctionalGroupDto: CreateFunctionalGroupDto,
@@ -73,16 +76,58 @@ export class FunctionalGroupsController {
     return this.functionalGroupsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateFunctionalGroupDto: UpdateFunctionalGroupDto,
+    @Res() res: Response,
+    @Request() request: any,
   ) {
-    return this.functionalGroupsService.update(+id, updateFunctionalGroupDto);
+    try {
+      const result = await this.functionalGroupsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateFunctionalGroupDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật nhóm chức năng không thành công!',
+          statusCode: 401,
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Cập nhật nhóm chức năng thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật nhóm chức năng không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.functionalGroupsService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.functionalGroupsService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xoá nhóm chức năng không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ statusCode: 200, message: 'Xoá nhóm chức năng thành công!' });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Xoá nhóm chức năng không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 }
