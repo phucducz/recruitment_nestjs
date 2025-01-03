@@ -1,9 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
 import { FunctionalGroup } from './functional_group.entity';
-import { RolesFunctional } from './roles_functional.entity';
 
 @Entity({ name: 'functionals' })
 export class Functional extends BaseEntity {
@@ -22,10 +21,4 @@ export class Functional extends BaseEntity {
   )
   @JoinColumn({ name: 'functional_groups_id', referencedColumnName: 'id' })
   functionalGroup: FunctionalGroup;
-
-  @OneToMany(
-    () => RolesFunctional,
-    (rolesFunctional) => rolesFunctional.functional,
-  )
-  rolesFunctionals: RolesFunctional[];
 }
