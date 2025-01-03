@@ -103,6 +103,7 @@ interface FunctionalGroupQueries extends BaseQueries {
 
 interface FunctionalQueries extends BaseQueries {
   id?: string;
+  rolesId: string;
 }
 
 interface RolesFunctionalQueries extends BaseQueries {

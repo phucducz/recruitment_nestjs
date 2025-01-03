@@ -30,10 +30,17 @@ export class FunctionalRepository {
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
-    const { page, pageSize } = functionalQueries;
+    const { page, pageSize, rolesId } = functionalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalRepository.findAndCount({
+      where: {
+        ...(rolesId && {
+          rolesFunctionals: {
+            role: { id: +rolesId },
+          },
+        }),
+      },
       ...paginationParams,
       select: {
         ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
