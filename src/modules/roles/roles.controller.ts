@@ -79,28 +79,35 @@ export class RolesController {
     }
   }
 
-  @Get('/all?')
+  @Get('/all')
   async findAll(
     @Query() findAllQueries: IFindRoleQueries,
     @Res() res: Response,
   ) {
-    const result = await this.rolesService.findAll(findAllQueries);
+    try {
+      const result = await this.rolesService.findAll(findAllQueries);
 
-    return res.status(200).json({
-      ...rtPageInfoAndItems(
-        {
-          page: +findAllQueries.page,
-          pageSize: +findAllQueries.pageSize,
-        },
-        result,
-      ),
-    });
+      return res.status(200).json({
+        ...rtPageInfoAndItems(
+          {
+            page: +findAllQueries.page,
+            pageSize: +findAllQueries.pageSize,
+          },
+          result,
+        ),
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Lỗi khi lấy danh sách chức vụ. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
-  @Get('?')
-  findOne(@Query('id') id: number) {
-    return this.rolesService.findById(id);
-  }
+  // @Get('?')
+  // findOne(@Query('id') id: number) {
+  //   return this.rolesService.findById(id);
+  // }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {

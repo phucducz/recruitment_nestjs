@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 
-import { getPaginationParams } from 'src/common/utils/function';
+import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { Role } from 'src/entities/role.entity';
+import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
+import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 
 @Injectable()
 export class RolesRepository {
@@ -38,6 +41,18 @@ export class RolesRepository {
     return await this.rolesRepository.findAndCount({
       where: {
         ...(findAllQueries?.id && { id: +findAllQueries.id }),
+      },
+      relations: [
+        'rolesFunctionals',
+        'rolesFunctionals.role',
+        'rolesFunctionals.functional',
+      ],
+      select: {
+        rolesFunctionals: {
+          ...filterColumns(ENTITIES.FIELDS.ROLES_FUNCTIONAL, removeColumns),
+          role: filterColumns(ENTITIES.FIELDS.ROLE, removeColumns),
+          functional: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
+        },
       },
       ...paginationParams,
     });
