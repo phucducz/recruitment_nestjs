@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -14,6 +16,7 @@ import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { RolesService } from 'src/services/roles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -109,10 +112,37 @@ export class RolesController {
   //   return this.rolesService.findById(id);
   // }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-  //   return this.rolesService.update(+id, updateRoleDto);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const result = await this.rolesService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateRoleDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Cập nhật chức vụ không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Cập nhật chức vụ thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Cập nhật chức vụ không thành công. ${error?.message}`,
+      });
+    }
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {
