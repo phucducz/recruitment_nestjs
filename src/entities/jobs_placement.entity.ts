@@ -22,5 +22,4 @@ export class JobsPlacement extends BaseEntityNotId {
   @ManyToOne(() => Placement, (placement) => placement.jobsPlacements)
   @JoinColumn([{ name: 'placements_id', referencedColumnName: 'id' }])
   placement: Placement;
-
 }
