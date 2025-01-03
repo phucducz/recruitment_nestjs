@@ -1,12 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CreateRolesFunctionalDto } from 'src/dto/roles_functionals/create-roles_functional.dto';
 import { UpdateRolesFunctionalDto } from 'src/dto/roles_functionals/update-roles_functional.dto';
+import { RolesFunctionalRepository } from 'src/modules/roles_functionals/roles_functional.repository';
+import { FunctionalsService } from './functionals.service';
+import { RolesService } from './roles.service';
 
 @Injectable()
 export class RolesFunctionalsService {
-  create(createRolesFunctionalDto: CreateRolesFunctionalDto) {
-    return 'This action adds a new rolesFunctional';
+  constructor(
+    @Inject()
+    private readonly rolesFunctionalRepository: RolesFunctionalRepository,
+    @Inject()
+    private readonly roleService: RolesService,
+    @Inject()
+    private readonly functionalService: FunctionalsService,
+  ) {}
+
+  async create(createRolesFunctionalDto: ICreate<CreateRolesFunctionalDto>) {
+    const { variable } = createRolesFunctionalDto;
+
+    return await this.rolesFunctionalRepository.create({
+      ...createRolesFunctionalDto,
+      variable: {
+        ...variable,
+        role: await this.roleService.findById(variable.rolesId),
+        functional: await this.functionalService.findById(
+          variable.functionalsId,
+        ),
+      },
+    });
   }
 
   findAll() {
@@ -18,10 +41,11 @@ export class RolesFunctionalsService {
   }
 
   update(id: number, updateRolesFunctionalDto: UpdateRolesFunctionalDto) {
+    console.log(updateRolesFunctionalDto);
     return `This action updates a #${id} rolesFunctional`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} rolesFunctional`;
+  async remove(id: number) {
+    return await this.rolesFunctionalRepository.remove(id);
   }
 }
