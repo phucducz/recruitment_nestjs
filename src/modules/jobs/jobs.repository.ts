@@ -180,15 +180,16 @@ export class JobsRepository {
       .leftJoin('job.status', 'status')
       .leftJoin('usersJobs.status', 'uj_status')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('status.id = :statusId', {
-        statusId: +(jobsQueries.statusId ?? '5'),
-      })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title, status.id',
       );
 
     if (jobsQueries.title)
       queryBuilder.andWhere('job.title = :title', { title });
+    if (jobsQueries.statusId)
+      queryBuilder.andWhere('status.id = :statusId', {
+        statusId: +jobsQueries.statusId,
+      });
     if (skip) queryBuilder.skip(skip);
     if (take) queryBuilder.take(take);
 
