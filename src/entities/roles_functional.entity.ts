@@ -11,7 +11,9 @@ export class RolesFunctional extends BaseEntityNotId {
   @PrimaryColumn({ name: 'roles_id', type: 'int' })
   rolesId: number;
 
-  @ManyToOne(() => Role, (role) => role.rolesFunctionals)
+  @ManyToOne(() => Role, (role) => role.rolesFunctionals, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
   role: Role;
 
@@ -19,7 +21,9 @@ export class RolesFunctional extends BaseEntityNotId {
   @PrimaryColumn({ name: 'functionals_id', type: 'int' })
   functionalsId: number;
 
-  @ManyToOne(() => Functional, (functional) => functional.rolesFunctionals)
+  @ManyToOne(() => Functional, (functional) => functional.rolesFunctionals, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'functionals_id', referencedColumnName: 'id' })
   functional: Functional;
 }

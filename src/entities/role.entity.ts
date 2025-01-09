@@ -19,6 +19,7 @@ export class Role extends BaseEntity {
   users: User[];
 
   @OneToMany(() => RolesFunctional, (rolesFunctional) => rolesFunctional.role, {
+    cascade: true,
     onDelete: 'CASCADE',
   })
   rolesFunctionals: RolesFunctional[];

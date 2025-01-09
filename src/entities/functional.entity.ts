@@ -27,7 +27,7 @@ export class Functional extends BaseEntity {
   @OneToMany(
     () => RolesFunctional,
     (rolesFunctional) => rolesFunctional.functional,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', cascade: true },
   )
   rolesFunctionals: RolesFunctional[];
 
