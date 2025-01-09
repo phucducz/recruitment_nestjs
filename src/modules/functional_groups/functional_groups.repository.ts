@@ -26,9 +26,11 @@ export class FunctionalGroupRepository {
 
     return await this.functionalGroupRepository.findAndCount({
       ...paginationParams,
-      relations: ['functionals'],
+      relations: ['creator', 'updater', 'functionals'],
       select: {
-        // ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
       order: { id: 'DESC' },
