@@ -30,7 +30,10 @@ export class FunctionalGroupRepository {
       select: {
         creator: { id: true, fullName: true },
         updater: { id: true, fullName: true },
-        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, [
+          'createBy',
+          'updateBy',
+        ]),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
       order: { id: 'DESC' },
