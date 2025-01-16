@@ -121,7 +121,7 @@ export class UsersJobRepository {
       },
       relations: ['job', 'user', 'status', 'schedules'],
       select: {
-        user: { fullName: true, id: true },
+        user: { fullName: true, id: true, avatarUrl: true },
         job: { title: true, id: true },
         schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
         ...this.generateUsersJobSelect([]),
