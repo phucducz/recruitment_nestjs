@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { RolesFunctional } from 'src/entities/roles_functional.entity';
@@ -13,10 +13,10 @@ import { RolesFunctionalsController } from './roles_functionals.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([RolesFunctional]),
-    AuthModule,
-    RolesModule,
     FunctionalsModule,
-    RefreshTokenModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => RefreshTokenModule),
+    forwardRef(() => RolesModule),
   ],
   controllers: [RolesFunctionalsController],
   providers: [RolesFunctionalsService, RolesFunctionalRepository],
