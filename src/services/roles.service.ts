@@ -1,9 +1,11 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
 import { FunctionalsService } from './functionals.service';
+import { RolesFunctionalsService } from './roles_functionals.service';
 
 @Injectable()
 export class RolesService {
@@ -13,6 +15,9 @@ export class RolesService {
     @Inject(RolesRepository) private readonly roleRepository: RolesRepository,
     @Inject(FunctionalsService)
     private readonly funtionalService: FunctionalsService,
+    @Inject(DataSource) private readonly dataSource: DataSource,
+    @Inject(forwardRef(() => RolesFunctionalsService))
+    private readonly rolesFunctionalService: RolesFunctionalsService,
   ) {}
 
   async findById(id: number) {
@@ -28,7 +33,33 @@ export class RolesService {
   }
 
   async create(createRoleDto: ICreate<CreateRoleDto>) {
-    return await this.roleRepository.create(createRoleDto);
+    const { variable, createBy } = createRoleDto;
+    const functionals =
+      variable.functionalIds &&
+      (await this.funtionalService.findByIds(variable.functionalIds));
+
+    return await this.dataSource.manager.transaction(
+      async (transactionalEntityManager) => {
+        const newRole = await this.roleRepository.create({
+          ...createRoleDto,
+          transactionalEntityManager,
+        });
+
+        if (functionals)
+          await Promise.all(
+            functionals.map(
+              async (func) =>
+                await this.rolesFunctionalService.create({
+                  createBy,
+                  variable: { functionalsId: func.id, rolesId: newRole.id },
+                  transactionalEntityManager,
+                }),
+            ),
+          );
+
+        return newRole;
+      },
+    );
   }
 
   async createMany(createManyRoleDto: ICreateMany<CreateRoleDto>) {

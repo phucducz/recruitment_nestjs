@@ -74,6 +74,7 @@ export class RolesRepository {
       createAt: new Date().toString(),
       createBy: createBy,
       title: variable.title,
+      ...(variable.description && { description: variable.description }),
     });
   }
 

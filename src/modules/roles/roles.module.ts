@@ -6,6 +6,7 @@ import { RolesService } from '../../services/roles.service';
 import { AuthModule } from '../auth/auth.module';
 import { FunctionalsModule } from '../functionals/functionals.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
+import { RolesFunctionalsModule } from '../roles_functionals/roles_functionals.module';
 import { RolesController } from './roles.controller';
 import { RolesRepository } from './roles.repository';
 
@@ -13,6 +14,7 @@ import { RolesRepository } from './roles.repository';
   imports: [
     TypeOrmModule.forFeature([Role]),
     FunctionalsModule,
+    forwardRef(() => RolesFunctionalsModule),
     forwardRef(() => AuthModule),
     forwardRef(() => RefreshTokenModule),
   ],
