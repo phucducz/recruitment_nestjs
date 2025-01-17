@@ -14,9 +14,9 @@ import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
+import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
 import { RolesService } from 'src/services/roles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
 
 @Controller('roles')
 export class RolesController {

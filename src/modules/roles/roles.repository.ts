@@ -107,7 +107,9 @@ export class RolesRepository {
   ) {
     const { updateBy, variable, transactionalEntityManager } = updateRoleDto;
     const updateParams = {
-      ...(variable.description && { description: variable.description }),
+      ...(typeof variable.description !== undefined && {
+        description: variable.description,
+      }),
       ...(variable.title && { title: variable.title }),
       updateAt: new Date().toString(),
       updateBy,
