@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOneOptions, Repository } from 'typeorm';
+import { EntityManager, FindOneOptions, In, Raw, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
@@ -21,10 +21,23 @@ export class FunctionalGroupRepository {
   ) {}
 
   async findAll(functionalGroupQueries: FunctionalGroupQueries) {
-    const { page, pageSize } = functionalGroupQueries;
+    const { page, pageSize, title, functionalGroupIds } =
+      functionalGroupQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalGroupRepository.findAndCount({
+      where: {
+        ...(title && {
+          title: Raw((value) => `${value} ILIKE :title`, {
+            title: `%${title}%`,
+          }),
+        }),
+        ...(functionalGroupIds && {
+          rolesFunctionals: {
+            functionalsId: In(functionalGroupIds),
+          },
+        }),
+      },
       ...paginationParams,
       relations: ['creator', 'updater', 'functionals'],
       select: {

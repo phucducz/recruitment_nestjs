@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Raw, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
@@ -38,14 +38,23 @@ export class RolesRepository {
   }
 
   async findAll(findAllQueries: IFindRoleQueries) {
+    const { page, pageSize, id, title, functionalIds } = findAllQueries;
     const paginationParams = getPaginationParams({
-      page: +findAllQueries.page,
-      pageSize: +findAllQueries.pageSize,
+      page: +page,
+      pageSize: +pageSize,
     });
 
     return await this.rolesRepository.findAndCount({
       where: {
-        ...(findAllQueries?.id && { id: +findAllQueries.id }),
+        ...(id && { id: +id }),
+        ...(title && {
+          title: Raw((value: string) => `${value} ILIKE '%${title}%'`),
+        }),
+        ...(functionalIds && {
+          rolesFunctionals: {
+            functionalsId: In(functionalIds),
+          },
+        }),
       },
       relations: [
         'creator',
