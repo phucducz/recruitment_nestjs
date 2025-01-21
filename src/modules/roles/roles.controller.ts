@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -89,6 +91,7 @@ export class RolesController {
   ) {
     try {
       const result = await this.rolesService.findAll(findAllQueries);
+      console.log(result);
 
       return res.status(200).json({
         ...rtPageInfoAndItems(
@@ -107,9 +110,11 @@ export class RolesController {
     }
   }
 
-  // @Get('?')
-  // findOne(@Query('id') id: number) {
-  //   return this.rolesService.findById(id);
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   console.log('id');
+
+  //   return this.rolesService.findById(+id);
   // }
 
   @UseGuards(JwtAuthGuard)
@@ -144,8 +149,28 @@ export class RolesController {
     }
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.rolesService.remove(+id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.rolesService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          statusCode: 401,
+          message: 'Xóa chức vụ không thành công!',
+        });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Xóa chức vụ thành công!',
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+
+      return res.status(500).json({
+        statusCode: 500,
+        message: `Xóa chức vụ không thành công. ${error?.message ?? error}!`,
+      });
+    }
+  }
 }

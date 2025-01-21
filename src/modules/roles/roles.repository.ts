@@ -169,4 +169,8 @@ export class RolesRepository {
 
     return await this.rolesRepository.update(id, updateParams);
   }
+
+  async delete(id: number) {
+    return (await this.rolesRepository.delete(id)).affected > 0;
+  }
 }

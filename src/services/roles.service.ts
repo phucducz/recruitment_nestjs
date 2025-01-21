@@ -83,4 +83,8 @@ export class RolesService {
       },
     });
   }
+
+  async remove(id: number) {
+    return await this.roleRepository.delete(id);
+  }
 }
