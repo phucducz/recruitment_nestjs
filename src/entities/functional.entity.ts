@@ -13,7 +13,7 @@ export class Functional extends BaseEntity {
   title: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   code: string;
 
   @ManyToOne(

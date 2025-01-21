@@ -68,7 +68,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
           rejectUnauthorized: false,
           require: true, // Thêm dòng này nếu cần thiết
         },
-        synchronize: false,
+        synchronize: true,
         autoLoadEntities: true,
         connectTimeoutMS: 30000,
       }),

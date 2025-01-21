@@ -68,7 +68,9 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', name: 'is_active', default: true, nullable: true })
   isActive: boolean;
 
-  @ManyToOne(() => Role, (role) => role.users)
+  @ManyToOne(() => Role, (role) => role.users, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
   role: Role;
 

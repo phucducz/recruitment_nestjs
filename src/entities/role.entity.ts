@@ -15,7 +15,9 @@ export class Role extends BaseEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   description: string;
 
-  @OneToMany(() => User, (user) => user.role)
+  @OneToMany(() => User, (user) => user.role, {
+    onDelete: 'SET NULL',
+  })
   users: User[];
 
   @OneToMany(() => RolesFunctional, (rolesFunctional) => rolesFunctional.role, {
