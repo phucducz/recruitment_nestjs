@@ -49,7 +49,7 @@ export class FunctionalGroupRepository {
         ]),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
-      order: { id: 'DESC' },
+      order: { id: 'DESC', functionals: { id: 'ASC' } },
     });
   }
 
