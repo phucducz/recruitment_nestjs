@@ -37,14 +37,14 @@ export class RolesRepository {
     });
   }
 
-  async findAll(findAllQueries: IFindRoleQueries) {
+  async findAll(findAllQueries: IFindRoleQueries): Promise<[Role[], number]> {
     const { page, pageSize, id, title, functionalIds } = findAllQueries;
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
     });
 
-    return await this.rolesRepository.findAndCount({
+    const [roles, totalItems] = await this.rolesRepository.findAndCount({
       where: {
         ...(id && { id: +id }),
         ...(title && {
@@ -56,24 +56,35 @@ export class RolesRepository {
           },
         }),
       },
-      relations: [
-        'creator',
-        'updater',
-        'rolesFunctionals',
-        'rolesFunctionals.role',
-        'rolesFunctionals.functional',
-      ],
-      select: {
-        creator: { id: true, fullName: true },
-        updater: { id: true, fullName: true },
-        rolesFunctionals: {
-          ...filterColumns(ENTITIES.FIELDS.ROLES_FUNCTIONAL, removeColumns),
-          role: filterColumns(ENTITIES.FIELDS.ROLE, removeColumns),
-          functional: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
-        },
-      },
+      select: { id: true },
       ...paginationParams,
     });
+
+    return [
+      await this.rolesRepository.find({
+        where: { id: In(roles?.map((role) => role.id)) },
+        relations: [
+          'creator',
+          'updater',
+          'rolesFunctionals',
+          'rolesFunctionals.role',
+          'rolesFunctionals.functional',
+        ],
+        select: {
+          creator: { id: true, fullName: true },
+          updater: { id: true, fullName: true },
+          rolesFunctionals: {
+            ...filterColumns(ENTITIES.FIELDS.ROLES_FUNCTIONAL, removeColumns),
+            role: filterColumns(ENTITIES.FIELDS.ROLE, removeColumns),
+            functional: filterColumns(
+              ENTITIES.FIELDS.FUNCTIONAL,
+              removeColumns,
+            ),
+          },
+        },
+      }),
+      totalItems,
+    ];
   }
 
   async create(createRole: ICreate<CreateRoleDto>) {
