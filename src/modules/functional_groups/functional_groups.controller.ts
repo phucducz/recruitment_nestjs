@@ -60,15 +60,22 @@ export class FunctionalGroupsController {
     @Query() functionalGroupQueries: FunctionalGroupQueries,
     @Res() res: Response,
   ) {
-    const { page, pageSize } = functionalGroupQueries;
-    const result = await this.functionalGroupsService.findAll(
-      functionalGroupQueries,
-    );
+    try {
+      const { page, pageSize } = functionalGroupQueries;
+      const result = await this.functionalGroupsService.findAll(
+        functionalGroupQueries,
+      );
 
-    return res.status(200).json({
-      statusCode: 200,
-      ...rtPageInfoAndItems({ page, pageSize }, result),
-    });
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems({ page, pageSize }, result),
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Lỗi khi lấy danh sách nhóm chức vụ. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
   @Get(':id')

@@ -102,7 +102,7 @@ interface IFindRoleQueries extends BaseQueries {
 interface FunctionalGroupQueries extends BaseQueries {
   id?: string;
   title?: string;
-  functionalGroupIds: number[];
+  functionalIds: number[];
 }
 
 interface FunctionalQueries extends BaseQueries {

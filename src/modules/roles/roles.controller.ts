@@ -91,7 +91,6 @@ export class RolesController {
   ) {
     try {
       const result = await this.rolesService.findAll(findAllQueries);
-      console.log(result);
 
       return res.status(200).json({
         ...rtPageInfoAndItems(

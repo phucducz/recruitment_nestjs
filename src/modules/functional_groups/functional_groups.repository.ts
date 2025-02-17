@@ -21,8 +21,7 @@ export class FunctionalGroupRepository {
   ) {}
 
   async findAll(functionalGroupQueries: FunctionalGroupQueries) {
-    const { page, pageSize, title, functionalGroupIds } =
-      functionalGroupQueries;
+    const { page, pageSize, title, functionalIds } = functionalGroupQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalGroupRepository.findAndCount({
@@ -32,9 +31,9 @@ export class FunctionalGroupRepository {
             title: `%${title}%`,
           }),
         }),
-        ...(functionalGroupIds && {
-          rolesFunctionals: {
-            functionalsId: In(functionalGroupIds),
+        ...(functionalIds && {
+          functionals: {
+            id: In(functionalIds),
           },
         }),
       },
