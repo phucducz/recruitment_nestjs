@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOneOptions, Repository } from 'typeorm';
+import { EntityManager, FindOneOptions, In, Raw, Repository } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
@@ -21,17 +21,34 @@ export class FunctionalGroupRepository {
   ) {}
 
   async findAll(functionalGroupQueries: FunctionalGroupQueries) {
-    const { page, pageSize } = functionalGroupQueries;
+    const { page, pageSize, title, functionalIds } = functionalGroupQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalGroupRepository.findAndCount({
+      where: {
+        ...(title && {
+          title: Raw((value) => `${value} ILIKE :title`, {
+            title: `%${title}%`,
+          }),
+        }),
+        ...(functionalIds && {
+          functionals: {
+            id: In(functionalIds),
+          },
+        }),
+      },
       ...paginationParams,
-      relations: ['functionals'],
+      relations: ['creator', 'updater', 'functionals'],
       select: {
-        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, removeColumns),
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL_GROUP, [
+          'createBy',
+          'updateBy',
+        ]),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
-      order: { id: 'DESC' },
+      order: { id: 'DESC', functionals: { id: 'ASC' } },
     });
   }
 

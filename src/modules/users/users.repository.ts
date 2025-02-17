@@ -191,6 +191,8 @@ export class UsersRepository {
       ...paginationParams,
       ...this.generateRelationshipOptionals({
         relationships: [
+          'creator',
+          'updater',
           'role',
           'usersJobFields',
           'jobPosition',
@@ -201,6 +203,8 @@ export class UsersRepository {
           password: false,
           role: this.userSelectColumns.role,
           jobPosition: this.userSelectColumns.jobPosition,
+          creator: { id: true, fullName: true },
+          updater: { id: true, fullName: true },
           usersJobFields: {
             ...this.usersJobFieldsFields,
             jobField: { ...this.jobFieldsFields },

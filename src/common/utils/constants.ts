@@ -27,6 +27,7 @@ import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
 import { filterColumns } from './function';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 
 export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
@@ -35,6 +36,7 @@ export const MANY_TO_MANY_ENTITIES = [
   'UsersJobField',
   'UsersJob',
   'DesiredJobsPlacement',
+  'RolesFunctional',
 ];
 
 const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
@@ -76,6 +78,7 @@ export const ENTITIES = {
     STATUS_TYPE: getEntityFields(StatusType),
     FUNCTIONAL: getEntityFields(Functional),
     FUNCTIONAL_GROUP: getEntityFields(FunctionalGroup),
+    ROLES_FUNCTIONAL: getEntityFields(RolesFunctional),
   },
 };
 

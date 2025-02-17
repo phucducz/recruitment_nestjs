@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Functional } from 'src/entities/functional.entity';
@@ -11,8 +11,8 @@ import { FunctionalsController } from './functionals.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Functional]),
-    AuthModule,
-    RefreshTokenModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => RefreshTokenModule),
   ],
   controllers: [FunctionalsController],
   providers: [FunctionalsService, FunctionalRepository],

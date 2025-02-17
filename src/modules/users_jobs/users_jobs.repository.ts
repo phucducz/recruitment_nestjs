@@ -119,10 +119,11 @@ export class UsersJobRepository {
             createAt: Between(sevenDaysAgo, today),
           }),
       },
-      relations: ['job', 'user', 'status'],
+      relations: ['job', 'user', 'status', 'schedules'],
       select: {
-        user: { fullName: true, id: true },
+        user: { fullName: true, id: true, avatarUrl: true },
         job: { title: true, id: true },
+        schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
         ...this.generateUsersJobSelect([]),
         createAt: true,
         status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),

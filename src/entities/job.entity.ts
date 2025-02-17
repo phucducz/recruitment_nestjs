@@ -114,4 +114,12 @@ export class Job extends BaseEntity {
   @ManyToOne(() => Status, (status) => status.jobs)
   @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
   status: Status;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

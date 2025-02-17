@@ -68,7 +68,9 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', name: 'is_active', default: true, nullable: true })
   isActive: boolean;
 
-  @ManyToOne(() => Role, (role) => role.users)
+  @ManyToOne(() => Role, (role) => role.users, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
   role: Role;
 
@@ -113,4 +115,12 @@ export class User extends BaseEntity {
   @ManyToOne(() => Placement, (placement) => placement.users)
   @JoinColumn({ name: 'placements_id', referencedColumnName: 'id' })
   placement: Placement;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

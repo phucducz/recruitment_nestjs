@@ -47,10 +47,12 @@ export class JobsRepository {
     'select' | 'relations'
   > {
     return {
-      relations: jobRelations.entites,
+      relations: [...jobRelations.entites, 'creator', 'updater'],
       select: {
         ...filterColumns(ENTITIES.FIELDS.JOB, removeColumns),
         ...jobSelectRelationColumns,
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
         jobsPlacements: {
           ...jobSelectRelationColumns.jobsPlacements,
           placement: this.placementSelectColumns,
@@ -112,7 +114,9 @@ export class JobsRepository {
     const result = await this.jobRepository.find({
       where: { id: In(jobs.map((job) => job.id)) },
       relations:
-        type === 'more' ? this.generateJobRelationships().relations : ['user'],
+        type === 'more'
+          ? this.generateJobRelationships().relations
+          : ['user', 'creator', 'updater'],
       select:
         type === 'more'
           ? {
@@ -126,6 +130,8 @@ export class JobsRepository {
           : {
               id: true,
               title: true,
+              creator: { id: true, fullName: true },
+              updater: { id: true, fullName: true },
               user: { id: true, fullName: true, companyName: true },
             },
       order: { id: 'ASC' },
@@ -174,15 +180,16 @@ export class JobsRepository {
       .leftJoin('job.status', 'status')
       .leftJoin('usersJobs.status', 'uj_status')
       .where('job.users_id = :usersId', { usersId })
-      .andWhere('status.id = :statusId', {
-        statusId: +(jobsQueries.statusId ?? '5'),
-      })
       .groupBy(
         'job.id, job.title, job.createAt, job.updateAt, job.salaryMin, job.salaryMax, job.quantity, user.fullName, workType.title, jobCategory.name, job.status, status.title, status.id',
       );
 
     if (jobsQueries.title)
       queryBuilder.andWhere('job.title = :title', { title });
+    if (jobsQueries.statusId)
+      queryBuilder.andWhere('status.id = :statusId', {
+        statusId: +jobsQueries.statusId,
+      });
     if (skip) queryBuilder.skip(skip);
     if (take) queryBuilder.take(take);
 

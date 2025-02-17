@@ -18,6 +18,14 @@ export class FunctionalsService {
     return await this.functionalRepository.findAll(functionalQueries);
   }
 
+  async findById(id: number) {
+    return await this.functionalRepository.findById(id);
+  }
+
+  async findByIds(ids: number[]) {
+    return await this.functionalRepository.findByIds(ids);
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} functional`;
   }

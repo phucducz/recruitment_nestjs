@@ -95,12 +95,23 @@ interface IFindUpcomingScheduleQueries extends BaseQueries {
 
 interface IFindRoleQueries extends BaseQueries {
   id?: string;
+  title?: string;
+  functionalIds: number[];
 }
 
 interface FunctionalGroupQueries extends BaseQueries {
   id?: string;
+  title?: string;
+  functionalIds: number[];
 }
 
 interface FunctionalQueries extends BaseQueries {
+  id?: string;
+  title?: string;
+  code?: string;
+  rolesId: string;
+}
+
+interface RolesFunctionalQueries extends BaseQueries {
   id?: string;
 }

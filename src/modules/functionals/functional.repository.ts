@@ -5,6 +5,7 @@ import {
   FindOneOptions,
   FindOptionsSelect,
   In,
+  Raw,
   Repository,
 } from 'typeorm';
 
@@ -21,18 +22,40 @@ export class FunctionalRepository {
     private readonly functionalRepository: Repository<Functional>,
   ) {}
 
+  async findById(id: number) {
+    return await this.functionalRepository.findOneBy({ id });
+  }
+
   async findByIds(ids: number[]) {
     return await this.functionalRepository.findBy({ id: In(ids) });
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
-    const { page, pageSize } = functionalQueries;
+    const { page, pageSize, rolesId, code, title } = functionalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.functionalRepository.findAndCount({
+      where: {
+        ...(rolesId && {
+          rolesFunctionals: {
+            role: { id: +rolesId },
+          },
+        }),
+        ...(title && {
+          title: Raw((value) => `${value} ILIKE :title`, {
+            title: `%${title}%`,
+          }),
+        }),
+        ...(code && {
+          code: Raw((value) => `${value} ILIKE :code`, { code: `%${code}%` }),
+        }),
+      },
       ...paginationParams,
+      relations: ['creator', 'updater'],
       select: {
-        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
+        ...filterColumns(ENTITIES.FIELDS.FUNCTIONAL, ['createBy', 'updateBy']),
+        creator: { id: true, fullName: true },
+        updater: { id: true, fullName: true },
       } as FindOptionsSelect<Functional>,
       order: { id: 'DESC' },
     });
