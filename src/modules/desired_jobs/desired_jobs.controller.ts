@@ -126,7 +126,7 @@ export class DesiredJobsController {
       });
     } catch (error) {
       return res.status(500).json({
-        message: `Cập nhật công việc mong muốn không thành công. ${error?.message ?? error}!`,
+        message: `Cập nhật công việc mong muốn không thành công: ${error?.message ?? error}!`,
         statusCode: 500,
       });
     }

@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
+import { AdminModule } from '../admin/admin.module';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { DesiredJobsModule } from '../desired_jobs/desired_jobs.module';
@@ -23,6 +24,7 @@ import { UsersRepository } from './users.repository';
   imports: [
     TypeOrmModule.forFeature([User, UsersJobField]),
     RolesModule,
+    AdminModule,
     JobFieldsModule,
     UsersJobFieldsModule,
     MailModule,

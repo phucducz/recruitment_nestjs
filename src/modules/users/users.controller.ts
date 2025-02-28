@@ -17,12 +17,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
-import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
+import { RolesService } from 'src/services/roles.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -33,19 +33,11 @@ export class UsersController {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => RolesService))
+    private readonly roleService: RolesService,
     @Inject(ResetPasswordService)
     private readonly resetPasswordService: ResetPasswordService,
   ) {}
-
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  // }
-
-  // @Get('?')
-  // findByEmail(@Query('email') email: string) {
-  //   return this.usersService.findByEmail(email);
-  // }
 
   @Get('/check-exist-email')
   async checkExistEmail(@Query('email') email: string, @Res() res: Response) {
@@ -70,25 +62,6 @@ export class UsersController {
         message: error,
         statusCode: 500,
       });
-    }
-  }
-
-  @Get('/all?')
-  async findAll(@Query() userQueries: IUserQueries, @Res() res: Response) {
-    const paginationParams = {
-      page: +userQueries.page,
-      pageSize: +userQueries.pageSize,
-    };
-    try {
-      const result = await this.usersService.findAll(userQueries);
-
-      return res
-        .status(200)
-        .json({ ...rtPageInfoAndItems(paginationParams, result) });
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ message: error?.message ?? error, statusCode: 500 });
     }
   }
 
@@ -252,8 +225,6 @@ export class UsersController {
     @Res() res: Response,
     @Request() request: any,
   ) {
-    console.log(updatePersonalInfoDto);
-
     try {
       const result = await this.usersService.updatePersonalInfo({
         updateBy: request.user.userId,

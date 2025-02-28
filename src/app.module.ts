@@ -44,6 +44,7 @@ import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
 import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
 import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
 import { WorkTypesModule } from './modules/work_types/work_types.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     StatusTypesModule,
     FunctionalGroupsModule,
     FunctionalsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

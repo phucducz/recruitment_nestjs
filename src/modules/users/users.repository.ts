@@ -17,6 +17,7 @@ import {
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { ISaveUserParams } from 'src/common/utils/types/user';
+import { UpdatUserByAdminDto } from 'src/dto/admin/update-user.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -173,7 +174,7 @@ export class UsersRepository {
   async findAll(
     userQueries: IUserQueries,
   ): Promise<[Omit<User, 'password'>[], number]> {
-    const { jobFieldsId, jobPositionsId, page, pageSize } = userQueries;
+    const { id, jobFieldsId, jobPositionsId, page, pageSize } = userQueries;
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
@@ -181,6 +182,7 @@ export class UsersRepository {
 
     return await this.userRepository.findAndCount({
       where: {
+        ...(id && { id: +id }),
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
         },
@@ -339,6 +341,28 @@ export class UsersRepository {
         updateParams,
       );
     } else result = await this.userRepository.update(updateBy, updateParams);
+
+    return result.affected > 0;
+  }
+
+  async updateUserRole(updateUserRole: IUpdate<UpdatUserByAdminDto>) {
+    const { updateBy, variable, transactionalEntityManager } = updateUserRole;
+    const updateParams = {
+      isActive: variable.status,
+      role: { id: variable.roleId },
+      updateAt: new Date().toString(),
+      updateBy,
+    };
+
+    let result = { affected: 0 } as UpdateResult;
+    if (transactionalEntityManager)
+      result = await (transactionalEntityManager as EntityManager).update(
+        User,
+        variable.userId,
+        updateParams,
+      );
+    else
+      result = await this.userRepository.update(variable.userId, updateParams);
 
     return result.affected > 0;
   }
