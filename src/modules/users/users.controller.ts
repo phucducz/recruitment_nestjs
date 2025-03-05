@@ -42,7 +42,9 @@ export class UsersController {
   @Get('/check-exist-email')
   async checkExistEmail(@Query('email') email: string, @Res() res: Response) {
     try {
-      const result = await this.usersService.findByEmail(email);
+      const result = await this.usersService.findByEmail(email, {
+        hasPassword: true,
+      });
 
       if (!result)
         return res
@@ -52,8 +54,8 @@ export class UsersController {
       return res.status(200).json({
         email,
         message: 'Email tồn tại',
-        hasPassword: result.password !== null,
-        signInWith: result.password !== null ? 'system' : 'other',
+        hasPassword: !!result.password,
+        signInWith: result.password ? 'system' : 'other',
         statusCode: 200,
       });
     } catch (error) {
