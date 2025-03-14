@@ -348,10 +348,12 @@ export class UsersRepository {
   async updateUserRole(updateUserRole: IUpdate<UpdatUserByAdminDto>) {
     const { updateBy, variable, transactionalEntityManager } = updateUserRole;
     const updateParams = {
-      isActive: variable.status,
-      role: { id: variable.roleId },
-      updateAt: new Date().toString(),
       updateBy,
+      updateAt: new Date().toString(),
+      ...(variable.roleId && { role: { id: variable.roleId } }),
+      ...((variable.status !== null || variable.status !== undefined) && {
+        isActive: variable.status,
+      }),
     };
 
     let result = { affected: 0 } as UpdateResult;

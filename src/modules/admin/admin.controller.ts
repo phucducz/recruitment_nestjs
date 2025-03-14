@@ -13,10 +13,10 @@ import {
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
-import { UsersService } from 'src/services/users.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdatUserByAdminDto } from 'src/dto/admin/update-user.dto';
 import { AdminService } from 'src/services/admin.service';
+import { UsersService } from 'src/services/users.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('admin')
 export class AdminController {
@@ -65,9 +65,10 @@ export class AdminController {
           statusCode: 401,
         });
 
-      return res
-        .status(200)
-        .json({ message: 'Cập nhật thông tin user thành công', statusCode: 200 });
+      return res.status(200).json({
+        message: 'Cập nhật thông tin user thành công',
+        statusCode: 200,
+      });
     } catch (error) {
       return res.status(500).json({
         message: `Cập nhật không thành công: ${error?.message ?? error}!`,
