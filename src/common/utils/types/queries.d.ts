@@ -23,6 +23,10 @@ interface IForeignLanguageQueries extends BaseQueries {
 }
 
 interface IUserQueries extends BaseQueries {
+  id: string;
+  email?: string;
+  roleId?: number;
+  statusId?: number;
   jobFieldsId?: string;
   jobPositionsId?: string;
 }

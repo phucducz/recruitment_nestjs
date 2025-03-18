@@ -49,17 +49,67 @@ export class PlacementsController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('/seed-provinces')
+  async createPlacementsByProvinceAPI(
+    @Res() res: Response,
+    @Request() request: any,
+  ) {
+    try {
+      const response = await fetch(
+        'https://provinces.open-api.vn/api/?depth=1',
+      );
+      const provinces = await response.json();
+
+      const placements = provinces.map((province) => ({
+        title: province.name,
+      }));
+
+      const result = await this.placementsService.createMany({
+        createBy: request.user.userId,
+        variables: placements,
+      });
+
+      if (result.length > 0)
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Tạo tỉnh thành thành công!',
+          records: result,
+        });
+
+      return res.status(401).json({
+        statusCode: 401,
+        message: 'Tạo tỉnh thành không thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({ stautsCode: 500, message: error });
+    }
+  }
+
   @Get('/all?')
   async findAll(@Query() pagination: IPagination, @Res() res: Response) {
-    const paginationParams = {
-      page: +pagination.page,
-      pageSize: +pagination.pageSize,
-    };
-    const result = await this.placementsService.findAll(paginationParams);
+    try {
+      const paginationParams = {
+        page: +pagination.page,
+        pageSize: +pagination.pageSize,
+      };
+      const result = await this.placementsService.findAll(paginationParams);
 
-    return res
-      .status(200)
-      .json({ ...rtPageInfoAndItems(paginationParams, result) });
+      if (result.length > 0)
+        return res
+          .status(200)
+          .json({ ...rtPageInfoAndItems(paginationParams, result) });
+
+      return res.status(401).json({
+        statusCode: 401,
+        message: `Lỗi khi lấy danh sách tỉnh thành!`,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        stautsCode: 500,
+        message: `Lỗi khi lấy danh sách tỉnh thành. ${error.message ?? error}`,
+      });
+    }
   }
 
   @Get('/all')

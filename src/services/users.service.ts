@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
+import { DataSource } from 'typeorm';
 
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
@@ -14,7 +15,6 @@ import { DesiredJob } from 'src/entities/desired_job.entity';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
-import { DataSource } from 'typeorm';
 import { CloudinaryService } from './cloudinary.service';
 import { DesiredJobsService } from './desired_jobs.service';
 import { JobFieldsService } from './job_fields.service';
@@ -54,10 +54,12 @@ export class UsersService {
     id: number,
     options?: IGenerateRelationshipOptional,
   ): Promise<User | null> {
+    const result = await this.userRepository.findById(id, options);
+    if (!result) throw new NotFoundException('Không tìm thấy người dùng');
+
     const desiredJob = await this.desiredJobService.findOneBy({
       where: { user: { id } },
     });
-    const result = await this.userRepository.findById(id, options);
 
     return {
       ...result,
@@ -189,7 +191,6 @@ export class UsersService {
     >,
   ) {
     const { updateBy, variable } = updatePersonalInfoDto;
-
     const currentUser = await this.userRepository.findById(updateBy, {
       hasRelations: false,
     });

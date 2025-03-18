@@ -36,7 +36,7 @@ export class JobConverter extends BaseConverter {
         avatarUrl: job.u_avatar_url,
         companyName: job.u_company_name,
         companyUrl: job.u_company_url,
-        isActive: job.u_is_active,
+        status: job.u_status,
       } as User,
       ...(job.jp_id && {
         jobPosition: {

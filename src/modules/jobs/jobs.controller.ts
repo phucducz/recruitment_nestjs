@@ -56,7 +56,12 @@ export class JobsController {
         record: null,
       });
     } catch (error) {
-      return res.status(500).json({ stautsCode: 500, message: error });
+      return res
+        .status(500)
+        .json({
+          stautsCode: 500,
+          message: `Tạo tin tuyển dụng không thành công: ${error?.message}`,
+        });
     }
   }
 
