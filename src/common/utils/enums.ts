@@ -55,7 +55,8 @@ export enum STATUS_TYPE_TITLES {
 }
 
 export enum STATUS_TYPE_CODES {
-  INTERVIEW = 'interview',
   JOB = 'job',
+  ACCOUNT = 'account',
   SCHEDULE = 'schedule',
+  INTERVIEW = 'interview',
 }

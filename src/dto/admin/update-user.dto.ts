@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdatUserByAdminDto {
   @IsOptional()
@@ -10,6 +10,6 @@ export class UpdatUserByAdminDto {
   roleId?: number;
 
   @IsOptional()
-  @IsBoolean()
-  status?: boolean;
+  @IsNumber()
+  statusId?: number;
 }

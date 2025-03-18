@@ -25,7 +25,7 @@ export class AdminController {
     @Inject(UsersService) private readonly usersService: UsersService,
   ) {}
 
-  @Get('/all')
+  @Get('/users/all')
   async findAll(@Query() userQueries: IUserQueries, @Res() res: Response) {
     const paginationParams = {
       page: +userQueries.page,
@@ -54,7 +54,7 @@ export class AdminController {
     @Res() res: Response,
   ) {
     try {
-      const result = await this.adminService.updateUserRole({
+      const result = await this.adminService.updateUser({
         updateBy: request.user.userId,
         variable: { ...updatUserByAdminDto, userId: +userId },
       });

@@ -10,7 +10,7 @@ export class AdminService {
     @Inject(UsersRepository) private readonly userRepository: UsersRepository,
   ) {}
 
-  async updateUserRole(updateUserRoleDto: IUpdate<UpdatUserByAdminDto>) {
+  async updateUser(updateUserRoleDto: IUpdate<UpdatUserByAdminDto>) {
     const { updateBy, variable } = updateUserRoleDto;
 
     const currentUser = await this.userRepository.findById(variable.userId, {
@@ -21,7 +21,7 @@ export class AdminService {
     const role = await this.roleService.findById(variable.roleId);
     if (!role) throw new NotFoundException('Không tìm thấy chức vụ');
 
-    return await this.userRepository.updateUserRole({
+    return await this.userRepository.updateUserByAdmin({
       updateBy,
       variable,
     });

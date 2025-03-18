@@ -174,7 +174,9 @@ export class UsersRepository {
   async findAll(
     userQueries: IUserQueries,
   ): Promise<[Omit<User, 'password'>[], number]> {
-    const { id, jobFieldsId, jobPositionsId, page, pageSize } = userQueries;
+    const { id, email, statusId, jobFieldsId, jobPositionsId, page, pageSize } =
+      userQueries;
+
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
@@ -183,6 +185,10 @@ export class UsersRepository {
     return await this.userRepository.findAndCount({
       where: {
         ...(id && { id: +id }),
+        ...(email && { email: email }),
+        status: {
+          ...(statusId && { id: statusId }),
+        },
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
         },
@@ -191,28 +197,51 @@ export class UsersRepository {
         },
       },
       ...paginationParams,
-      ...this.generateRelationshipOptionals({
-        relationships: [
-          'creator',
-          'updater',
-          'role',
-          'usersJobFields',
-          'jobPosition',
-          'usersJobFields.jobField',
-        ],
-        select: {
-          ...this.userFields,
-          password: false,
-          role: this.userSelectColumns.role,
-          jobPosition: this.userSelectColumns.jobPosition,
-          creator: { id: true, fullName: true },
-          updater: { id: true, fullName: true },
-          usersJobFields: {
-            ...this.usersJobFieldsFields,
-            jobField: { ...this.jobFieldsFields },
-          },
+      relations: [
+        'role',
+        'status',
+        'updater',
+        'creator',
+        'jobPosition',
+        'usersJobFields',
+        'usersJobFields.jobField',
+      ],
+      select: {
+        ...this.userFields,
+        password: false,
+        role: this.userSelectColumns.role,
+        jobPosition: this.userSelectColumns.jobPosition,
+        createAt: {},
+        updateAt: {},
+        status: { id: true, title: true, code: true },
+        updater: { fullName: true, updateAt: true, updateBy: true },
+        usersJobFields: {
+          ...this.usersJobFieldsFields,
+          jobField: { ...this.jobFieldsFields },
         },
-      } as IGenerateRelationshipOptional<User>),
+      },
+      // ...this.generateRelationshipOptionals({
+      //   relationships: [
+      //     'role',
+      //     'updater',
+      //     'creator',
+      //     'jobPosition',
+      //     'usersJobFields',
+      //     'usersJobFields.jobField',
+      //   ],
+      //   select: {
+      //     ...this.userFields,
+      //     password: false,
+      //     role: this.userSelectColumns.role,
+      //     jobPosition: this.userSelectColumns.jobPosition,
+      //     creator: { id: true, fullName: true },
+      //     updater: { id: true, fullName: true },
+      //     usersJobFields: {
+      //       ...this.usersJobFieldsFields,
+      //       jobField: { ...this.jobFieldsFields },
+      //     },
+      //   },
+      // } as IGenerateRelationshipOptional<User>),
     });
   }
 
@@ -345,15 +374,13 @@ export class UsersRepository {
     return result.affected > 0;
   }
 
-  async updateUserRole(updateUserRole: IUpdate<UpdatUserByAdminDto>) {
+  async updateUserByAdmin(updateUserRole: IUpdate<UpdatUserByAdminDto>) {
     const { updateBy, variable, transactionalEntityManager } = updateUserRole;
     const updateParams = {
       updateBy,
-      updateAt: new Date().toString(),
+      updateAt: new Date().toISOString(),
       ...(variable.roleId && { role: { id: variable.roleId } }),
-      ...((variable.status !== null || variable.status !== undefined) && {
-        isActive: variable.status,
-      }),
+      ...(variable.statusId && { status: { id: variable.statusId } }),
     };
 
     let result = { affected: 0 } as UpdateResult;
