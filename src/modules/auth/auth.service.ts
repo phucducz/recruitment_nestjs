@@ -109,7 +109,6 @@ export class AuthService {
     if (type === 'google') {
       if (!currentUser) {
         const role = await this.roleService.findByTitle('user');
-
         if (!role) return null;
 
         const result = await this.register({

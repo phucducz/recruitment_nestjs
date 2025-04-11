@@ -9,18 +9,23 @@ import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { DataSource } from 'typeorm';
 
+import { STATUS_CODE } from 'src/common/utils/enums';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
+import { UserWithExtrasDto } from 'src/dto/users/user-with-extras.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { CloudinaryService } from './cloudinary.service';
 import { DesiredJobsService } from './desired_jobs.service';
+import { FunctionalsService } from './functionals.service';
 import { JobFieldsService } from './job_fields.service';
 import { JobPositionsService } from './job_positions.service';
 import { PlacementsService } from './placements.service';
 import { RolesService } from './roles.service';
+import { RolesFunctionalsService } from './roles_functionals.service';
+import { StatusService } from './status.service';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +33,12 @@ export class UsersService {
     @Inject(UsersRepository) private readonly userRepository: UsersRepository,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => FunctionalsService))
+    private readonly functionalsService: FunctionalsService,
+    @Inject(forwardRef(() => RolesFunctionalsService))
+    private readonly rolesFunctionalsService: RolesFunctionalsService,
     @Inject(RolesService) private readonly roleService: RolesService,
+    @Inject(StatusService) private readonly statusService: StatusService,
     @Inject(forwardRef(() => JobPositionsService))
     private readonly jobPositionService: JobPositionsService,
     @Inject(CloudinaryService)
@@ -57,16 +67,26 @@ export class UsersService {
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
-    const desiredJob = await this.desiredJobService.findOneBy({
-      where: { user: { id } },
-    });
+    const [desiredJob, rolesFunctionals] = await Promise.all([
+      this.desiredJobService.findOneBy({
+        where: { user: { id } },
+      }),
+      this.rolesFunctionalsService.findByRolesId(result.role.id),
+    ]);
 
-    return {
+    const functionals = await this.functionalsService.findByIds(
+      rolesFunctionals?.map((rolesFunctional) => rolesFunctional.functionalsId),
+    );
+
+    const UserWithExtras: UserWithExtrasDto = {
       ...result,
+      functionals,
       desiredJob: {
         totalYearExperience: desiredJob?.totalYearExperience ?? null,
       } as DesiredJob,
     };
+
+    return UserWithExtras;
   }
 
   async findAll(userQueries: IUserQueries) {
@@ -81,6 +101,7 @@ export class UsersService {
     return await this.userRepository.save({
       ...registerDto,
       role: await this.roleService.findById(registerDto.roleId),
+      status: await this.statusService.findByCode(STATUS_CODE.ACCOUNT_ACTIVE),
       jobPosition: await this.jobPositionService.findById(
         registerDto.jobPositionsId,
       ),

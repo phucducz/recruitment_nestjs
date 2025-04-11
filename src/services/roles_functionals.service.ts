@@ -32,6 +32,10 @@ export class RolesFunctionalsService {
     });
   }
 
+  async findByRolesId(rolesId: number) {
+    return await this.rolesFunctionalRepository.findByRolesId(rolesId);
+  }
+
   findAll() {
     return `This action returns all rolesFunctionals`;
   }

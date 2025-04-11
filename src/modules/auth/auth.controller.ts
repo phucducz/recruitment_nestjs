@@ -151,7 +151,6 @@ export class AuthController {
       };
 
     const result = await this.authService.register(registerDto);
-
     if (result.id)
       return {
         message: 'Đăng ký tài khoản thành công!',

@@ -42,6 +42,12 @@ export class RolesFunctionalRepository {
     return (await this.rolesFunctionalRepository.delete(id)).affected > 0;
   }
 
+  async findByRolesId(rolesId: number) {
+    return await this.rolesFunctionalRepository.find({
+      where: { rolesId },
+    });
+  }
+  
   async findAll(rolesFunctionalQueries: RolesFunctionalQueries) {
     const { page, pageSize } = rolesFunctionalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
