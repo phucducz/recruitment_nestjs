@@ -9,11 +9,11 @@ import {
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
-import { ApplicationStatus } from './application_status.entity';
 import { BaseEntityNotId } from './base.entity';
 import { CurriculumVitae } from './curriculum_vitae';
 import { Job } from './job.entity';
 import { Schedule } from './schedule.entity';
+import { Status } from './status.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'users_jobs' })
@@ -70,12 +70,9 @@ export class UsersJob extends BaseEntityNotId {
   @JoinColumn({ name: 'curriculum_vitaes_id', referencedColumnName: 'id' })
   curriculumVitae: CurriculumVitae;
 
-  @ManyToOne(
-    () => ApplicationStatus,
-    (applicationStatus) => applicationStatus.usesJobs,
-  )
-  @JoinColumn({ name: 'application_status_id', referencedColumnName: 'id' })
-  applicationStatus: ApplicationStatus;
+  @ManyToOne(() => Status, (status) => status.usesJobs)
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  status: Status;
 
   @OneToMany(() => Schedule, (schedule) => schedule.usersJob)
   schedules: Schedule[];

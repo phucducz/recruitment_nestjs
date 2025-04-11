@@ -1,14 +1,17 @@
-interface BaseQueries extends IPagination {}
+type BaseQueries = IPagination;
 
 interface IJobQueries extends BaseQueries {
   title?: string;
-  placementsId?: string;
+  placementIds?: string;
   salaryMin?: string;
   salaryMax?: string;
   workTypesId?: string;
   categoriesId?: string;
   jobFieldsId?: string;
   usersId?: string;
+  statusId?: string;
+  jobsId?: string;
+  type?: 'less' | 'more';
 }
 
 interface ISkillQueries extends BaseQueries {
@@ -20,6 +23,10 @@ interface IForeignLanguageQueries extends BaseQueries {
 }
 
 interface IUserQueries extends BaseQueries {
+  id: string;
+  email?: string;
+  roleId?: number;
+  statusId?: number;
   jobFieldsId?: string;
   jobPositionsId?: string;
 }
@@ -34,6 +41,8 @@ interface IFindApplicantsQueries extends BaseQueries {
   applicantName?: string;
   source?: string;
   applyDate?: string;
+  statusId?: string;
+  type?: 'default' | 'new';
 }
 
 interface IFindDesiredJobsQueries extends BaseQueries {
@@ -57,8 +66,8 @@ interface IFindUserSkillsQueries extends BaseQueries {
 }
 
 interface IFindUserForeignLanguagesQueries extends BaseQueries {
-  foreignLanguagesId?: string;
-  usersId?: string;
+  foreignLanguagesId?: string | number;
+  usersId?: string | number;
 }
 
 interface IFindApplicationStatusQueries extends BaseQueries {
@@ -67,10 +76,46 @@ interface IFindApplicationStatusQueries extends BaseQueries {
 
 interface IFIndJobsForEmployerQueries extends BaseQueries {
   title?: string;
-  applicationStatusId?: string;
+  statusId?: string;
 }
 
 interface IFindApplicantDetailQueries {
   usersId: string;
   jobsId: string;
+}
+
+interface IFindStatusQueries extends BaseQueries {
+  type?: string;
+}
+
+interface IFindInterviewSchedules extends BaseQueries {
+  usersId: string;
+  jobsId: string;
+}
+
+interface IFindUpcomingScheduleQueries extends BaseQueries {
+  type: 'interviewing' | 'start_working';
+}
+
+interface IFindRoleQueries extends BaseQueries {
+  id?: string;
+  title?: string;
+  functionalIds: number[];
+}
+
+interface FunctionalGroupQueries extends BaseQueries {
+  id?: string;
+  title?: string;
+  functionalIds: number[];
+}
+
+interface FunctionalQueries extends BaseQueries {
+  id?: string;
+  title?: string;
+  code?: string;
+  rolesId: string;
+}
+
+interface RolesFunctionalQueries extends BaseQueries {
+  id?: string;
 }

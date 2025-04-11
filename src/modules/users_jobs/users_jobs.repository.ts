@@ -1,20 +1,28 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import {
+  Between,
+  EntityManager,
+  FindOptionsWhere,
+  Raw,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 
-import { UsersJobConverter } from 'src/common/converters/users_jobs.converter';
+import dayjs from 'dayjs';
 import {
   CVSelectColumns,
   ENTITIES,
   jobSelectColumns,
   jobSelectRelationColumns,
+  months,
   removeColumns,
 } from 'src/common/utils/constants';
 import { APPLICANT_SOURCES } from 'src/common/utils/enums';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
-import { CurriculumVitae } from 'src/entities/curriculum_vitae';
+import { Job } from 'src/entities/job.entity';
 import { UsersJob } from 'src/entities/users_job.entity';
 
 @Injectable()
@@ -22,9 +30,6 @@ export class UsersJobRepository {
   constructor(
     @InjectRepository(UsersJob)
     private readonly usersJobRepository: Repository<UsersJob>,
-    @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(UsersJobConverter)
-    private readonly usersJobConverter: UsersJobConverter,
   ) {}
 
   generateUsersJobSelect(rmColumns: string[]) {
@@ -33,7 +38,7 @@ export class UsersJobRepository {
 
   async create(
     createUsersJobDto: ICreate<
-      CreateUsersJobDto & { curriculumVitae: CurriculumVitae }
+      CreateUsersJobDto & Pick<UsersJob, 'curriculumVitae' | 'status'>
     >,
   ) {
     const { createBy, variable } = createUsersJobDto;
@@ -41,9 +46,10 @@ export class UsersJobRepository {
     return (await this.usersJobRepository.save({
       createAt: new Date().toString(),
       createBy,
-      jobsId: variable.jobsId,
+      jobsId: +variable.jobsId,
       usersId: createBy,
       curriculumVitae: variable.curriculumVitae,
+      status: variable.status,
     })) as UsersJob;
   }
 
@@ -57,7 +63,7 @@ export class UsersJobRepository {
 
     return await this.usersJobRepository.findAndCount({
       where: { usersId },
-      relations: ['curriculumVitae', 'job', 'job.user'],
+      relations: ['curriculumVitae', 'job', 'status', 'job.user'],
       select: {
         job: {
           ...jobSelectRelationColumns,
@@ -66,6 +72,11 @@ export class UsersJobRepository {
           createBy: false,
           updateAt: false,
           updateBy: false,
+          status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
+          user: filterColumns(ENTITIES.FIELDS.USER, [
+            ...removeColumns,
+            'password',
+          ]),
         },
         ...this.generateUsersJobSelect(removeColumns),
         createAt: true,
@@ -76,109 +87,50 @@ export class UsersJobRepository {
     });
   }
 
-  async findApplicantsForJob(
-    findApplicantsForJob: IFindApplicantsQueries,
-  ): Promise<[Record<string, any>[], number]> {
-    const { usersId, applicantName, source, jobsId } = findApplicantsForJob;
-    const paginationParams = getPaginationParams({
-      page: findApplicantsForJob.page,
-      pageSize: findApplicantsForJob.pageSize,
+  async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
+    const { usersId, page, pageSize, applicantName, source, jobsId, statusId } =
+      findApplicantsForJob;
+    const paginationParams = getPaginationParams({ page, pageSize });
+    const sevenDaysAgo = dayjs()
+      .subtract(7, 'day')
+      .startOf('day')
+      .format('YYYY-MM-DD HH:mm:ss');
+    const today = dayjs().endOf('day').format('YYYY-MM-DD HH:mm:ss');
+
+    return await this.usersJobRepository.findAndCount({
+      where: {
+        job: { user: { id: usersId } } as FindOptionsWhere<Job>,
+        ...(applicantName && {
+          user: {
+            fullName: Raw((value) => `${value} ILIKE '%${applicantName}%'`),
+          },
+        }),
+        ...(source && {
+          referrerId: Raw((value) =>
+            source === APPLICANT_SOURCES.ADDED_BY_EMPLOYEE
+              ? `${value} IS NOT NULL`
+              : `${value} IS NULL`,
+          ),
+        }),
+        ...(jobsId && { jobsId: +jobsId }),
+        ...(statusId && { status: { id: +statusId } }),
+        ...(findApplicantsForJob.type &&
+          findApplicantsForJob.type === 'new' && {
+            createAt: Between(sevenDaysAgo, today),
+          }),
+      },
+      relations: ['job', 'user', 'status', 'schedules'],
+      select: {
+        user: { fullName: true, id: true, avatarUrl: true },
+        job: { title: true, id: true },
+        schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
+        ...this.generateUsersJobSelect([]),
+        createAt: true,
+        status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
+      },
+      ...paginationParams,
     });
-
-    const queryParams: any = [usersId];
-    let whereClause = 'WHERE job_users_id = $1 ';
-
-    if (applicantName) {
-      queryParams.push(`%${applicantName}%`);
-      whereClause += 'AND full_name ILIKE $2 ';
-    }
-    if (jobsId) {
-      queryParams.push(jobsId);
-      whereClause += `AND jobs_id = $${queryParams.length} `;
-    }
-    if (source)
-      whereClause +=
-        source === APPLICANT_SOURCES.ADDED_BY_EMPLOYEE
-          ? 'AND referrer_id IS NOT NULL'
-          : 'AND referrer_id IS NULL';
-
-    queryParams.push(paginationParams.take, paginationParams.skip);
-
-    const result = (await this.dataSource.query(
-      `
-      WITH combine_data AS (
-        SELECT 
-          u.id as users_id, u.full_name as full_name, j.id as  jobs_id, j.title as job_title, 
-          null as job_recommendations_id, uj.cv_viewed_at cv_viewed_at, uj.create_at as create_at, 
-          uj.referrer_id as referrer_id, uj.employer_update_by as employer_update_by, 
-          uj.employer_update_at as employer_update_at, ast.id as application_status_id, 
-          ast.title as application_status_title, j.users_id as  job_users_id
-        FROM jobs as j
-        LEFT JOIN users_jobs as uj ON uj.jobs_id = j.id
-        LEFT JOIN users as u ON u.id = uj.users_id
-        LEFT JOIN application_status as ast ON uj.application_status_id = ast.id
-        UNION ALL
-        SELECT 
-          null as users_id, jr.full_name as full_name, j.id as  jobs_id, j.title as job_title, 
-          jr.id as job_recommendations_id, jr.cv_viewed_at cv_viewed_at, jr.create_at as create_at, 
-          jr.create_by as referrer_id, jr.employer_update_by as employer_update_by, 
-          jr.employer_update_at as employer_update_at, ast.id as application_status_id, 
-          ast.title as application_status_title, j.users_id as  job_users_id
-        FROM jobs as j, job_recommendations as jr, application_status as ast
-        WHERE jr.jobs_id = j.id and jr.applications_id = ast.id
-      )
-      SELECT 
-        cd.*, 
-        (SELECT COUNT(*) FROM combine_data WHERE job_users_id = 4) as total_items
-      FROM combine_data as cd
-      ${whereClause}
-      ORDER BY create_at DESC
-      LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length};
-    `,
-      queryParams,
-    )) as Record<string, any>[];
-
-    return [
-      result.map((item) => this.usersJobConverter.toCamelCase(item)),
-      Number(result[0]?.total_items ?? '0'),
-    ];
   }
-
-  // async findApplicantsForJob(findApplicantsForJob: IFindApplicantsQueries) {
-  //   const { usersId, page, pageSize, applicantName, source } =
-  //     findApplicantsForJob;
-  //   const paginationParams = getPaginationParams({ page, pageSize });
-
-  //   return await this.usersJobRepository.findAndCount({
-  //     where: {
-  //       job: { user: { id: usersId } } as FindOptionsWhere<Job>,
-  //       ...(applicantName && {
-  //         user: {
-  //           fullName: Raw((value) => `${value} ILIKE '%${applicantName}%'`),
-  //         },
-  //       }),
-  //       ...(source && {
-  //         referrerId: Raw((value) =>
-  //           source === APPLICANT_SOURCES.ADDED_BY_EMPLOYEE
-  //             ? `${value} IS NOT NULL`
-  //             : `${value} IS NULL`,
-  //         ),
-  //       }),
-  //     },
-  //     relations: ['job', 'user', 'applicationStatus'],
-  //     select: {
-  //       job: { title: true, id: true },
-  //       ...this.generateUsersJobSelect([]),
-  //       user: { fullName: true, id: true },
-  //       createAt: true,
-  //       applicationStatus: filterColumns(
-  //         ENTITIES.FIELDS.APPLICATION_STATUS,
-  //         removeColumns,
-  //       ),
-  //     },
-  //     ...paginationParams,
-  //   });
-  // }
 
   async findApplicantDetail(
     findApplicantDetailQueries: IFindApplicantDetailQueries,
@@ -188,7 +140,7 @@ export class UsersJobRepository {
         usersId: +findApplicantDetailQueries.usersId,
         jobsId: +findApplicantDetailQueries.jobsId,
       },
-      relations: ['job', 'applicationStatus', 'curriculumVitae', 'schedules'],
+      relations: ['job', 'user', 'status', 'curriculumVitae'],
       select: {
         createAt: true,
         updateAt: true,
@@ -197,16 +149,13 @@ export class UsersJobRepository {
           'referrerId',
           'employerUpdateBy',
         ]),
+        user: { id: true, fullName: true },
         job: { title: true, id: true },
         curriculumVitae: filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
           ...removeColumns,
           'isDeleted',
         ]),
-        applicationStatus: filterColumns(
-          ENTITIES.FIELDS.APPLICATION_STATUS,
-          removeColumns,
-        ),
-        schedules: filterColumns(ENTITIES.FIELDS.SCHEDULE, removeColumns),
+        status: filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
       },
     });
   }
@@ -223,22 +172,51 @@ export class UsersJobRepository {
       { jobsId: number; usersId: number }
     >,
   ) {
-    const { variable, queries } = updateUsersJobDto;
-
-    const result = await this.usersJobRepository.update(queries, {
+    const { variable, queries, transactionalEntityManager } = updateUsersJobDto;
+    const updateParams = {
       ...[
         'employerUpdateBy',
         'employerUpdateAt',
         'updateBy',
         'updateAt',
-        'applicationStatus',
+        'status',
+        'cvViewedAt',
       ].reduce((acc, key) => {
         if (variable[key]) acc[key] = variable[key];
 
         return acc;
       }, {} as UsersJob),
-    });
+    };
+    let updateResult = { affected: 0 } as UpdateResult;
 
-    return result.affected > 0;
+    if (transactionalEntityManager)
+      updateResult = await (transactionalEntityManager as EntityManager).update(
+        UsersJob,
+        queries,
+        updateParams,
+      );
+    else
+      updateResult = await this.usersJobRepository.update(
+        queries,
+        updateParams,
+      );
+
+    return updateResult.affected > 0;
+  }
+
+  async getMonthlyCandidateStatisticsByYear(year: string) {
+    return await this.usersJobRepository
+      .createQueryBuilder('uj')
+      .select(
+        months
+          .number()
+          .map(
+            (month, index) =>
+              `COUNT(CASE WHEN EXTRACT(MONTH FROM create_at) = ${month} THEN 1 END) as ${months.name[index].toLowerCase()}`,
+          )
+          .join(', '),
+      )
+      .where('EXTRACT(YEAR FROM create_at) = :year', { year: year })
+      .getRawOne();
   }
 }

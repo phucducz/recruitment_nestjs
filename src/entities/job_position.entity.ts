@@ -6,7 +6,6 @@ import { DesiredJobsPosition } from './desired_jobs_position.entity';
 import { Job } from './job.entity';
 import { User } from './user.entity';
 import { WorkExperience } from './work_experience.entity';
-import { JobRecommendation } from './job_recomendation.entity';
 
 @Entity({ name: 'job_positions' })
 export class JobPosition extends BaseEntity {
@@ -31,10 +30,4 @@ export class JobPosition extends BaseEntity {
     (desiredJobsPosition) => desiredJobsPosition.jobPosition,
   )
   desiredJobsPositions: DesiredJobsPosition[];
-
-  @OneToMany(
-    () => JobRecommendation,
-    (jobRecommendation) => jobRecommendation.jobPosition,
-  )
-  jobRecomendations: JobRecommendation[];
 }

@@ -5,14 +5,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { APPLICANT_SOURCES, ROLES } from 'src/common/utils/enums';
+import {
+  APPLICANT_SOURCES,
+  ROLES,
+  STATUS_TITLES,
+  STATUS_TYPE_TITLES,
+} from 'src/common/utils/enums';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobRepository } from 'src/modules/users_jobs/users_jobs.repository';
-import { ApplicationStatusService } from './application_status.service';
+import { DataSource } from 'typeorm';
 import { CurriculumVitaesService } from './curriculum_vitaes.service';
 import { RolesService } from './roles.service';
+import { StatusService } from './status.service';
+import { StatusTypesService } from './status_types.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -22,25 +29,39 @@ export class UsersJobsService {
     private readonly usersJobRepository: UsersJobRepository,
     @Inject(CurriculumVitaesService)
     private readonly curriculumVitaesService: CurriculumVitaesService,
-    @Inject(ApplicationStatusService)
-    private readonly applicationStatusService: ApplicationStatusService,
     @Inject(RolesService)
     private readonly roleService: RolesService,
     @Inject(UsersService)
     private readonly userService: UsersService,
+    @Inject(StatusService)
+    private readonly statusService: StatusService,
+    @Inject(StatusTypesService)
+    private readonly statusTypesService: StatusTypesService,
+    @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
   async aplly(createUsersJobDto: ICreate<CreateUsersJobDto>) {
     const { variable } = createUsersJobDto;
     const cv = await this.curriculumVitaesService.findById(
-      variable.curriculumVitaesId,
+      +variable.curriculumVitaesId,
+    );
+    const statusType = await this.statusTypesService.findByTitle(
+      STATUS_TYPE_TITLES.INTERVIEW,
+    );
+    const status = await this.statusService.findByTitle(
+      STATUS_TITLES.APPLICATION_EVALUATING,
+      statusType.id,
     );
 
     if (!cv) throw new BadRequestException('Hãy cung cấp CV để ứng tuyển!');
 
     return await this.usersJobRepository.create({
       ...createUsersJobDto,
-      variable: { ...variable, curriculumVitae: cv },
+      variable: {
+        ...variable,
+        curriculumVitae: cv,
+        status,
+      },
     });
   }
 
@@ -71,13 +92,24 @@ export class UsersJobsService {
   }
 
   async findApplicantDetail(
-    findApplicantDetailQueries: IFindApplicantDetailQueries,
+    findApplicantDetailQueries: IFindApplicantDetailQueries & {
+      updateBy: number;
+    },
   ) {
     if (
       !findApplicantDetailQueries.usersId ||
       !findApplicantDetailQueries.jobsId
     )
       throw new Error('jobsId và usersId là bắt buộc!');
+
+    await this.usersJobRepository.update({
+      queries: {
+        usersId: +findApplicantDetailQueries.usersId,
+        jobsId: +findApplicantDetailQueries.jobsId,
+      },
+      updateBy: findApplicantDetailQueries.updateBy,
+      variable: { cvViewedAt: new Date().toString() },
+    });
 
     return await this.usersJobRepository.findApplicantDetail(
       findApplicantDetailQueries,
@@ -121,13 +153,17 @@ export class UsersJobsService {
           : {
               employerUpdateAt: nowDate,
               employerUpdateBy: updateBy,
-              applicationStatus: await this.applicationStatusService.findById(
-                variable.statusId,
-              ),
+              status: await this.statusService.findById(variable.statusId),
             }) as Partial<UsersJob>),
       },
       queries: { jobsId: variable.jobsId, usersId: variable.usersId },
     });
+  }
+
+  async getMonthlyCandidateStatisticsByYear(year: string) {
+    return await this.usersJobRepository.getMonthlyCandidateStatisticsByYear(
+      year,
+    );
   }
 
   remove(id: number) {

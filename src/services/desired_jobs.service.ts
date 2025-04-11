@@ -16,8 +16,8 @@ import { DesiredJobsPositionRepository } from 'src/modules/desired_jobs_position
 import { JobFieldsRepository } from 'src/modules/job_fields/job_fields.repository';
 import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.repository';
 import { PlacementsRepository } from 'src/modules/placements/placements.repository';
-import { UsersSkillsRepository } from 'src/modules/users_skills/users_skills.repository';
-import { SkillsService } from './skills.service';
+import { UsersForeignLanguagesRepository } from 'src/modules/users_foreign_languages/user_foreign_languages.repository';
+import { ForeignLanguagesService } from './foreign_languages.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -37,12 +37,16 @@ export class DesiredJobsService {
     private readonly jobFieldRepository: JobFieldsRepository,
     @Inject(AchivementsRepository)
     private readonly achivementRepository: AchivementsRepository,
-    @Inject(UsersSkillsRepository)
-    private readonly userSkillRepository: UsersSkillsRepository,
+    // @Inject(UsersSkillsRepository)
+    // private readonly userSkillRepository: UsersSkillsRepository,
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+    @Inject(UsersForeignLanguagesRepository)
+    private readonly usersForeignLanguagesRepository: UsersForeignLanguagesRepository,
     @Inject(DataSource) private readonly dataSource: DataSource,
-    @Inject(SkillsService) private readonly skillService: SkillsService,
+    @Inject(ForeignLanguagesService)
+    private readonly foreignLanguagesService: ForeignLanguagesService,
+    // @Inject(SkillsService) private readonly skillService: SkillsService,
   ) {}
 
   checkValidStartAfterOfferField(startAfterOffer: string) {
@@ -67,47 +71,58 @@ export class DesiredJobsService {
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
         const user = await this.userService.findById(createBy);
-        const storedSkills = await this.userSkillRepository.findByUserId(
-          user.id,
-        );
+        const [storedForeignLanguages] =
+          await this.usersForeignLanguagesRepository.findBy({
+            usersId: user.id,
+          });
 
         const {
-          itemToUpdate: skillToUpdate,
-          itemsToAdd: skillsToAdd,
-          itemsToRemove: skillsToRemove,
+          itemToUpdate: foreignLanguagesToUpdate,
+          itemsToAdd: foreignLanguagesToAdd,
+          itemsToRemove: foreignLanguagesToRemove,
         } = getItemsDiff({
-          items: { data: variable.skills, key: 'id' },
-          storedItems: { data: storedSkills, key: 'skillsId' },
+          items: { data: variable.foreignLanguages, key: 'id' },
+          storedItems: {
+            data: storedForeignLanguages,
+            key: 'foreignLanguagesId',
+          },
         });
 
-        if (skillsToRemove.length > 0)
-          await this.userSkillRepository.removeMany(
-            skillsToRemove.map((skill) => ({
-              skillsId: skill.skillsId,
-              usersId: user.id,
-            })),
-          );
-
-        if (skillsToAdd.length > 0)
-          await this.userSkillRepository.createMany({
-            createBy,
+        if (foreignLanguagesToAdd.length > 0)
+          await this.usersForeignLanguagesRepository.createMany({
+            createBy: user.id,
             variables: await Promise.all(
-              skillsToAdd.map(async (skill) => ({
-                level: skill.level,
-                skillsId: skill.id,
-                skill: await this.skillService.findById(skill.id),
+              foreignLanguagesToAdd.map(async (foreignLanguage) => ({
+                foreignLanguage: await this.foreignLanguagesService.findById(
+                  foreignLanguage.id,
+                ),
+                level: foreignLanguage.level,
                 user,
+                foreignLanguagesId: foreignLanguage.id,
               })),
             ),
           });
-        if (skillToUpdate.length > 0)
-          await this.userSkillRepository.updateMany({
-            updateBy: createBy,
-            variables: skillToUpdate.map((skill) => ({
-              level: skill.level,
-              skillsId: skill.id,
+
+        if (foreignLanguagesToUpdate.length > 0)
+          await this.usersForeignLanguagesRepository.updateMany(
+            foreignLanguagesToUpdate.map((foreignLanguage) => ({
+              queries: {
+                foreignLanguagesId: foreignLanguage.id,
+                usersId: user.id,
+              },
+              updateBy: createBy,
+              variable: { level: foreignLanguage.level },
+              transactionalEntityManager,
             })),
-          });
+          );
+
+        if (foreignLanguagesToRemove.length > 0)
+          await this.usersForeignLanguagesRepository.removeMany(
+            foreignLanguagesToRemove.map((foreignLanguage) => ({
+              foreignLanguagesId: foreignLanguage.foreignLanguagesId,
+              usersId: user.id,
+            })),
+          );
 
         if (user.achivement) {
           const achivements = await this.achivementRepository.findById(

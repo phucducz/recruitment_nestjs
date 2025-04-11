@@ -88,12 +88,6 @@ export class DesiredJobsController {
         where: { user: { id: request.user.userId } },
       });
 
-      if (!result)
-        return res.status(401).json({
-          message: 'Lấy thông tin công việc mong muốn thất bại!',
-          statusCode: 401,
-        });
-
       return res.status(200).json({
         statusCode: 200,
         ...result,
@@ -132,7 +126,7 @@ export class DesiredJobsController {
       });
     } catch (error) {
       return res.status(500).json({
-        message: `Cập nhật công việc mong muốn không thành công. ${error?.message ?? error}!`,
+        message: `Cập nhật công việc mong muốn không thành công: ${error?.message ?? error}!`,
         statusCode: 500,
       });
     }

@@ -17,6 +17,7 @@ import { CurriculumVitae } from './curriculum_vitae';
 import { DesiredJob } from './desired_job.entity';
 import { Placement } from './placement.entity';
 import { RefreshToken } from './refresh_token.entity';
+import { Status } from './status.entity';
 import { UsersForeignLanguage } from './users_foreign_language.entity';
 import { UsersJob } from './users_job.entity';
 import { UsersJobField } from './users_job_field.entity';
@@ -64,11 +65,13 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', name: 'company_url', length: 45, nullable: true })
   companyUrl: string;
 
-  @Field()
-  @Column({ type: 'boolean', name: 'is_active', default: true, nullable: true })
-  isActive: boolean;
+  @ManyToOne(() => Status, (status) => status.users, { nullable: true })
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  status: Status;
 
-  @ManyToOne(() => Role, (role) => role.users)
+  @ManyToOne(() => Role, (role) => role.users, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'roles_id', referencedColumnName: 'id' })
   role: Role;
 
@@ -113,4 +116,12 @@ export class User extends BaseEntity {
   @ManyToOne(() => Placement, (placement) => placement.users)
   @JoinColumn({ name: 'placements_id', referencedColumnName: 'id' })
   placement: Placement;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

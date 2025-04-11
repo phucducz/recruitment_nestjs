@@ -21,7 +21,7 @@ export class CreateDesiredJobDto {
 
   @IsArray()
   @IsOptional()
-  skills: {
+  foreignLanguages: {
     id: number;
     level: number;
   }[];

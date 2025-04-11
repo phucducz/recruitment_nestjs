@@ -8,13 +8,12 @@ import {
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
-import { JOB_STATUS } from 'src/common/utils/enums';
 import { BaseEntity } from 'src/entities/base.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
-import { JobRecommendation } from './job_recomendation.entity';
 import { JobsPlacement } from './jobs_placement.entity';
+import { Status } from './status.entity';
 import { User } from './user.entity';
 import { UsersJob } from './users_job.entity';
 import { WorkType } from './work_type.entity';
@@ -43,7 +42,7 @@ export class Job extends BaseEntity {
 
   @Field()
   @Column({ type: 'timestamp without time zone', name: 'application_deadline' })
-  applicationDeadline: Timestamp;
+  applicationDeadline: Timestamp | string;
 
   @Field()
   @Column({ type: 'int', nullable: true, name: 'delete_by' })
@@ -82,9 +81,9 @@ export class Job extends BaseEntity {
   @Column({ type: 'int', default: 1, nullable: true })
   quantity: number;
 
-  @Field()
-  @Column({ type: 'varchar', enum: JOB_STATUS, default: JOB_STATUS.ACTIVE })
-  status: string;
+  // @Field()
+  // @Column({ type: 'varchar', enum: JOB_STATUS, default: JOB_STATUS.ACTIVE })
+  // status: string;
 
   @ManyToOne(() => JobCategory, (jobCategory) => jobCategory.jobs)
   @JoinColumn({ name: 'job_categories_id', referencedColumnName: 'id' })
@@ -112,9 +111,15 @@ export class Job extends BaseEntity {
   @JoinColumn({ name: 'work_types_id', referencedColumnName: 'id' })
   workType: WorkType;
 
-  @OneToMany(
-    () => JobRecommendation,
-    (jobRecommendation) => jobRecommendation.job,
-  )
-  jobRecomendations: JobRecommendation[];
+  @ManyToOne(() => Status, (status) => status.jobs)
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  status: Status;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

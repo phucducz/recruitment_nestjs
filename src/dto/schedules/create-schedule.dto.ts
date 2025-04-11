@@ -16,4 +16,8 @@ export class CreateScheduleDto {
   @IsNumber()
   @IsOptional()
   jobsId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  statusId: number;
 }

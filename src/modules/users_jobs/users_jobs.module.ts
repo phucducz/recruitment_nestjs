@@ -1,16 +1,15 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UsersJobConverter } from 'src/common/converters/users_jobs.converter';
 import { UsersJob } from 'src/entities/users_job.entity';
 import { UsersJobsService } from '../../services/users_jobs.service';
-import { ApplicationStatusModule } from '../application_status/application_status.module';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { CurriculumVitaesModule } from '../curriculum_vitaes/curriculum_vitaes.module';
-import { JobRecomendationsModule } from '../job_recomendations/job_recomendations.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { RolesModule } from '../roles/roles.module';
+import { StatusModule } from '../status/status.module';
+import { StatusTypesModule } from '../status_types/status_types.module';
 import { UsersModule } from '../users/users.module';
 import { UsersJobsController } from './users_jobs.controller';
 import { UsersJobRepository } from './users_jobs.repository';
@@ -21,14 +20,14 @@ import { UsersJobRepository } from './users_jobs.repository';
     RefreshTokenModule,
     AuthModule,
     CloudinaryModule,
-    ApplicationStatusModule,
     RolesModule,
     UsersModule,
-    JobRecomendationsModule,
+    StatusModule,
+    StatusTypesModule,
     forwardRef(() => CurriculumVitaesModule),
   ],
   controllers: [UsersJobsController],
-  providers: [UsersJobsService, UsersJobRepository, UsersJobConverter],
+  providers: [UsersJobsService, UsersJobRepository],
   exports: [UsersJobsService],
 })
 export class UsersJobsModule {}

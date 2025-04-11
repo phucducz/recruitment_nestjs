@@ -1,9 +1,10 @@
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
-export const getPaginationParams = ({
-  page = 1,
-  pageSize = 10,
-}: IPagination): { take?: number; skip?: number } => {
+export const getPaginationParams = (
+  params: IPagination,
+): { take?: number; skip?: number } => {
+  const { page = 1, pageSize = 10 } = params;
+
   return {
     ...(page && { skip: (page - 1) * pageSize }),
     ...(pageSize && { take: pageSize }),
@@ -11,9 +12,10 @@ export const getPaginationParams = ({
 };
 
 export const rtPageInfoAndItems = (
-  { page = 1, pageSize = 10 }: PaginationDto,
+  pagination: PaginationDto,
   result: [any[], number],
 ) => {
+  const { page = 1, pageSize = 10 } = pagination;
   const [items, totalItems] = result;
 
   if (!page || !pageSize)

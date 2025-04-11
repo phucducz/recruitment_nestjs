@@ -17,6 +17,7 @@ import {
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { ISaveUserParams } from 'src/common/utils/types/user';
+import { UpdatUserByAdminDto } from 'src/dto/admin/update-user.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -173,7 +174,9 @@ export class UsersRepository {
   async findAll(
     userQueries: IUserQueries,
   ): Promise<[Omit<User, 'password'>[], number]> {
-    const { jobFieldsId, jobPositionsId, page, pageSize } = userQueries;
+    const { id, email, statusId, jobFieldsId, jobPositionsId, page, pageSize } =
+      userQueries;
+
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
@@ -181,6 +184,11 @@ export class UsersRepository {
 
     return await this.userRepository.findAndCount({
       where: {
+        ...(id && { id: +id }),
+        ...(email && { email: email }),
+        status: {
+          ...(statusId && { id: statusId }),
+        },
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
         },
@@ -189,24 +197,51 @@ export class UsersRepository {
         },
       },
       ...paginationParams,
-      ...this.generateRelationshipOptionals({
-        relationships: [
-          'role',
-          'usersJobFields',
-          'jobPosition',
-          'usersJobFields.jobField',
-        ],
-        select: {
-          ...this.userFields,
-          password: false,
-          role: this.userSelectColumns.role,
-          jobPosition: this.userSelectColumns.jobPosition,
-          usersJobFields: {
-            ...this.usersJobFieldsFields,
-            jobField: { ...this.jobFieldsFields },
-          },
+      relations: [
+        'role',
+        'status',
+        'updater',
+        'creator',
+        'jobPosition',
+        'usersJobFields',
+        'usersJobFields.jobField',
+      ],
+      select: {
+        ...this.userFields,
+        password: false,
+        role: this.userSelectColumns.role,
+        jobPosition: this.userSelectColumns.jobPosition,
+        createAt: {},
+        updateAt: {},
+        status: { id: true, title: true, code: true },
+        updater: { fullName: true, updateAt: true, updateBy: true },
+        usersJobFields: {
+          ...this.usersJobFieldsFields,
+          jobField: { ...this.jobFieldsFields },
         },
-      } as IGenerateRelationshipOptional<User>),
+      },
+      // ...this.generateRelationshipOptionals({
+      //   relationships: [
+      //     'role',
+      //     'updater',
+      //     'creator',
+      //     'jobPosition',
+      //     'usersJobFields',
+      //     'usersJobFields.jobField',
+      //   ],
+      //   select: {
+      //     ...this.userFields,
+      //     password: false,
+      //     role: this.userSelectColumns.role,
+      //     jobPosition: this.userSelectColumns.jobPosition,
+      //     creator: { id: true, fullName: true },
+      //     updater: { id: true, fullName: true },
+      //     usersJobFields: {
+      //       ...this.usersJobFieldsFields,
+      //       jobField: { ...this.jobFieldsFields },
+      //     },
+      //   },
+      // } as IGenerateRelationshipOptional<User>),
     });
   }
 
@@ -310,7 +345,10 @@ export class UsersRepository {
 
   async updateAccountInfo(
     updateAccountInfoDto: IUpdate<
-      UpdateAccountInfoDto & { avatarUrl: string | null }
+      Omit<UpdateAccountInfoDto, 'isChangePassword'> & {
+        avatarUrl: string | null;
+        isChangePassword: boolean;
+      }
     >,
   ) {
     const { updateBy, variable, transactionalEntityManager } =
@@ -332,6 +370,28 @@ export class UsersRepository {
         updateParams,
       );
     } else result = await this.userRepository.update(updateBy, updateParams);
+
+    return result.affected > 0;
+  }
+
+  async updateUserByAdmin(updateUserRole: IUpdate<UpdatUserByAdminDto>) {
+    const { updateBy, variable, transactionalEntityManager } = updateUserRole;
+    const updateParams = {
+      updateBy,
+      updateAt: new Date().toISOString(),
+      ...(variable.roleId && { role: { id: variable.roleId } }),
+      ...(variable.statusId && { status: { id: variable.statusId } }),
+    };
+
+    let result = { affected: 0 } as UpdateResult;
+    if (transactionalEntityManager)
+      result = await (transactionalEntityManager as EntityManager).update(
+        User,
+        variable.userId,
+        updateParams,
+      );
+    else
+      result = await this.userRepository.update(variable.userId, updateParams);
 
     return result.affected > 0;
   }

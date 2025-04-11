@@ -18,12 +18,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
 import { rtPageInfoAndItems } from 'src/common/utils/function';
-import { CreateJobRecommendationDto } from 'src/dto/job_recomendations/create-job_recomendation.dto';
 import { CreateUsersJobDto } from 'src/dto/users_jobs/create-users_job.dto';
 import { UpdateUsersJobDto } from 'src/dto/users_jobs/update-users_job.dto';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
-import { JobRecommendationsService } from 'src/services/job_recomendations.service';
 import { UsersJobsService } from '../../services/users_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -33,7 +31,6 @@ export class UsersJobsController {
     private readonly usersJobsService: UsersJobsService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly curriculumVitaesService: CurriculumVitaesService,
-    private readonly jobRecomendationsService: JobRecommendationsService,
   ) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -82,7 +79,7 @@ export class UsersJobsController {
       const createBy = request.user.userId;
 
       const isApplied = await this.usersJobsService.isApplied({
-        jobsId: data.jobsId,
+        jobsId: +data.jobsId,
         usersId: createBy,
       });
 
@@ -133,42 +130,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/recommendation-candidate')
-  @UseInterceptors(FileInterceptor('file'))
-  async recomendationCandidate(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() createJobRecomendationDto: CreateJobRecommendationDto,
-    @Request() request: any,
-    @Res() res: Response,
-  ) {
-    try {
-      if (!file) throw new Error('Vui lòng cung cấp CV của ứng viên');
-
-      const result = await this.jobRecomendationsService.create({
-        createBy: request.user.userId,
-        variable: { ...createJobRecomendationDto, file },
-      });
-
-      if (!result)
-        return res.status(401).json({
-          statusCode: 401,
-          message: 'Thêm ứng viên không thành công!',
-        });
-
-      return res.status(200).json({
-        statusCode: 200,
-        message: 'Thêm ứng viên thành công!',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        statusCode: 500,
-        message: `Thêm ứng viên không thành công. ${error?.message ?? error}!`,
-      });
-    }
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('applied-jobs')
+  @Get('/applied-jobs')
   async findAppliedJobs(
     @Query() appliedJobQueries: IAppliedJobQueries,
     @Request() request: any,
@@ -191,7 +153,7 @@ export class UsersJobsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('applicants')
+  @Get('/applicants')
   async findApplicantsForJob(
     @Query() applicantsQueries: Omit<IFindApplicantsQueries, 'usersId'>,
     @Res() res: Response,
@@ -207,8 +169,8 @@ export class UsersJobsController {
         statusCode: 200,
         ...rtPageInfoAndItems(
           {
-            page: applicantsQueries?.page,
-            pageSize: applicantsQueries?.pageSize,
+            page: applicantsQueries.page,
+            pageSize: applicantsQueries.pageSize,
           },
           result,
         ),
@@ -220,15 +182,18 @@ export class UsersJobsController {
     }
   }
 
-  @Get('applicants/detail')
+  @UseGuards(JwtAuthGuard)
+  @Get('/applicants/detail')
   async findApplicantDetail(
     @Query() findApplicantDetailQueries: IFindApplicantDetailQueries,
     @Res() res: Response,
+    @Request() request: any,
   ) {
     try {
-      const result = await this.usersJobsService.findApplicantDetail(
-        findApplicantDetailQueries,
-      );
+      const result = await this.usersJobsService.findApplicantDetail({
+        ...findApplicantDetailQueries,
+        updateBy: +request.user.userId,
+      });
 
       return res.status(200).json({ statusCode: 200, ...result });
     } catch (error) {
@@ -236,16 +201,6 @@ export class UsersJobsController {
         .status(500)
         .json({ statusCode: 500, message: `Lỗi. ${error?.message ?? error}` });
     }
-  }
-
-  @Get()
-  findAll() {
-    return this.usersJobsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersJobsService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -276,6 +231,26 @@ export class UsersJobsController {
         statusCode: 500,
         message: `Cập nhật công việc đã ứng tuyển thất bại. ${error?.message ?? error}!`,
       });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/applicants/monthly-statistic')
+  async getMonthlyCandidateStatisticsByYear(
+    @Query() queries: { year: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const result =
+        await this.usersJobsService.getMonthlyCandidateStatisticsByYear(
+          queries.year,
+        );
+
+      return res.status(200).json({ statusCode: 200, ...result });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ statusCode: 500, message: error?.message ?? error });
     }
   }
 

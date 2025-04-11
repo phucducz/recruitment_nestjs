@@ -1,12 +1,13 @@
 import { FindOptionsSelect } from 'typeorm';
 
 import { Achivement } from 'src/entities/achivement.entity';
-import { ApplicationStatus } from 'src/entities/application_status.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
 import { ForeignLanguage } from 'src/entities/foreign_language.entity';
+import { Functional } from 'src/entities/functional.entity';
+import { FunctionalGroup } from 'src/entities/functional_group.entity';
 import { Job } from 'src/entities/job.entity';
 import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
@@ -16,6 +17,8 @@ import { Placement } from 'src/entities/placement.entity';
 import { Role } from 'src/entities/role.entity';
 import { Schedule } from 'src/entities/schedule.entity';
 import { Skill } from 'src/entities/skill.entity';
+import { Status } from 'src/entities/status.entity';
+import { StatusType } from 'src/entities/status_type.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersForeignLanguage } from 'src/entities/users_foreign_language.entity';
 import { UsersJob } from 'src/entities/users_job.entity';
@@ -24,6 +27,7 @@ import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
 import { filterColumns } from './function';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 
 export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
@@ -32,6 +36,7 @@ export const MANY_TO_MANY_ENTITIES = [
   'UsersJobField',
   'UsersJob',
   'DesiredJobsPlacement',
+  'RolesFunctional',
 ];
 
 const getEntityFields = (entity: typeof BaseEntity | any): string[] => {
@@ -68,8 +73,12 @@ export const ENTITIES = {
     USERS_JOB: getEntityFields(UsersJob),
     DESIRED_JOB: getEntityFields(DesiredJob),
     DESIRED_JOBS_PLACEMENT: getEntityFields(DesiredJobsPlacement),
-    APPLICATION_STATUS: getEntityFields(ApplicationStatus),
+    STATUS: getEntityFields(Status),
     SCHEDULE: getEntityFields(Schedule),
+    STATUS_TYPE: getEntityFields(StatusType),
+    FUNCTIONAL: getEntityFields(Functional),
+    FUNCTIONAL_GROUP: getEntityFields(FunctionalGroup),
+    ROLES_FUNCTIONAL: getEntityFields(RolesFunctional),
   },
 };
 
@@ -87,6 +96,7 @@ export const jobRelations = {
     'jobsPlacements',
     'workType',
     'jobCategory',
+    'status',
     'jobsPlacements.placement',
   ],
   fields: [
@@ -100,14 +110,11 @@ export const jobRelations = {
     filterColumns(ENTITIES.FIELDS.JOB_PLACEMENT, removeColumns),
     filterColumns(ENTITIES.FIELDS.WORK_TYPE, removeColumns),
     filterColumns(ENTITIES.FIELDS.JOB_CATEGORY, removeColumns),
+    filterColumns(ENTITIES.FIELDS.STATUS, removeColumns),
   ],
 };
 
 export const jobSelectColumns = filterColumns(ENTITIES.FIELDS.JOB, [
-  'salaryMin',
-  'salaryMax',
-  'salaryMin',
-  'salaryMax',
   'maxExpYearRequired',
   'minExpYearRequired',
   'applicationDeadline',
@@ -125,7 +132,6 @@ export const jobSelectRelationColumns = jobRelations.entites.reduce(
 ) as any;
 
 export const CVSelectColumns = filterColumns(ENTITIES.FIELDS.CURRICULUM_VITAE, [
-  ...removeColumns,
   'isDeleted',
 ]) as FindOptionsSelect<CurriculumVitae>;
 
@@ -138,3 +144,25 @@ export const usersJobColumns = filterColumns(
   ENTITIES.FIELDS.USERS_JOB_FIELD,
   removeColumns,
 );
+
+export const months = {
+  name: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+  number: (): number[] => {
+    const monthNumber = [];
+    for (let i = 1; i <= 12; i++) monthNumber.push(i);
+    return monthNumber;
+  },
+};

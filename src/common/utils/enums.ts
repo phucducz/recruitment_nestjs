@@ -34,3 +34,29 @@ export enum APPLICANT_SOURCES {
   ADDED_BY_EMPLOYEE = 'Thêm bởi thành viên',
   APPLY = 'Ứng tuyển',
 }
+
+export enum STATUS_TITLES {
+  JOB_ACTIVE = 'Đang tuyển',
+  JOB_INACTIVE = 'Ngừng đăng tin',
+  JOB_DELETED = 'Đã xóa',
+  APPLICATION_EVALUATING = 'Đang đánh giá',
+  APPLICATION_INTERVIEWING = 'Phỏng vấn',
+  APPLICATION_RECRUITING = 'Đã tuyển',
+  APPLICATION_OFFERING = 'Đang offer',
+  APPLICATION_REJECTED = 'Đã từ chối',
+  SCHEDULE_INTERVIEWING = 'Phỏng vấn',
+  SCHEDULE_START_WORKING = 'Bắt đầu đi làm',
+}
+
+export enum STATUS_TYPE_TITLES {
+  INTERVIEW = 'Phỏng vấn',
+  JOB = 'Công việc',
+  SCHEDULE = 'Lịch trình',
+}
+
+export enum STATUS_TYPE_CODES {
+  JOB = 'job',
+  ACCOUNT = 'account',
+  SCHEDULE = 'schedule',
+  INTERVIEW = 'interview',
+}
