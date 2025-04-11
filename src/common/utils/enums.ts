@@ -60,3 +60,8 @@ export enum STATUS_TYPE_CODES {
   SCHEDULE = 'schedule',
   INTERVIEW = 'interview',
 }
+
+export enum STATUS_CODE {
+  ACCOUNT_ACTIVE = 'ACCOUNT_ACTIVE',
+  ACCOUNT_INACTIVE = 'ACCOUNT_INACTIVE',
+}

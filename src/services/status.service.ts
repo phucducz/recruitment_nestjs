@@ -24,6 +24,10 @@ export class StatusService {
     return await this.statusRepository.findByTitle(title, statusTypesId);
   }
 
+  async findByCode(code: string) {
+    return await this.statusRepository.findByCode(code);
+  }
+
   async findById(id: number) {
     return await this.statusRepository.findById(id);
   }

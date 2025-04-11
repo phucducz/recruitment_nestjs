@@ -8,6 +8,7 @@ import { AdminModule } from '../admin/admin.module';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { DesiredJobsModule } from '../desired_jobs/desired_jobs.module';
+import { FunctionalsModule } from '../functionals/functionals.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
@@ -15,6 +16,8 @@ import { PlacementsModule } from '../placements/placements.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { ResetPasswordModule } from '../reset_password/reset_password.module';
 import { RolesModule } from '../roles/roles.module';
+import { RolesFunctionalsModule } from '../roles_functionals/roles_functionals.module';
+import { StatusModule } from '../status/status.module';
 import { UsersJobFieldsModule } from '../users_job_fields/users_job_fields.module';
 import { UsersController } from './users.controller';
 import { UsersConverter } from './users.converter';
@@ -30,9 +33,12 @@ import { UsersRepository } from './users.repository';
     MailModule,
     ResetPasswordModule,
     PlacementsModule,
-    forwardRef(() => DesiredJobsModule),
-    forwardRef(() => CloudinaryModule),
+    StatusModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => DesiredJobsModule),
+    forwardRef(() => FunctionalsModule),
+    forwardRef(() => RolesFunctionalsModule),
+    forwardRef(() => CloudinaryModule),
     forwardRef(() => RefreshTokenModule),
     forwardRef(() => JobPositionsModule),
   ],

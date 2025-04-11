@@ -24,6 +24,10 @@ export class StatusRepository {
     return await this.statusRepository.findOneBy({ id });
   }
 
+  async findByCode(code: string) {
+    return await this.statusRepository.findOneBy({ code });
+  }
+
   async findByType(title: string) {
     return await this.statusRepository.findBy({ statusType: { title } });
   }

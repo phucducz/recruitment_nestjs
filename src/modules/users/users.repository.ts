@@ -253,7 +253,8 @@ export class UsersRepository {
     saveUserParams: ISaveUserParams & { jobFields: JobField[] },
   ): Promise<User> {
     try {
-      const { role, email, fullName, password, avatarURL } = saveUserParams;
+      const { role, email, fullName, password, avatarURL, status } =
+        saveUserParams;
       let newUserRecord: User | null = null;
 
       if (!role) return null;
@@ -268,6 +269,7 @@ export class UsersRepository {
           email: email,
           phoneNumber: saveUserParams.phoneNumber,
           role: role,
+          status: status,
           avatarUrl: avatarURL,
         });
       } else if (role.title === 'employer') {
@@ -290,6 +292,7 @@ export class UsersRepository {
               phoneNumber: phoneNumber,
               role,
               jobPosition,
+              status: status,
               avatarUrl: avatarURL,
             });
 
@@ -315,6 +318,7 @@ export class UsersRepository {
           password: password,
           email: email,
           role: role,
+          status: status,
           avatarUrl: avatarURL,
         });
       }
