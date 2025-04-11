@@ -35,7 +35,7 @@ export class ScheduleRepository {
       date: variable.date,
       status: variable.status,
       ...(variable.note && { note: variable.note }),
-      usersJob: variable.usersJob,
+      ...(variable.usersJob && { usersJob: variable.usersJob }),
     } as Schedule;
 
     if (transactionalEntityManager) {

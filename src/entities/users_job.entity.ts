@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Timestamp,
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
@@ -35,7 +36,7 @@ export class UsersJob extends BaseEntityNotId {
     nullable: true,
     name: 'employer_update_by',
   })
-  employerUpdateBy: string;
+  employerUpdateBy: number;
 
   @Field()
   @Column({
@@ -43,7 +44,7 @@ export class UsersJob extends BaseEntityNotId {
     nullable: true,
     name: 'employer_update_at',
   })
-  employerUpdateAt: string;
+  employerUpdateAt: Timestamp | string;
 
   @Field()
   @PrimaryColumn({ name: 'users_id', type: 'int' })
