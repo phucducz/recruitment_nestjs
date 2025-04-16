@@ -12,6 +12,7 @@ const envModule = ConfigModule.forRoot({
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
@@ -27,6 +28,8 @@ import { JobPositionsModule } from './modules/job_positions/job_positions.module
 import { JobsModule } from './modules/jobs/jobs.module';
 import { JobsPlacementsModule } from './modules/jobs_placements/jobs_placements.module';
 import { MailModule } from './modules/mail/mail.module';
+import { MenuViewGroupsModule } from './modules/menu_view_groups/menu_view_groups.module';
+import { MenuViewsModule } from './modules/menu_views/menu_views.module';
 import { OTPModule } from './modules/otp/otp.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
@@ -44,7 +47,6 @@ import { UsersJobsModule } from './modules/users_jobs/users_jobs.module';
 import { UsersSkillsModule } from './modules/users_skills/users_skills.module';
 import { WorkExperiencesModule } from './modules/work_experiences/work_experiences.module';
 import { WorkTypesModule } from './modules/work_types/work_types.module';
-import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -108,6 +110,8 @@ import { AdminModule } from './modules/admin/admin.module';
     FunctionalGroupsModule,
     FunctionalsModule,
     AdminModule,
+    MenuViewsModule,
+    MenuViewGroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

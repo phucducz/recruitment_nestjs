@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
 import { FunctionalGroup } from './functional_group.entity';
+import { MenuViews } from './menu_views.entity';
 import { RolesFunctional } from './roles_functional.entity';
 import { User } from './user.entity';
 
@@ -13,7 +14,7 @@ export class Functional extends BaseEntity {
   title: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true, unique: true })
   code: string;
 
   @ManyToOne(
@@ -30,6 +31,13 @@ export class Functional extends BaseEntity {
     { onDelete: 'CASCADE', cascade: true },
   )
   rolesFunctionals: RolesFunctional[];
+
+  @ManyToOne(() => MenuViews, (menuView) => menuView.functionals, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'menu_view_id' })
+  menu: MenuViews;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'create_by' })

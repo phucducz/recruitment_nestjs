@@ -12,6 +12,10 @@ export class FunctionalGroup extends BaseEntity {
   title: string;
 
   @Field()
+  @Column({ type: 'varchar', length: 50 })
+  admin_title: string;
+
+  @Field()
   @Column({ type: 'varchar', length: 200, nullable: true })
   description: string;
 
@@ -25,4 +29,8 @@ export class FunctionalGroup extends BaseEntity {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'update_by' })
   updater: User;
+
+  @Field()
+  @Column({ name: 'order_index', type: 'int', nullable: true, default: 0 })
+  orderIndex: number;
 }

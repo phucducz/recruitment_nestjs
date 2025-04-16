@@ -65,3 +65,8 @@ export enum STATUS_CODE {
   ACCOUNT_ACTIVE = 'ACCOUNT_ACTIVE',
   ACCOUNT_INACTIVE = 'ACCOUNT_INACTIVE',
 }
+
+export enum ICON_TYPE {
+  IMAGE = 'image',
+  BUILT_IN = 'builtin',
+}

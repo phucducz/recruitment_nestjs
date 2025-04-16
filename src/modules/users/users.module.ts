@@ -1,6 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { MenuViewGroup } from 'src/entities/menu_view_group.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
@@ -25,7 +27,12 @@ import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UsersJobField]),
+    TypeOrmModule.forFeature([
+      User,
+      UsersJobField,
+      MenuViewGroup,
+      RolesFunctional,
+    ]),
     RolesModule,
     AdminModule,
     JobFieldsModule,
