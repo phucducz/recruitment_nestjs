@@ -119,7 +119,6 @@ export class AuthController {
   ) {
     try {
       const refreshToken = request.headers.cookies;
-
       if (!refreshToken)
         return res
           .status(401)

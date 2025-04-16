@@ -36,7 +36,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const refreshToken = this.extractRefreshTokenFromCookie(request);
 
       if (!token)
-        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.NO_PROVIDED_TOKEN);
+        throw new UnauthorizedException(
+          UNAUTHORIZED_EXCEPTION_MESSAGE.NO_PROVIDED_TOKEN,
+        );
 
       try {
         const payload = await this.jwtService.verifyAsync(token, {
@@ -45,7 +47,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         request['user'] = payload;
       } catch {
-        throw new UnauthorizedException(UNAUTHORIZED_EXCEPTION_MESSAGE.TOKEN_EXPIRED);
+        throw new UnauthorizedException(
+          UNAUTHORIZED_EXCEPTION_MESSAGE.TOKEN_EXPIRED,
+        );
       }
 
       await this.authService.compareToken(token, refreshToken);

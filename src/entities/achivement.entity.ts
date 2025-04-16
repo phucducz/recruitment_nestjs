@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
@@ -13,6 +13,6 @@ export class Achivement extends BaseEntity {
   // @ManyToOne(() => User, (user) => user.achivements)
   // user: User;
 
-  @OneToOne(() => User, user => user.achivement)
+  @OneToOne(() => User, (user) => user.achivement)
   user: User;
 }

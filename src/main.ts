@@ -21,6 +21,7 @@ async function bootstrap() {
     new UnauthorizedExceptionFilter(),
     new InternalServerErrorExceptionFilter(),
   );
+  
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
