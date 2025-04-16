@@ -23,7 +23,7 @@ export class MenuViews extends BaseEntity {
   iconType: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 200, nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   icon: string;
 
   @Field()

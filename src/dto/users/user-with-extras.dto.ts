@@ -1,8 +1,12 @@
 import { DesiredJob } from 'src/entities/desired_job.entity';
-import { MenuViewGroup } from 'src/entities/menu_view_group.entity';
 import { User } from 'src/entities/user.entity';
+import {
+  MenuViewDto,
+  MenuViewGroupDto,
+} from '../menu_view_groups/get-menu_view_group.dto';
 
 export class UserWithExtrasDto extends User {
   desiredJob: DesiredJob;
-  viewGroups: MenuViewGroup[];
+  viewGroups: MenuViewGroupDto[];
+  standaloneViews: MenuViewDto[];
 }

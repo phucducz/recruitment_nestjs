@@ -32,6 +32,9 @@ export class Functional extends BaseEntity {
   )
   rolesFunctionals: RolesFunctional[];
 
+  @Column({ name: 'menu_view_id', nullable: true })
+  menuViewId: number;
+
   @ManyToOne(() => MenuViews, (menuView) => menuView.functionals, {
     nullable: true,
     onDelete: 'SET NULL',
