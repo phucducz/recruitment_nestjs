@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { SignInDto } from 'src/dto/auth/sign-in.dto';
+import { RedisService } from 'src/services/redis.service';
 import { RolesService } from 'src/services/roles.service';
 import { UsersService } from 'src/services/users.service';
 import { RefreshTokenService } from '../refresh_token/refresh_token.service';
@@ -24,6 +25,7 @@ export class AuthService {
 
   constructor(
     @Inject(JwtService) private jwtService: JwtService,
+    @Inject(RedisService) private redisService: RedisService,
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     @Inject(UsersConverter) private readonly userConverter: UsersConverter,
@@ -56,9 +58,14 @@ export class AuthService {
     return true;
   }
 
-  async generateToken(id: number, email: string, fullName: string) {
+  async generateToken(
+    id: number,
+    email: string,
+    fullName: string,
+    roleId: number,
+  ) {
     return await this.jwtService.signAsync(
-      { userId: id, email, fullName },
+      { userId: id, email, fullName, roleId },
       { expiresIn: '1h' },
     );
   }
@@ -84,6 +91,8 @@ export class AuthService {
       hasRelations: false,
     });
 
+    await this.redisService.cacheFunctionalsByRole(currentUser.role.id);
+
     let refreshToken = null;
     let userInfo = null;
 
@@ -100,6 +109,7 @@ export class AuthService {
               currentUser.id,
               currentUser.email,
               currentUser.fullName,
+              currentUser.role.id,
             )
           : null,
         refreshToken: refreshToken,
@@ -112,10 +122,10 @@ export class AuthService {
         if (!role) return null;
 
         const result = await this.register({
+          roleId: role.id,
           email: signInDto.email,
           password: undefined,
           fullName: signInDto.fullName,
-          roleId: role.id,
           avatarURL: signInDto.avatarURL,
         });
         const { refreshToken: rf } = await this.refreshTokenService.create({
@@ -130,6 +140,7 @@ export class AuthService {
             result.id,
             result.email,
             result.fullName,
+            currentUser.role.id,
           ),
           refreshToken: rf,
         };

@@ -1,11 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Auth } from 'src/entities/auth.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { MailModule } from '../mail/mail.module';
 import { OTPModule } from '../otp/otp.module';
+import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { ResetPasswordModule } from '../reset_password/reset_password.module';
 import { RolesModule } from '../roles/roles.module';
@@ -18,10 +20,11 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Auth]),
+    TypeOrmModule.forFeature([Auth, RolesFunctional]),
     RolesModule,
     MailModule,
     OTPModule,
+    RedisModule,
     ResetPasswordModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),

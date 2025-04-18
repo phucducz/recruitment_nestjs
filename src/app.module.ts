@@ -33,6 +33,7 @@ import { MenuViewsModule } from './modules/menu_views/menu_views.module';
 import { OTPModule } from './modules/otp/otp.module';
 import { PlacementsModule } from './modules/placements/placements.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
+import { RedisModule } from './modules/redis/redis.module';
 import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 import { ResetPasswordModule } from './modules/reset_password/reset_password.module';
 import { RolesModule } from './modules/roles/roles.module';
@@ -112,6 +113,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     AdminModule,
     MenuViewsModule,
     MenuViewGroupsModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
