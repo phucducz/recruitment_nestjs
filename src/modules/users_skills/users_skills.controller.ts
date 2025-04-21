@@ -13,17 +13,21 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateUsersSkillDto } from 'src/dto/users_skills/create-users_skill.dto';
 import { UpdateUsersSkillDto } from 'src/dto/users_skills/update-users_skill.dto';
 import { UsersSkillsService } from '../../services/users_skills.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('users-skills')
 export class UsersSkillsController {
   constructor(private readonly usersSkillsService: UsersSkillsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Post()
   async create(
     @Body() createUsersSkillDto: CreateUsersSkillDto,
@@ -82,7 +86,8 @@ export class UsersSkillsController {
     return this.usersSkillsService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch(':skillsId')
   async update(
     @Param('skillsId') skillsId: number,
@@ -116,7 +121,8 @@ export class UsersSkillsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Delete(':skillsId')
   async remove(
     @Param('skillsId') skillsId: number,

@@ -17,15 +17,17 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { ResetPasswordDto } from 'src/dto/users/reset-password.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { ResetPasswordService } from 'src/services/forgot_password.service';
-import { RolesService } from 'src/services/roles.service';
 import { UsersService } from '../../services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('users')
 export class UsersController {
@@ -33,8 +35,6 @@ export class UsersController {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
-    @Inject(forwardRef(() => RolesService))
-    private readonly roleService: RolesService,
     @Inject(ResetPasswordService)
     private readonly resetPasswordService: ResetPasswordService,
   ) {}
@@ -141,7 +141,8 @@ export class UsersController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch('/account-info')
   @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
@@ -218,7 +219,8 @@ export class UsersController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch('/personal-info')
   @UseInterceptors(FileInterceptor('file'))
   async updatePersonalInfo(

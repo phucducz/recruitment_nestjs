@@ -3,7 +3,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
@@ -39,13 +39,9 @@ export class PermissionGuard implements CanActivate {
     const userPermissions =
       await this.redisService.getFunctionalsFromCacheByRole(user.roleId);
 
-    console.log('user', user);
-    console.log('userPermissions', userPermissions);
-
-    const hasPermission = requiredPermissions?.some((permission) =>
+    const hasPermission = requiredPermissions?.every((permission) =>
       userPermissions.includes(permission),
     );
-    console.log('hasPermission', hasPermission);
 
     if (!hasPermission)
       throw new ForbiddenException(

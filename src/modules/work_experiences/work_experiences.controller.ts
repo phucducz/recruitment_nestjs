@@ -13,11 +13,14 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateWorkExperienceDto } from 'src/dto/work_experiences/create-work_experience.dto';
 import { UpdateWorkExperienceDto } from 'src/dto/work_experiences/update-work_experience.dto';
 import { WorkExperiencesService } from '../../services/work_experiences.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('work-experiences')
 export class WorkExperiencesController {
@@ -25,7 +28,8 @@ export class WorkExperiencesController {
     private readonly workExperiencesService: WorkExperiencesService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Post()
   async create(
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
@@ -85,7 +89,8 @@ export class WorkExperiencesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -118,6 +123,8 @@ export class WorkExperiencesController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
     try {

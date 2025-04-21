@@ -16,6 +16,7 @@ import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
 import { PlacementsModule } from '../placements/placements.module';
+import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { ResetPasswordModule } from '../reset_password/reset_password.module';
 import { RolesModule } from '../roles/roles.module';
@@ -43,6 +44,7 @@ import { UsersRepository } from './users.repository';
     ResetPasswordModule,
     PlacementsModule,
     StatusModule,
+    RedisModule,
     forwardRef(() => AuthModule),
     forwardRef(() => DesiredJobsModule),
     forwardRef(() => CloudinaryModule),
