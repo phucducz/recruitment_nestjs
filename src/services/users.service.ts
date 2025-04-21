@@ -75,15 +75,28 @@ export class UsersService {
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
-    const desiredJob = await this.desiredJobService.findOneBy({
-      where: { user: { id } },
+    const [desiredJob, rolesFunctionals] = await Promise.all([
+      await this.desiredJobService.findOneBy({
+        where: { user: { id } },
+      }),
+      await this.rolesFunctionalsRepository.find({
+        where: { rolesId: result.role.id },
+        relations: ['functional'],
+      }),
+    ]);
+
+    const functionalIds = rolesFunctionals.map((rf) => rf.functionalsId);
+    const functionals = await this.functionalRepository.find({
+      where: { id: In(functionalIds) },
+      select: ['id', 'menuViewId', 'code'],
     });
 
-    const viewGroups = await this.buildViewGroups(result.role.id);
+    const viewGroups = await this.buildViewGroups(functionalIds, functionals);
 
     const userWithExtras: UserWithExtrasDto = {
       ...result,
       ...viewGroups,
+      functionals: functionals.map((fnc) => fnc.code),
       desiredJob: {
         totalYearExperience: desiredJob?.totalYearExperience ?? null,
       } as DesiredJob,
@@ -92,19 +105,11 @@ export class UsersService {
     return userWithExtras;
   }
 
-  async buildViewGroups(roleId: number): Promise<ViewGroupsResponseDto> {
-    const rolesFunctionals = await this.rolesFunctionalsRepository.find({
-      where: { rolesId: roleId },
-      relations: ['functional'],
-    });
-
-    const functionalIds = rolesFunctionals.map((rf) => rf.functionalsId);
-
-    const functionals = await this.functionalRepository.find({
-      where: { id: In(functionalIds) },
-      select: ['id', 'menuViewId'],
-    });
-
+  async buildViewGroups(
+    functionalIds: number[],
+    functionals: Functional[],
+  ): Promise<ViewGroupsResponseDto> {
+    const userPermissionCodes = functionals.map((f) => f.code);
     const menuViewIds = [
       ...new Set(
         functionals.filter((f) => f.menuViewId).map((f) => f.menuViewId),
@@ -117,26 +122,38 @@ export class UsersService {
       order: { orderIndex: 'ASC' },
     });
 
-    const filteredMenuViews = menuViews.map((menuView) => {
-      const filteredFunctionals = menuView.functionals
-        .filter((f) => functionalIds.includes(f.id))
-        .map((f) => ({
-          id: f.id,
-          title: f.title,
-          code: f.code,
-        }));
+    console.log('menuViews', menuViews);
 
-      return {
-        id: menuView.id,
-        title: menuView.title,
-        iconType: menuView.iconType,
-        icon: menuView.icon,
-        path: menuView.path,
-        orderIndex: menuView.orderIndex,
-        functionals: filteredFunctionals,
-        menuViewGroupId: menuView.group?.id || null,
-      };
-    });
+    const filteredMenuViews = menuViews
+      .filter((menuView) => {
+        const viewPermission = menuView.functionals.find((f) =>
+          f.code.startsWith('VIEW_'),
+        )?.code;
+
+        return viewPermission && userPermissionCodes.includes(viewPermission);
+      })
+      .map((menuView) => {
+        const filteredFunctionals = menuView.functionals
+          .filter((f) => functionalIds.includes(f.id))
+          .map((f) => ({
+            id: f.id,
+            title: f.title,
+            code: f.code,
+          }));
+
+        return {
+          id: menuView.id,
+          title: menuView.title,
+          iconType: menuView.iconType,
+          icon: menuView.icon,
+          path: menuView.path,
+          orderIndex: menuView.orderIndex,
+          functionals: filteredFunctionals,
+          menuViewGroupId: menuView.group?.id || null,
+        };
+      });
+
+    console.log('filteredMenuViews', filteredMenuViews);
 
     const menuViewGroups = await this.menuViewGroupRepository.find({
       order: { orderIndex: 'ASC' },

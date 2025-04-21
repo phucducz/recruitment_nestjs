@@ -13,11 +13,14 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/create-users_foreign_language.dto';
 import { UpdateUsersForeignLanguageDto } from 'src/dto/users_foreign_languages/update-users_foreign_language.dto';
 import { UsersForeignLanguagesService } from '../../services/users_foreign_languages.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('users-foreign-languages')
 export class UsersForeignLanguagesController {
@@ -25,7 +28,8 @@ export class UsersForeignLanguagesController {
     private readonly usersForeignLanguagesService: UsersForeignLanguagesService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Post()
   async create(
     @Body() createUsersForeignLanguageDto: CreateUsersForeignLanguageDto,
@@ -86,7 +90,8 @@ export class UsersForeignLanguagesController {
     return this.usersForeignLanguagesService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch(':foreignLanguagesId')
   async update(
     @Param('foreignLanguagesId') foreignLanguagesId: number,
@@ -120,7 +125,8 @@ export class UsersForeignLanguagesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Delete(':foreignLanguagesId')
   async remove(
     @Param('foreignLanguagesId') foreignLanguagesId: number,

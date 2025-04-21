@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersSkill } from 'src/entities/users_skill.entity';
 import { UsersSkillsService } from '../../services/users_skills.service';
 import { AuthModule } from '../auth/auth.module';
+import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { SkillsModule } from '../skills/skills.module';
 import { UsersModule } from '../users/users.module';
@@ -14,6 +15,7 @@ import { UsersSkillsRepository } from './users_skills.repository';
   imports: [
     TypeOrmModule.forFeature([UsersSkill]),
     SkillsModule,
+    RedisModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),
     forwardRef(() => AuthModule),

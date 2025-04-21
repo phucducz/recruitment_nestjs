@@ -7,6 +7,7 @@ import {
 
 export class UserWithExtrasDto extends User {
   desiredJob: DesiredJob;
+  functionals: string[];
   viewGroups: MenuViewGroupDto[];
   standaloneViews: MenuViewDto[];
 }
