@@ -109,81 +109,82 @@ export class UsersService {
     functionalIds: number[],
     functionals: Functional[],
   ): Promise<ViewGroupsResponseDto> {
-    const userPermissionCodes = functionals.map((f) => f.code);
-    const menuViewIds = [
-      ...new Set(
-        functionals.filter((f) => f.menuViewId).map((f) => f.menuViewId),
-      ),
-    ];
+    try {
+      const userPermissionCodes = functionals.map((f) => f.code);
+      const menuViewIds = [
+        ...new Set(
+          functionals.filter((f) => f.menuViewId).map((f) => f.menuViewId),
+        ),
+      ];
 
-    const menuViews = await this.menuViewsRepository.find({
-      where: { id: In(menuViewIds) },
-      relations: ['functionals', 'group'],
-      order: { orderIndex: 'ASC' },
-    });
-
-    console.log('menuViews', menuViews);
-
-    const filteredMenuViews = menuViews
-      .filter((menuView) => {
-        const viewPermission = menuView.functionals.find((f) =>
-          f.code.startsWith('VIEW_'),
-        )?.code;
-
-        return viewPermission && userPermissionCodes.includes(viewPermission);
-      })
-      .map((menuView) => {
-        const filteredFunctionals = menuView.functionals
-          .filter((f) => functionalIds.includes(f.id))
-          .map((f) => ({
-            id: f.id,
-            title: f.title,
-            code: f.code,
-          }));
-
-        return {
-          id: menuView.id,
-          title: menuView.title,
-          iconType: menuView.iconType,
-          icon: menuView.icon,
-          path: menuView.path,
-          orderIndex: menuView.orderIndex,
-          functionals: filteredFunctionals,
-          menuViewGroupId: menuView.group?.id || null,
-        };
+      const menuViews = await this.menuViewsRepository.find({
+        where: { id: In(menuViewIds) },
+        relations: ['functionals', 'group'],
+        order: { orderIndex: 'ASC' },
       });
 
-    console.log('filteredMenuViews', filteredMenuViews);
+      const filteredMenuViews = menuViews
+        .filter((menuView) => {
+          const viewPermission = menuView.functionals.find((f) =>
+            f.code.startsWith('VIEW_'),
+          )?.code;
 
-    const menuViewGroups = await this.menuViewGroupRepository.find({
-      order: { orderIndex: 'ASC' },
-    });
+          return viewPermission && userPermissionCodes.includes(viewPermission);
+        })
+        .map((menuView) => {
+          const filteredFunctionals = menuView.functionals
+            .filter((f) => functionalIds.includes(f.id))
+            .map((f) => ({
+              id: f.id,
+              title: f.title,
+              code: f.code,
+            }));
 
-    const viewGroups = menuViewGroups
-      .map((group) => {
-        const views = filteredMenuViews
-          .filter((mv) => mv.menuViewGroupId === group.id)
-          .sort((a, b) => a.orderIndex - b.orderIndex);
+          return {
+            id: menuView.id,
+            title: menuView.title,
+            iconType: menuView.iconType,
+            icon: menuView.icon,
+            path: menuView.path,
+            orderIndex: menuView.orderIndex,
+            functionals: filteredFunctionals,
+            menuViewGroupId: menuView.group?.id || null,
+          };
+        });
 
-        return {
-          id: group.id,
-          title: group.title,
-          orderIndex: group.orderIndex,
-          menuViews: views,
-        };
-      })
-      .filter((group) => group.menuViews?.length);
+      const menuViewGroups = await this.menuViewGroupRepository.find({
+        order: { orderIndex: 'ASC' },
+      });
 
-    const standaloneViews = filteredMenuViews
-      .filter((mv) => !mv.menuViewGroupId)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
+      const viewGroups = menuViewGroups
+        .map((group) => {
+          const views = filteredMenuViews
+            .filter((mv) => mv.menuViewGroupId === group.id)
+            .sort((a, b) => a.orderIndex - b.orderIndex);
 
-    const result = {
-      viewGroups,
-      standaloneViews,
-    };
+          return {
+            id: group.id,
+            title: group.title,
+            orderIndex: group.orderIndex,
+            menuViews: views,
+          };
+        })
+        .filter((group) => group.menuViews?.length);
 
-    return result;
+      const standaloneViews = filteredMenuViews
+        .filter((mv) => !mv.menuViewGroupId)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+
+      const result = {
+        viewGroups,
+        standaloneViews,
+      };
+
+      return result;
+    } catch (error) {
+      console.log('buildViewGroups Error:', error);
+      throw new BadRequestException(error);
+    }
   }
 
   async findAll(userQueries: IUserQueries) {

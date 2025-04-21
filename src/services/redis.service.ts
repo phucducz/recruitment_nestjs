@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createClient } from 'redis';
 import { Repository } from 'typeorm';
@@ -96,7 +101,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         `[Redis Error]: Caching functionals for role ${roleId}:`,
         error,
       );
-      throw error;
+      throw new BadGatewayException(error);
     }
   }
 

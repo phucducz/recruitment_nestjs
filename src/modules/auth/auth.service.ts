@@ -91,15 +91,16 @@ export class AuthService {
       hasRelations: false,
     });
 
-    await this.redisService.cacheFunctionalsByRole(currentUser.role.id);
-
     let refreshToken = null;
     let userInfo = null;
 
     if (currentUser) {
-      const rf = await this.refreshTokenService.create({
-        userId: currentUser.id,
-      });
+      const [rf] = await Promise.all([
+        await this.refreshTokenService.create({
+          userId: currentUser.id,
+        }),
+        await this.redisService.cacheFunctionalsByRole(currentUser.role.id),
+      ]);
       refreshToken = rf.refreshToken;
 
       userInfo = {
@@ -119,6 +120,7 @@ export class AuthService {
     if (type === 'google') {
       if (!currentUser) {
         const role = await this.roleService.findByTitle('user');
+
         if (!role) return null;
 
         const result = await this.register({
@@ -128,9 +130,13 @@ export class AuthService {
           fullName: signInDto.fullName,
           avatarURL: signInDto.avatarURL,
         });
-        const { refreshToken: rf } = await this.refreshTokenService.create({
-          userId: result.id,
-        });
+
+        const [{ refreshToken }] = await Promise.all([
+          this.refreshTokenService.create({
+            userId: result.id,
+          }),
+          await this.redisService.cacheFunctionalsByRole(result.role.id),
+        ]);
 
         return {
           ...this.userConverter.entityToBasicInfo(
@@ -140,9 +146,9 @@ export class AuthService {
             result.id,
             result.email,
             result.fullName,
-            currentUser.role.id,
+            result.role.id,
           ),
-          refreshToken: rf,
+          refreshToken,
         };
       }
 
