@@ -109,13 +109,6 @@ export class RolesController {
     }
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   console.log('id');
-
-  //   return this.rolesService.findById(+id);
-  // }
-
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(

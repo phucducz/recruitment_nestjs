@@ -5,6 +5,7 @@ import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
 import { FunctionalsService } from './functionals.service';
+import { RedisService } from './redis.service';
 import { RolesFunctionalsService } from './roles_functionals.service';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class RolesService {
   private readonly logger = new Logger(RolesRepository.name);
 
   constructor(
+    private redisService: RedisService,
     @Inject(RolesRepository) private readonly roleRepository: RolesRepository,
     @Inject(FunctionalsService)
     private readonly funtionalService: FunctionalsService,
@@ -68,18 +70,22 @@ export class RolesService {
 
   async update(id: number, updateRoleDto: IUpdate<UpdateRoleDto>) {
     const { variable } = updateRoleDto;
-    const [storedFunctional] = await this.funtionalService.findAll({
-      rolesId: id.toString(),
-    });
+    const [[storedFunctional], newFunctionals] = await Promise.all([
+      await this.funtionalService.findAll({
+        rolesId: id.toString(),
+      }),
+      await this.funtionalService.findByIds(variable.functionalIds),
+    ]);
+
+    const functionals = newFunctionals?.map((functional) => functional.code);
+    await this.redisService.cacheFunctionalsByRole(id, functionals);
 
     return await this.roleRepository.update(id, {
       ...updateRoleDto,
       variable: {
         ...variable,
         storedFunctional,
-        newFunctionals: await this.funtionalService.findByIds(
-          variable.functionalIds,
-        ),
+        newFunctionals,
       },
     });
   }

@@ -5,26 +5,30 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
-import { DataSource } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { STATUS_CODE } from 'src/common/utils/enums';
+import { ViewGroupsResponseDto } from 'src/dto/menu_view_groups/get-menu_view_group.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
 import { UserWithExtrasDto } from 'src/dto/users/user-with-extras.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
+import { Functional } from 'src/entities/functional.entity';
+import { MenuViewGroup } from 'src/entities/menu_view_group.entity';
+import { MenuViews } from 'src/entities/menu_views.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { User } from 'src/entities/user.entity';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UsersRepository } from 'src/modules/users/users.repository';
 import { CloudinaryService } from './cloudinary.service';
 import { DesiredJobsService } from './desired_jobs.service';
-import { FunctionalsService } from './functionals.service';
 import { JobFieldsService } from './job_fields.service';
 import { JobPositionsService } from './job_positions.service';
 import { PlacementsService } from './placements.service';
 import { RolesService } from './roles.service';
-import { RolesFunctionalsService } from './roles_functionals.service';
 import { StatusService } from './status.service';
 
 @Injectable()
@@ -33,10 +37,6 @@ export class UsersService {
     @Inject(UsersRepository) private readonly userRepository: UsersRepository,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
-    @Inject(forwardRef(() => FunctionalsService))
-    private readonly functionalsService: FunctionalsService,
-    @Inject(forwardRef(() => RolesFunctionalsService))
-    private readonly rolesFunctionalsService: RolesFunctionalsService,
     @Inject(RolesService) private readonly roleService: RolesService,
     @Inject(StatusService) private readonly statusService: StatusService,
     @Inject(forwardRef(() => JobPositionsService))
@@ -51,6 +51,14 @@ export class UsersService {
     private readonly dataSource: DataSource,
     @Inject(PlacementsService)
     private readonly placementsService: PlacementsService,
+    @InjectRepository(MenuViews)
+    private menuViewsRepository: Repository<MenuViews>,
+    @InjectRepository(MenuViewGroup)
+    private menuViewGroupRepository: Repository<MenuViewGroup>,
+    @InjectRepository(RolesFunctional)
+    private rolesFunctionalsRepository: Repository<RolesFunctional>,
+    @InjectRepository(Functional)
+    private functionalRepository: Repository<Functional>,
   ) {}
 
   async findByEmail(
@@ -67,26 +75,98 @@ export class UsersService {
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
-    const [desiredJob, rolesFunctionals] = await Promise.all([
-      this.desiredJobService.findOneBy({
-        where: { user: { id } },
-      }),
-      this.rolesFunctionalsService.findByRolesId(result.role.id),
-    ]);
+    const desiredJob = await this.desiredJobService.findOneBy({
+      where: { user: { id } },
+    });
 
-    const functionals = await this.functionalsService.findByIds(
-      rolesFunctionals?.map((rolesFunctional) => rolesFunctional.functionalsId),
-    );
+    const viewGroups = await this.buildViewGroups(result.role.id);
 
-    const UserWithExtras: UserWithExtrasDto = {
+    const userWithExtras: UserWithExtrasDto = {
       ...result,
-      functionals,
+      ...viewGroups,
       desiredJob: {
         totalYearExperience: desiredJob?.totalYearExperience ?? null,
       } as DesiredJob,
     };
 
-    return UserWithExtras;
+    return userWithExtras;
+  }
+
+  async buildViewGroups(roleId: number): Promise<ViewGroupsResponseDto> {
+    const rolesFunctionals = await this.rolesFunctionalsRepository.find({
+      where: { rolesId: roleId },
+      relations: ['functional'],
+    });
+
+    const functionalIds = rolesFunctionals.map((rf) => rf.functionalsId);
+
+    const functionals = await this.functionalRepository.find({
+      where: { id: In(functionalIds) },
+      select: ['id', 'menuViewId'],
+    });
+
+    const menuViewIds = [
+      ...new Set(
+        functionals.filter((f) => f.menuViewId).map((f) => f.menuViewId),
+      ),
+    ];
+
+    const menuViews = await this.menuViewsRepository.find({
+      where: { id: In(menuViewIds) },
+      relations: ['functionals', 'group'],
+      order: { orderIndex: 'ASC' },
+    });
+
+    const filteredMenuViews = menuViews.map((menuView) => {
+      const filteredFunctionals = menuView.functionals
+        .filter((f) => functionalIds.includes(f.id))
+        .map((f) => ({
+          id: f.id,
+          title: f.title,
+          code: f.code,
+        }));
+
+      return {
+        id: menuView.id,
+        title: menuView.title,
+        iconType: menuView.iconType,
+        icon: menuView.icon,
+        path: menuView.path,
+        orderIndex: menuView.orderIndex,
+        functionals: filteredFunctionals,
+        menuViewGroupId: menuView.group?.id || null,
+      };
+    });
+
+    const menuViewGroups = await this.menuViewGroupRepository.find({
+      order: { orderIndex: 'ASC' },
+    });
+
+    const viewGroups = menuViewGroups
+      .map((group) => {
+        const views = filteredMenuViews
+          .filter((mv) => mv.menuViewGroupId === group.id)
+          .sort((a, b) => a.orderIndex - b.orderIndex);
+
+        return {
+          id: group.id,
+          title: group.title,
+          orderIndex: group.orderIndex,
+          menuViews: views,
+        };
+      })
+      .filter((group) => group.menuViews?.length);
+
+    const standaloneViews = filteredMenuViews
+      .filter((mv) => !mv.menuViewGroupId)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
+    const result = {
+      viewGroups,
+      standaloneViews,
+    };
+
+    return result;
   }
 
   async findAll(userQueries: IUserQueries) {

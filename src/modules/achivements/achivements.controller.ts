@@ -13,16 +13,20 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { AchivementsService } from '../../services/achivements.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('achivements')
 export class AchivementsController {
   constructor(private readonly achivementsService: AchivementsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Post()
   async create(
     @Body() createAchivementDto: CreateAchivementDto,
@@ -68,40 +72,15 @@ export class AchivementsController {
 
       return res.status(200).json({ statusCode: 200, result: result });
     } catch (error) {
-      return res
-        .status(500)
-        .json({
-          message: `Lấy thành tựu thất bại ${error?.message ?? error}`,
-          statusCode: 500,
-        });
+      return res.status(500).json({
+        message: `Lấy thành tựu thất bại ${error?.message ?? error}`,
+        statusCode: 500,
+      });
     }
   }
 
-  // @Get()
-  // async findById(
-  //   @Query() achivementQueries: IFindAchivementQueries,
-  //   @Res() res: Response,
-  // ) {
-  //   try {
-  //     const result = await this.achivementsService.findById(
-  //       +achivementQueries.id,
-  //     );
-
-  //     if (!result)
-  //       return res.status(401).json({
-  //         message: 'Lấy thành tựu không thành công!',
-  //         statusCode: 401,
-  //       });
-
-  //     return res.status(200).json({ statusCode: 200, ...result });
-  //   } catch (error) {
-  //     return res
-  //       .status(500)
-  //       .json({ message: error?.message ?? error, statusCode: 500 });
-  //   }
-  // }
-
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -131,7 +110,8 @@ export class AchivementsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_PROFILE)
   @Delete(':id')
   async remove(
     @Param('id') id: string,

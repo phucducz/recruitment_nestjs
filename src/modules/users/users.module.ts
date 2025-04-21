@@ -1,6 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { Functional } from 'src/entities/functional.entity';
+import { MenuViewGroup } from 'src/entities/menu_view_group.entity';
+import { MenuViews } from 'src/entities/menu_views.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersJobField } from 'src/entities/users_job_field.entity';
 import { UsersService } from '../../services/users.service';
@@ -8,7 +12,6 @@ import { AdminModule } from '../admin/admin.module';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { DesiredJobsModule } from '../desired_jobs/desired_jobs.module';
-import { FunctionalsModule } from '../functionals/functionals.module';
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { MailModule } from '../mail/mail.module';
@@ -16,7 +19,6 @@ import { PlacementsModule } from '../placements/placements.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { ResetPasswordModule } from '../reset_password/reset_password.module';
 import { RolesModule } from '../roles/roles.module';
-import { RolesFunctionalsModule } from '../roles_functionals/roles_functionals.module';
 import { StatusModule } from '../status/status.module';
 import { UsersJobFieldsModule } from '../users_job_fields/users_job_fields.module';
 import { UsersController } from './users.controller';
@@ -25,7 +27,14 @@ import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UsersJobField]),
+    TypeOrmModule.forFeature([
+      User,
+      UsersJobField,
+      MenuViews,
+      Functional,
+      MenuViewGroup,
+      RolesFunctional,
+    ]),
     RolesModule,
     AdminModule,
     JobFieldsModule,
@@ -36,8 +45,6 @@ import { UsersRepository } from './users.repository';
     StatusModule,
     forwardRef(() => AuthModule),
     forwardRef(() => DesiredJobsModule),
-    forwardRef(() => FunctionalsModule),
-    forwardRef(() => RolesFunctionalsModule),
     forwardRef(() => CloudinaryModule),
     forwardRef(() => RefreshTokenModule),
     forwardRef(() => JobPositionsModule),

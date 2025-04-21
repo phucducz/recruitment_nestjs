@@ -4,12 +4,15 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import dayjs from 'dayjs';
-
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
+import { Repository } from 'typeorm';
+
 import { UNAUTHORIZED_EXCEPTION_MESSAGE } from 'src/common/utils/enums';
 import { CreateRefreshTokenDto } from 'src/dto/refresh_token/create-refresh_token.dto';
 import { REFRESH_TOKEN_STATUS } from 'src/entities/refresh_token.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { UsersService } from 'src/services/users.service';
 import { AuthService } from '../auth/auth.service';
 import { RefreshTokensRepository } from './refresh_token.repository';
@@ -23,6 +26,8 @@ export class RefreshTokenService {
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject()
     private readonly refreshTokenRepository: RefreshTokensRepository,
+    @InjectRepository(RolesFunctional)
+    private readonly rolesFunctionalsRepository: Repository<RolesFunctional>,
   ) {}
 
   async create(createRefreshTokenDto: CreateRefreshTokenDto) {
@@ -39,12 +44,11 @@ export class RefreshTokenService {
 
   async refresh(refreshToken: string) {
     const { userId } = await this.authService.getByToken(refreshToken);
+    const { id, email, fullName, role } =
+      await this.userService.findById(userId);
 
     await this.verifyRefreshToken(refreshToken);
-
-    const { id, email, fullName } = await this.userService.findById(userId);
-
-    return this.authService.generateToken(id, email, fullName);
+    return this.authService.generateToken(id, email, fullName, role.id);
   }
 
   async verifyRefreshToken(refreshToken: string) {
