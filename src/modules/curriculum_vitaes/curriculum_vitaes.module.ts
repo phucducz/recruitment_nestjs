@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CurriculumVitae } from 'src/entities/curriculum_vitae';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { AuthModule } from '../auth/auth.module';
+import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { UsersModule } from '../users/users.module';
 import { CurriculumVitaesRepository } from './curriculum_vitae.repository';
@@ -12,6 +13,7 @@ import { CurriculumVitaesController } from './curriculum_vitaes.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CurriculumVitae]),
+    RedisModule,
     forwardRef(() => UsersModule),
     forwardRef(() => RefreshTokenModule),
     forwardRef(() => AuthModule),

@@ -142,7 +142,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions(PERMISSION.USER_UPDATE_ACCOUNT)
   @Patch('/account-info')
   @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
