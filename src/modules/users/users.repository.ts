@@ -244,7 +244,7 @@ export class UsersRepository {
       // } as IGenerateRelationshipOptional<User>),
     });
   }
-
+  
   async isExist(email: string): Promise<boolean> {
     return (await this.userRepository.countBy({ email })) > 0;
   }

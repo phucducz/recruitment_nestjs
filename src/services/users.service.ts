@@ -10,7 +10,7 @@ import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
 import { DataSource, In, Repository } from 'typeorm';
 
-import { STATUS_CODE } from 'src/common/utils/enums';
+import { PERMISSION_TYPE, STATUS_CODE } from 'src/common/utils/enums';
 import { ViewGroupsResponseDto } from 'src/dto/menu_view_groups/get-menu_view_group.dto';
 import { UpdateAccountInfoDto } from 'src/dto/users/update-accounnt-info.dto';
 import { UpdatePersonalInfoDto } from 'src/dto/users/update-personal-info.dto';
@@ -75,7 +75,7 @@ export class UsersService {
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
-    const [desiredJob, rolesFunctionals] = await Promise.all([
+    const [desiredJob, rolesFunctionals, hasPassword] = await Promise.all([
       await this.desiredJobService.findOneBy({
         where: { user: { id } },
       }),
@@ -83,6 +83,7 @@ export class UsersService {
         where: { rolesId: result.role.id },
         relations: ['functional'],
       }),
+      await this.checkUserHasPassword(id),
     ]);
 
     const functionalIds = rolesFunctionals.map((rf) => rf.functionalsId);
@@ -96,6 +97,7 @@ export class UsersService {
     const userWithExtras: UserWithExtrasDto = {
       ...result,
       ...viewGroups,
+      hasPassword,
       functionals: functionals.map((fnc) => fnc.code),
       desiredJob: {
         totalYearExperience: desiredJob?.totalYearExperience ?? null,
@@ -125,8 +127,10 @@ export class UsersService {
 
       const filteredMenuViews = menuViews
         .filter((menuView) => {
-          const viewPermission = menuView.functionals.find((f) =>
-            f.code.startsWith('VIEW_'),
+          const viewPermission = menuView.functionals.find(
+            (f) =>
+              f.code.includes(PERMISSION_TYPE.VIEW) ||
+              f.code.includes(PERMISSION_TYPE.MANAGER),
           )?.code;
 
           return viewPermission && userPermissionCodes.includes(viewPermission);
@@ -191,6 +195,10 @@ export class UsersService {
     return await this.userRepository.findAll(userQueries);
   }
 
+  async userHasPassword() {
+    return await this.userRepository;
+  }
+
   async isExist(email: string): Promise<boolean> {
     return await this.userRepository.isExist(email);
   }
@@ -209,10 +217,12 @@ export class UsersService {
     });
   }
 
-  async hasPassword(userId: number) {
-    return !!(await this.userRepository.findById(userId, {
-      hasPassword: true,
-    }));
+  async checkUserHasPassword(userId: number) {
+    return !!(
+      await this.userRepository.findById(userId, {
+        hasPassword: true,
+      })
+    ).password;
   }
 
   async verifyPassword(oldPassword: string, storedPassword: string) {
@@ -337,23 +347,23 @@ export class UsersService {
             currentUser.avatarUrl,
           );
 
-        console.log({
-          fullName: variable.fullName,
-          ...(variable.jobPositionsId && {
-            jobPosition: await this.jobPositionService.findById(
-              +variable.jobPositionsId,
-            ),
-          }),
-          ...(variable.placementsId && {
-            placement: await this.placementsService.findById(
-              +variable.placementsId,
-            ),
-          }),
-          ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
-          ...(variable.companyName && { companyName: variable.companyName }),
-          ...(variable.companyUrl && { companyUrl: variable.companyUrl }),
-          ...(variable.file && { avatarUrl }),
-        });
+        // console.log({
+        //   fullName: variable.fullName,
+        //   ...(variable.jobPositionsId && {
+        //     jobPosition: await this.jobPositionService.findById(
+        //       +variable.jobPositionsId,
+        //     ),
+        //   }),
+        //   ...(variable.placementsId && {
+        //     placement: await this.placementsService.findById(
+        //       +variable.placementsId,
+        //     ),
+        //   }),
+        //   ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
+        //   ...(variable.companyName && { companyName: variable.companyName }),
+        //   ...(variable.companyUrl && { companyUrl: variable.companyUrl }),
+        //   ...(variable.file && { avatarUrl }),
+        // });
 
         const result = await transactionalEntityManager.update(
           User,
