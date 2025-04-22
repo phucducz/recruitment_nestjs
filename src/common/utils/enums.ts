@@ -7,7 +7,7 @@ export enum UNAUTHORIZED_EXCEPTION_MESSAGE {
 }
 
 export enum FORBIDDEN_EXCEPTION_MESSAGE {
-  MISSING_PERMISSION = 'Bạn không đủ quyền hạn để thực hiện thao tác này'
+  MISSING_PERMISSION = 'Bạn không đủ quyền hạn để thực hiện thao tác này',
 }
 
 export enum FORGOT_PASSWORD_TOKEN_STATUS {
@@ -75,11 +75,17 @@ export enum ICON_TYPE {
   BUILT_IN = 'builtin',
 }
 
+export enum PERMISSION_TYPE {
+  VIEW = 'VIEW',
+  MANAGER = 'MANAGER',
+}
+
 export enum PERMISSION {
   // USER
   VIEW_PROFILE = 'VIEW_PROFILE',
   EDIT_PROFILE = 'EDIT_PROFILE',
   VIEW_RESUME = 'VIEW_RESUME',
+  UPLOAD_RESUME = 'UPLOAD_RESUME',
   DELETE_RESUME = 'DELETE_RESUME',
   VIEW_DESIRED_JOB = 'VIEW_DESIRED_JOB',
   EDIT_DESIRED_JOB = 'EDIT_DESIRED_JOB',
@@ -101,4 +107,3 @@ export enum PERMISSION {
   // OTHERS
   LOGOUT = 'LOGOUT',
 }
-
