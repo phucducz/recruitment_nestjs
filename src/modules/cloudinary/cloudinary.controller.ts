@@ -11,8 +11,11 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 import { cloudinaryStorage } from './cloudinary-storage.config';
 
 @Controller('cloudinary')
@@ -22,7 +25,8 @@ export class CloudinaryController {
     private readonly curriculumVitaesService: CurriculumVitaesService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.UPLOAD_RESUME)
   @Post('/upload/CVs')
   @UseInterceptors(
     FilesInterceptor('files', 10, { storage: cloudinaryStorage }),

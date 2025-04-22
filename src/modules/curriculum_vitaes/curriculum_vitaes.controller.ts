@@ -9,8 +9,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('curriculum-vitaes')
 export class CurriculumVitaesController {
@@ -34,30 +37,26 @@ export class CurriculumVitaesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.DELETE_RESUME)
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-    @Res() res: Response,
-  ) {
+  async remove(@Param('id') id: string, @Res() res: Response) {
     try {
       const result = await this.curriculumVitaesService.remove(+id);
 
-      if(!result)
+      if (!result)
         return res
-        .status(401)
-        .json({ message: 'Xóa CV không thành công!', statusCode: 401 });
+          .status(401)
+          .json({ message: 'Xóa CV không thành công!', statusCode: 401 });
 
       return res
         .status(200)
         .json({ message: 'Xóa CV thành công!', statusCode: 200 });
     } catch (error) {
-      return res
-        .status(500)
-        .json({
-          message: `Xóa CV không thành công. ${error?.message ?? error}!`,
-          statusCode: 500,
-        });
+      return res.status(500).json({
+        message: `Xóa CV không thành công. ${error?.message ?? error}!`,
+        statusCode: 500,
+      });
     }
   }
 }
