@@ -174,8 +174,16 @@ export class UsersRepository {
   async findAll(
     userQueries: IUserQueries,
   ): Promise<[Omit<User, 'password'>[], number]> {
-    const { id, email, statusId, jobFieldsId, jobPositionsId, page, pageSize } =
-      userQueries;
+    const {
+      id,
+      email,
+      statusId,
+      roleId,
+      jobFieldsId,
+      jobPositionsId,
+      page,
+      pageSize,
+    } = userQueries;
 
     const paginationParams = getPaginationParams({
       page: +page,
@@ -188,6 +196,9 @@ export class UsersRepository {
         ...(email && { email: email }),
         status: {
           ...(statusId && { id: statusId }),
+        },
+        role: {
+          ...(roleId && { rolesFunctionals: { rolesId: roleId } }),
         },
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
@@ -206,6 +217,7 @@ export class UsersRepository {
         'usersJobFields',
         'usersJobFields.jobField',
       ],
+      order: { createAt: 'DESC' },
       select: {
         ...this.userFields,
         password: false,
@@ -220,31 +232,9 @@ export class UsersRepository {
           jobField: { ...this.jobFieldsFields },
         },
       },
-      // ...this.generateRelationshipOptionals({
-      //   relationships: [
-      //     'role',
-      //     'updater',
-      //     'creator',
-      //     'jobPosition',
-      //     'usersJobFields',
-      //     'usersJobFields.jobField',
-      //   ],
-      //   select: {
-      //     ...this.userFields,
-      //     password: false,
-      //     role: this.userSelectColumns.role,
-      //     jobPosition: this.userSelectColumns.jobPosition,
-      //     creator: { id: true, fullName: true },
-      //     updater: { id: true, fullName: true },
-      //     usersJobFields: {
-      //       ...this.usersJobFieldsFields,
-      //       jobField: { ...this.jobFieldsFields },
-      //     },
-      //   },
-      // } as IGenerateRelationshipOptional<User>),
     });
   }
-  
+
   async isExist(email: string): Promise<boolean> {
     return (await this.userRepository.countBy({ email })) > 0;
   }
