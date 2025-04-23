@@ -217,7 +217,6 @@ export class UsersRepository {
         'usersJobFields',
         'usersJobFields.jobField',
       ],
-      order: { createAt: 'DESC' },
       select: {
         ...this.userFields,
         password: false,
@@ -232,6 +231,7 @@ export class UsersRepository {
           jobField: { ...this.jobFieldsFields },
         },
       },
+      order: { createAt: 'DESC' },
     });
   }
 
