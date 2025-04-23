@@ -57,6 +57,7 @@ export class RolesRepository {
         }),
       },
       select: { id: true },
+      order: { id: 'DESC' },
       ...paginationParams,
     });
 

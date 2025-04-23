@@ -57,7 +57,7 @@ export class FunctionalRepository {
         creator: { id: true, fullName: true },
         updater: { id: true, fullName: true },
       } as FindOptionsSelect<Functional>,
-      order: { id: 'DESC' },
+      order: { createAt: 'DESC' },
     });
   }
 
