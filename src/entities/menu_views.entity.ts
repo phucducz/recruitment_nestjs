@@ -1,9 +1,11 @@
 import { Field } from 'src/common/decorators/field.decorator';
 import { ICON_TYPE } from 'src/common/utils/enums';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+
 import { BaseEntity } from './base.entity';
 import { Functional } from './functional.entity';
 import { MenuViewGroup } from './menu_view_group.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'menu_views' })
 export class MenuViews extends BaseEntity {
@@ -40,4 +42,12 @@ export class MenuViews extends BaseEntity {
   @ManyToOne(() => MenuViewGroup, (group) => group.menuViews)
   @JoinColumn({ name: 'menu_view_group_id', referencedColumnName: 'id' })
   group: MenuViewGroup;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

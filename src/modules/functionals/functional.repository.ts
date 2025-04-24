@@ -31,8 +31,9 @@ export class FunctionalRepository {
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
-    const { page, pageSize, rolesId, code, title } = functionalQueries;
-    const paginationParams = getPaginationParams({ page, pageSize });
+    const { page, pageSize, rolesId, code, title, type } = functionalQueries;
+    const paginationParams =
+      type !== 'combobox' ? getPaginationParams({ page, pageSize }) : {};
 
     return await this.functionalRepository.findAndCount({
       where: {

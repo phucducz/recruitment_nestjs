@@ -114,8 +114,17 @@ interface FunctionalQueries extends BaseQueries {
   title?: string;
   code?: string;
   rolesId: string;
+  type?: string;
 }
 
 interface RolesFunctionalQueries extends BaseQueries {
   id?: string;
+}
+
+interface MenuViewQueries extends BaseQueries {
+  title?: string;
+  path?: string;
+  orderIndex?: number;
+  iconType?: string;
+  createdDate?: string;
 }
