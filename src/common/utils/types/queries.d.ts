@@ -114,6 +114,7 @@ interface FunctionalQueries extends BaseQueries {
   title?: string;
   code?: string;
   rolesId: string;
+  type?: string;
 }
 
 interface RolesFunctionalQueries extends BaseQueries {
