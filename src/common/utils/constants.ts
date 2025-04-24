@@ -13,8 +13,10 @@ import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
+import { MenuViews } from 'src/entities/menu_views.entity';
 import { Placement } from 'src/entities/placement.entity';
 import { Role } from 'src/entities/role.entity';
+import { RolesFunctional } from 'src/entities/roles_functional.entity';
 import { Schedule } from 'src/entities/schedule.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { Status } from 'src/entities/status.entity';
@@ -27,7 +29,6 @@ import { UsersSkill } from 'src/entities/users_skill.entity';
 import { WorkExperience } from 'src/entities/work_experience.entity';
 import { WorkType } from 'src/entities/work_type.entity';
 import { filterColumns } from './function';
-import { RolesFunctional } from 'src/entities/roles_functional.entity';
 
 export const MANY_TO_MANY_ENTITIES = [
   'UsersForeignLanguage',
@@ -79,6 +80,7 @@ export const ENTITIES = {
     FUNCTIONAL: getEntityFields(Functional),
     FUNCTIONAL_GROUP: getEntityFields(FunctionalGroup),
     ROLES_FUNCTIONAL: getEntityFields(RolesFunctional),
+    MENU_VIEW: getEntityFields(MenuViews),
   },
 };
 
