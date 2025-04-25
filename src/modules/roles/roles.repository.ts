@@ -121,7 +121,7 @@ export class RolesRepository {
     id: number,
     updateRoleDto: IUpdate<
       UpdateRoleDto & {
-        storedFunctional: Functional[];
+        storedFunctionals: Functional[];
         newFunctionals: Functional[];
       }
     >,
@@ -138,7 +138,7 @@ export class RolesRepository {
 
     const { itemsToAdd, itemsToRemove } = getItemsDiff({
       items: { data: variable.newFunctionals, key: 'id' },
-      storedItems: { data: variable.storedFunctional, key: 'id' },
+      storedItems: { data: variable.storedFunctionals, key: 'id' },
     });
 
     if (itemsToAdd.length > 0 || itemsToRemove.length > 0) {

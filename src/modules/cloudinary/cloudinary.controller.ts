@@ -16,7 +16,10 @@ import { PERMISSION } from 'src/common/utils/enums';
 import { CurriculumVitaesService } from 'src/services/curriculum_vitaes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PermissionGuard } from '../auth/permission.guard';
-import { cloudinaryStorage } from './cloudinary-storage.config';
+import {
+  cloudinaryStorageCV,
+  cloudinaryStorageIcon,
+} from './cloudinary-storage.config';
 
 @Controller('cloudinary')
 export class CloudinaryController {
@@ -29,7 +32,7 @@ export class CloudinaryController {
   @Permissions(PERMISSION.UPLOAD_RESUME)
   @Post('/upload/CVs')
   @UseInterceptors(
-    FilesInterceptor('files', 10, { storage: cloudinaryStorage }),
+    FilesInterceptor('files', 10, { storage: cloudinaryStorageCV }),
   )
   async uploadCVs(
     @UploadedFiles() files: Express.Multer.File[],
@@ -49,6 +52,36 @@ export class CloudinaryController {
           url: file.path,
         })),
       });
+
+      return res.status(200).json({
+        message: 'Tải file thành công!',
+        statusCode: 200,
+        items: files.map((item) => ({
+          url: item.path,
+          originFileName: item.originalname,
+        })),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/upload/icon')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, { storage: cloudinaryStorageIcon }),
+  )
+  async uploadIcon(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Res() res: Response,
+  ) {
+    try {
+      if (!files || files.length <= 0)
+        return res
+          .status(200)
+          .json({ message: 'Vui lòng chọn file để tải lên!', statusCode: 200 });
 
       return res.status(200).json({
         message: 'Tải file thành công!',
