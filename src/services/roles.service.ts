@@ -3,8 +3,8 @@ import { DataSource } from 'typeorm';
 
 import { CreateRoleDto } from 'src/dto/roles/create-role.dto';
 import { UpdateRoleDto } from 'src/dto/roles/update-role.dto';
+import { FunctionalRepository } from 'src/modules/functionals/functional.repository';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
-import { FunctionalsService } from './functionals.service';
 import { RedisService } from './redis.service';
 import { RolesFunctionalsService } from './roles_functionals.service';
 
@@ -15,9 +15,8 @@ export class RolesService {
   constructor(
     private redisService: RedisService,
     @Inject(RolesRepository) private readonly roleRepository: RolesRepository,
-    @Inject(FunctionalsService)
-    private readonly funtionalService: FunctionalsService,
     @Inject(DataSource) private readonly dataSource: DataSource,
+    @Inject() private readonly functionalRepository: FunctionalRepository,
     @Inject(forwardRef(() => RolesFunctionalsService))
     private readonly rolesFunctionalService: RolesFunctionalsService,
   ) {}
@@ -38,7 +37,7 @@ export class RolesService {
     const { variable, createBy } = createRoleDto;
     const functionals =
       variable.functionalIds &&
-      (await this.funtionalService.findByIds(variable.functionalIds));
+      (await this.functionalRepository.findByIds(variable.functionalIds));
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
@@ -70,11 +69,11 @@ export class RolesService {
 
   async update(id: number, updateRoleDto: IUpdate<UpdateRoleDto>) {
     const { variable } = updateRoleDto;
-    const [[storedFunctional], newFunctionals] = await Promise.all([
-      await this.funtionalService.findAll({
-        rolesId: id.toString(),
+    const [storedFunctionals, newFunctionals] = await Promise.all([
+      await this.functionalRepository.find({
+        where: { rolesFunctionals: { rolesId: id } },
       }),
-      await this.funtionalService.findByIds(variable.functionalIds),
+      await this.functionalRepository.findByIds(variable.functionalIds),
     ]);
 
     const functionals = newFunctionals?.map((functional) => functional.code);
@@ -84,7 +83,7 @@ export class RolesService {
       ...updateRoleDto,
       variable: {
         ...variable,
-        storedFunctional,
+        storedFunctionals,
         newFunctionals,
       },
     });
