@@ -21,8 +21,10 @@ export class FunctionalGroupRepository {
   ) {}
 
   async findAll(functionalGroupQueries: FunctionalGroupQueries) {
-    const { page, pageSize, title, functionalIds } = functionalGroupQueries;
-    const paginationParams = getPaginationParams({ page, pageSize });
+    const { page, pageSize, title, type, functionalIds } =
+      functionalGroupQueries;
+    const paginationParams =
+      type === 'default' ? getPaginationParams({ page, pageSize }) : {};
 
     return await this.functionalGroupRepository.findAndCount({
       where: {
@@ -48,7 +50,7 @@ export class FunctionalGroupRepository {
         ]),
         functionals: filterColumns(ENTITIES.FIELDS.FUNCTIONAL, removeColumns),
       },
-      order: { id: 'DESC', functionals: { id: 'ASC' } },
+      order: { createAt: 'DESC', functionals: { id: 'ASC' } },
     });
   }
 
