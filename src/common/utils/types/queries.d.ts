@@ -28,6 +28,7 @@ interface IUserQueries extends BaseQueries {
   roleId?: number;
   statusId?: number;
   jobFieldsId?: string;
+  createdDate?: string;
   jobPositionsId?: string;
 }
 
@@ -100,6 +101,7 @@ interface IFindUpcomingScheduleQueries extends BaseQueries {
 interface IFindRoleQueries extends BaseQueries {
   id?: string;
   title?: string;
+  createdDate?: string;
   functionalIds: number[];
 }
 

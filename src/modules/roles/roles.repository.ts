@@ -1,6 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, In, Raw, Repository } from 'typeorm';
+import dayjs from 'dayjs';
+import {
+  Between,
+  DataSource,
+  EntityManager,
+  In,
+  Raw,
+  Repository,
+} from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
@@ -38,7 +46,8 @@ export class RolesRepository {
   }
 
   async findAll(findAllQueries: IFindRoleQueries): Promise<[Role[], number]> {
-    const { page, pageSize, id, title, functionalIds } = findAllQueries;
+    const { page, pageSize, id, title, createdDate, functionalIds } =
+      findAllQueries;
     const paginationParams = getPaginationParams({
       page: +page,
       pageSize: +pageSize,
@@ -54,6 +63,12 @@ export class RolesRepository {
           rolesFunctionals: {
             functionalsId: In(functionalIds),
           },
+        }),
+        ...(createdDate && {
+          createAt: Between(
+            dayjs(createdDate).startOf('day').toDate(),
+            dayjs(createdDate).endOf('day').toDate(),
+          ),
         }),
       },
       select: { id: true },
@@ -83,6 +98,7 @@ export class RolesRepository {
             ),
           },
         },
+        order: { createAt: 'DESC' },
       }),
       totalItems,
     ];
