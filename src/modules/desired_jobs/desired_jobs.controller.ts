@@ -13,11 +13,14 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSION } from 'src/common/utils/enums';
 import { rtPageInfoAndItems } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJobsService } from '../../services/desired_jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PermissionGuard } from '../auth/permission.guard';
 
 @Controller('desired-jobs')
 export class DesiredJobsController {
@@ -100,7 +103,8 @@ export class DesiredJobsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permissions(PERMISSION.EDIT_DESIRED_JOB)
   @Patch(':id')
   async update(
     @Param('id') id: string,

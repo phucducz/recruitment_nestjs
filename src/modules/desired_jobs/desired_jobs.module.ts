@@ -12,6 +12,7 @@ import { ForeignLanguagesModule } from '../foreign_languages/foreign_languages.m
 import { JobFieldsModule } from '../job_fields/job_fields.module';
 import { JobPositionsModule } from '../job_positions/job_positions.module';
 import { PlacementsModule } from '../placements/placements.module';
+import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { SkillsModule } from '../skills/skills.module';
 import { UsersModule } from '../users/users.module';
@@ -23,6 +24,7 @@ import { DesiredJobsRepository } from './desired_jobs.repository';
 @Module({
   imports: [
     TypeOrmModule.forFeature([DesiredJob, JobField]),
+    RedisModule,
     JobFieldsModule,
     UsersSkillsModule,
     SkillsModule,
