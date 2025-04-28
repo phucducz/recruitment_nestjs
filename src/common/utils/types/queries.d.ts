@@ -108,8 +108,9 @@ interface IFindRoleQueries extends BaseQueries {
 interface FunctionalGroupQueries extends BaseQueries {
   id?: string;
   title?: string;
-  type: 'default' | 'all';
-  functionalIds: number[];
+  createdDate?: string;
+  type?: 'default' | 'all';
+  functionalIds?: number[];
 }
 
 interface FunctionalQueries extends BaseQueries {
@@ -118,6 +119,7 @@ interface FunctionalQueries extends BaseQueries {
   code?: string;
   rolesId: string;
   type?: string;
+  createdDate?: string;
 }
 
 interface RolesFunctionalQueries extends BaseQueries {

@@ -1,6 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOneOptions, In, Raw, Repository } from 'typeorm';
+import dayjs from 'dayjs';
+import {
+  Between,
+  EntityManager,
+  FindOneOptions,
+  In,
+  Raw,
+  Repository,
+} from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
@@ -21,7 +29,7 @@ export class FunctionalGroupRepository {
   ) {}
 
   async findAll(functionalGroupQueries: FunctionalGroupQueries) {
-    const { page, pageSize, title, type, functionalIds } =
+    const { page, pageSize, title, type, createdDate, functionalIds } =
       functionalGroupQueries;
     const paginationParams =
       type === 'default' ? getPaginationParams({ page, pageSize }) : {};
@@ -37,6 +45,12 @@ export class FunctionalGroupRepository {
           functionals: {
             id: In(functionalIds),
           },
+        }),
+        ...(createdDate && {
+          createAt: Between(
+            dayjs(createdDate).startOf('day').toDate(),
+            dayjs(createdDate).endOf('day').toDate(),
+          ),
         }),
       },
       ...paginationParams,
