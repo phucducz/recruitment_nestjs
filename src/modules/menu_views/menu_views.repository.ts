@@ -28,9 +28,19 @@ export class MenuViewRepository {
   ) {}
 
   async findAll(menuViewQueries: MenuViewQueries) {
-    const { page, pageSize, title, path, iconType, orderIndex, createdDate } =
-      menuViewQueries;
-    const paginationParams = getPaginationParams({ page, pageSize });
+    const {
+      page,
+      pageSize,
+      title,
+      path,
+      iconType,
+      orderIndex,
+      type,
+      createdDate,
+    } = menuViewQueries;
+
+    const paginationParams =
+      type !== 'combobox' ? getPaginationParams({ page, pageSize }) : {};
 
     return await this.menuViewRepository.findAndCount({
       where: {

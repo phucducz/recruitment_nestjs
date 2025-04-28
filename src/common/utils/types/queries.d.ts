@@ -131,5 +131,13 @@ interface MenuViewQueries extends BaseQueries {
   path?: string;
   orderIndex?: number;
   iconType?: string;
+  type: 'default' | 'combobox';
   createdDate?: string;
+}
+
+interface MenuViewGroupQueries extends BaseQueries {
+  title?: string;
+  orderIndex?: number;
+  createdDate?: string;
+  menuViewIds?: number[];
 }

@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateMenuViewGroupDto } from '../../dto/menu_view_groups/update-menu_view_group.dto';
+import { Inject, Injectable } from '@nestjs/common';
+
 import { CreateMenuViewGroupDto } from 'src/dto/menu_view_groups/create-menu_view_group.dto';
+import { MenuViewGroupRepository } from 'src/modules/menu_view_groups/menu_view_groups.repository';
+import { UpdateMenuViewGroupDto } from '../dto/menu_view_groups/update-menu_view_group.dto';
 
 @Injectable()
 export class MenuViewGroupsService {
+  constructor(
+    @Inject()
+    private readonly menuViewGroupRepository: MenuViewGroupRepository,
+  ) {}
+
   create(createMenuViewGroupDto: CreateMenuViewGroupDto) {
     return 'This action adds a new menuViewGroup';
   }
 
-  findAll() {
-    return `This action returns all menuViewGroups`;
+  async findAll(menuViewGroupQueries: MenuViewGroupQueries) {
+    return await this.menuViewGroupRepository.findAll(menuViewGroupQueries);
   }
 
   findOne(id: number) {

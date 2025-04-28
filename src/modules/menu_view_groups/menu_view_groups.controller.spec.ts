@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MenuViewGroupsController } from './menu_view_groups.controller';
-import { MenuViewGroupsService } from './menu_view_groups.service';
+import { MenuViewGroupsService } from '../../services/menu_view_groups.service';
 
 describe('MenuViewGroupsController', () => {
   let controller: MenuViewGroupsController;
