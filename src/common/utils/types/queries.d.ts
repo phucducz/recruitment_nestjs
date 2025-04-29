@@ -28,6 +28,7 @@ interface IUserQueries extends BaseQueries {
   roleId?: number;
   statusId?: number;
   jobFieldsId?: string;
+  createdDate?: string;
   jobPositionsId?: string;
 }
 
@@ -100,14 +101,16 @@ interface IFindUpcomingScheduleQueries extends BaseQueries {
 interface IFindRoleQueries extends BaseQueries {
   id?: string;
   title?: string;
+  createdDate?: string;
   functionalIds: number[];
 }
 
 interface FunctionalGroupQueries extends BaseQueries {
   id?: string;
   title?: string;
-  type: 'default' | 'all';
-  functionalIds: number[];
+  createdDate?: string;
+  type?: 'default' | 'all';
+  functionalIds?: number[];
 }
 
 interface FunctionalQueries extends BaseQueries {
@@ -116,6 +119,7 @@ interface FunctionalQueries extends BaseQueries {
   code?: string;
   rolesId: string;
   type?: string;
+  createdDate?: string;
 }
 
 interface RolesFunctionalQueries extends BaseQueries {
@@ -127,5 +131,13 @@ interface MenuViewQueries extends BaseQueries {
   path?: string;
   orderIndex?: number;
   iconType?: string;
+  type: 'default' | 'combobox';
   createdDate?: string;
+}
+
+interface MenuViewGroupQueries extends BaseQueries {
+  title?: string;
+  orderIndex?: number;
+  createdDate?: string;
+  menuViewIds?: number[];
 }

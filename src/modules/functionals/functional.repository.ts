@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import {
+  Between,
   EntityManager,
   FindOneOptions,
   FindOptionsSelect,
@@ -31,7 +33,8 @@ export class FunctionalRepository {
   }
 
   async findAll(functionalQueries: FunctionalQueries) {
-    const { page, pageSize, rolesId, code, title, type } = functionalQueries;
+    const { page, pageSize, rolesId, code, title, type, createdDate } =
+      functionalQueries;
     const paginationParams =
       type !== 'combobox' ? getPaginationParams({ page, pageSize }) : {};
 
@@ -49,6 +52,12 @@ export class FunctionalRepository {
         }),
         ...(code && {
           code: Raw((value) => `${value} ILIKE :code`, { code: `%${code}%` }),
+        }),
+        ...(createdDate && {
+          createAt: Between(
+            dayjs(createdDate).startOf('day').toDate(),
+            dayjs(createdDate).endOf('day').toDate(),
+          ),
         }),
       },
       ...paginationParams,

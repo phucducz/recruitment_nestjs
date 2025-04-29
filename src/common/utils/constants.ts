@@ -13,6 +13,7 @@ import { JobCategory } from 'src/entities/job_category.entity';
 import { JobField } from 'src/entities/job_field.entity';
 import { JobPosition } from 'src/entities/job_position.entity';
 import { JobsPlacement } from 'src/entities/jobs_placement.entity';
+import { MenuViewGroup } from 'src/entities/menu_view_group.entity';
 import { MenuViews } from 'src/entities/menu_views.entity';
 import { Placement } from 'src/entities/placement.entity';
 import { Role } from 'src/entities/role.entity';
@@ -81,6 +82,7 @@ export const ENTITIES = {
     FUNCTIONAL_GROUP: getEntityFields(FunctionalGroup),
     ROLES_FUNCTIONAL: getEntityFields(RolesFunctional),
     MENU_VIEW: getEntityFields(MenuViews),
+    MENU_VIEW_GROUP: getEntityFields(MenuViewGroup),
   },
 };
 

@@ -39,7 +39,10 @@ export class MenuViews extends BaseEntity {
   @OneToMany(() => Functional, (functional) => functional.menu)
   functionals: Functional[];
 
-  @ManyToOne(() => MenuViewGroup, (group) => group.menuViews)
+  @ManyToOne(() => MenuViewGroup, (group) => group.menuViews, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'menu_view_group_id', referencedColumnName: 'id' })
   group: MenuViewGroup;
 

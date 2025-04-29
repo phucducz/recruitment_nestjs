@@ -4,7 +4,9 @@ import dayjs from 'dayjs';
 import {
   Between,
   EntityManager,
+  FindOneOptions,
   FindOptionsSelect,
+  In,
   Raw,
   Repository,
 } from 'typeorm';
@@ -12,6 +14,7 @@ import {
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import {
   filterColumns,
+  formatParams,
   getItemsDiff,
   getPaginationParams,
 } from 'src/common/utils/function';
@@ -27,10 +30,34 @@ export class MenuViewRepository {
     private readonly menuViewRepository: Repository<MenuViews>,
   ) {}
 
+  async find(options: FindOneOptions<MenuViews>) {
+    return await this.menuViewRepository.find({
+      select: {
+        ...filterColumns(ENTITIES.FIELDS.MENU_VIEW, removeColumns),
+      } as FindOptionsSelect<MenuViews>,
+      ...options,
+    });
+  }
+
+  async findByIds(ids: number[]) {
+    return await this.menuViewRepository.findBy({ id: In(ids) });
+  }
+
   async findAll(menuViewQueries: MenuViewQueries) {
-    const { page, pageSize, title, path, iconType, orderIndex, createdDate } =
-      menuViewQueries;
-    const paginationParams = getPaginationParams({ page, pageSize });
+    const formatedParams = formatParams(menuViewQueries);
+    const {
+      page,
+      pageSize,
+      title,
+      path,
+      iconType,
+      orderIndex,
+      type,
+      createdDate,
+    } = formatedParams;
+
+    const paginationParams =
+      type !== 'combobox' ? getPaginationParams({ page, pageSize }) : {};
 
     return await this.menuViewRepository.findAndCount({
       where: {
@@ -70,24 +97,15 @@ export class MenuViewRepository {
       CreateMenuViewsDto & { functionals?: Functional[] }
     >,
   ): Promise<MenuViews> {
-    console.log(createMenuViewsDto);
     const { createBy, variable, transactionalEntityManager } =
       createMenuViewsDto;
 
+    const { functionalIds, ...rest } = formatParams(variable);
     const createParams = {
-      title: variable.title,
-      path: variable.path,
-      iconType: variable.iconType,
-      icon: variable.icon,
-      orderIndex: variable.orderIndex,
-      functionals: variable.functionals,
+      ...rest,
       createBy,
       createAt: new Date().toString(),
-    } as MenuViews;
-
-    // console.log('createParams', createParams);
-
-    // return {} as MenuViews;
+    };
 
     if (transactionalEntityManager)
       return await transactionalEntityManager.save(MenuViews, createParams);
@@ -107,12 +125,11 @@ export class MenuViewRepository {
     const { variable, updateBy, transactionalEntityManager } =
       updateMenuViewsDto;
 
+    const { functionalIds, functionals, storedFunctionals, ...rest } =
+      formatParams(variable);
+
     const updateParams = {
-      ...(variable.icon && { icon: variable.icon }),
-      ...(variable.path && { path: variable.path }),
-      ...(variable.title && { title: variable.title }),
-      ...(variable.iconType && { iconType: variable.iconType }),
-      ...(variable.orderIndex && { orderIndex: variable.orderIndex }),
+      ...rest,
       updateAt: new Date().toString(),
       updateBy,
     };

@@ -5,7 +5,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import {
+  Between,
   DataSource,
   EntityManager,
   FindOneOptions,
@@ -181,6 +183,7 @@ export class UsersRepository {
       roleId,
       jobFieldsId,
       jobPositionsId,
+      createdDate,
       page,
       pageSize,
     } = userQueries;
@@ -206,6 +209,12 @@ export class UsersRepository {
         jobPosition: {
           ...(jobPositionsId && { id: +jobPositionsId }),
         },
+        ...(createdDate && {
+          createAt: Between(
+            dayjs(createdDate).startOf('day').toDate(),
+            dayjs(createdDate).endOf('day').toDate(),
+          ),
+        }),
       },
       ...paginationParams,
       relations: [
