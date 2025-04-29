@@ -11,10 +11,6 @@ export class FunctionalGroup extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   title: string;
 
-  // @Field()
-  // @Column({ type: 'varchar', length: 50 })
-  // admin_title: string;
-
   @Field()
   @Column({ type: 'varchar', length: 200, nullable: true })
   description: string;

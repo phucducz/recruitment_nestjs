@@ -97,7 +97,6 @@ export class MenuViewRepository {
       CreateMenuViewsDto & { functionals?: Functional[] }
     >,
   ): Promise<MenuViews> {
-    console.log(createMenuViewsDto);
     const { createBy, variable, transactionalEntityManager } =
       createMenuViewsDto;
 

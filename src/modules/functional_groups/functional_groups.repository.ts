@@ -75,6 +75,7 @@ export class FunctionalGroupRepository {
   ): Promise<FunctionalGroup> {
     const { createBy, variable, transactionalEntityManager } =
       createFunctionalGroupDto;
+
     const createParams = {
       description: variable.description,
       title: variable.title,

@@ -9,6 +9,7 @@ import {
   Query,
   Res,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -22,9 +23,34 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class MenuViewGroupsController {
   constructor(private readonly menuViewGroupsService: MenuViewGroupsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createMenuViewGroupDto: CreateMenuViewGroupDto) {
-    return this.menuViewGroupsService.create(createMenuViewGroupDto);
+  async create(
+    @Res() res: Response,
+    @Request() request: any,
+    @Body() createMenuViewGroupDto: CreateMenuViewGroupDto,
+  ) {
+    try {
+      const result = await this.menuViewGroupsService.create({
+        createBy: request.user.userId,
+        variable: createMenuViewGroupDto,
+      });
+
+      if (!result)
+        return res
+          .status(401)
+          .json({ message: 'Tạo nhóm chức năng thất bại!', statusCode: 401 });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Tạo mới nhóm chức năng thành công!',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật menu không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,16 +74,57 @@ export class MenuViewGroupsController {
     return this.menuViewGroupsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
+    @Res() res: Response,
+    @Request() request: any,
     @Param('id') id: string,
     @Body() updateMenuViewGroupDto: UpdateMenuViewGroupDto,
   ) {
-    return this.menuViewGroupsService.update(+id, updateMenuViewGroupDto);
+    try {
+      const result = this.menuViewGroupsService.update(+id, {
+        updateBy: request.user.userId,
+        variable: updateMenuViewGroupDto,
+      });
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Cập nhật menu không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ statusCode: 200, message: 'Cập nhật menu thành công!' });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Cập nhật menu không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.menuViewGroupsService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const result = await this.menuViewGroupsService.remove(+id);
+
+      if (!result)
+        return res.status(401).json({
+          message: 'Xoá nhóm chức năng không thành công!',
+          statusCode: 401,
+        });
+
+      return res
+        .status(200)
+        .json({ statusCode: 200, message: 'Xoá nhóm chức năng thành công!' });
+    } catch (error) {
+      return res.status(500).json({
+        message: `Xoá nhóm chức năng không thành công. ${error?.message}`,
+        statusCode: 500,
+      });
+    }
   }
 }
