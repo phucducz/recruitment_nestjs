@@ -18,8 +18,8 @@ export class CreateMenuViewsDto {
   iconType: string;
 
   @IsString()
-  @IsNotEmpty()
-  icon: string;
+  @IsOptional()
+  icon?: string;
 
   @IsArray()
   @IsNotEmpty()
