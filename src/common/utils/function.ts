@@ -111,3 +111,19 @@ export const getItemsDiff = <T, ST extends Record<string, any>>(params: {
 
   return { itemsToAdd, itemsToRemove, itemToUpdate };
 };
+
+export const formatParams = <T extends object>(params: T): T => {
+  const formatedParams = Object.entries(params).reduce(
+    (prevVal, currentVal) => {
+      const [key, value] = currentVal;
+
+      if (value)
+        prevVal[key] = typeof value === 'string' ? value?.trim() : value;
+
+      return prevVal;
+    },
+    {} as T,
+  );
+
+  return formatedParams;
+};
