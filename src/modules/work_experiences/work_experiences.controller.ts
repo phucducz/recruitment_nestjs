@@ -29,7 +29,7 @@ export class WorkExperiencesController {
   ) {}
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Post()
   async create(
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
@@ -90,7 +90,7 @@ export class WorkExperiencesController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -124,7 +124,7 @@ export class WorkExperiencesController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
     try {

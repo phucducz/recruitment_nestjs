@@ -27,7 +27,7 @@ export class UsersSkillsController {
   constructor(private readonly usersSkillsService: UsersSkillsService) {}
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Post()
   async create(
     @Body() createUsersSkillDto: CreateUsersSkillDto,
@@ -87,7 +87,7 @@ export class UsersSkillsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Patch(':skillsId')
   async update(
     @Param('skillsId') skillsId: number,
@@ -122,7 +122,7 @@ export class UsersSkillsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Delete(':skillsId')
   async remove(
     @Param('skillsId') skillsId: number,

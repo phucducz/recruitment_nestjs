@@ -29,7 +29,7 @@ export class UsersForeignLanguagesController {
   ) {}
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Post()
   async create(
     @Body() createUsersForeignLanguageDto: CreateUsersForeignLanguageDto,
@@ -91,7 +91,7 @@ export class UsersForeignLanguagesController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Patch(':foreignLanguagesId')
   async update(
     @Param('foreignLanguagesId') foreignLanguagesId: number,
@@ -126,7 +126,7 @@ export class UsersForeignLanguagesController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Delete(':foreignLanguagesId')
   async remove(
     @Param('foreignLanguagesId') foreignLanguagesId: number,

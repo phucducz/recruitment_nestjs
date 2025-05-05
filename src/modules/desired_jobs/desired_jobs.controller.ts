@@ -104,7 +104,7 @@ export class DesiredJobsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_DESIRED_JOB)
+  @Permissions([PERMISSION.EDIT_DESIRED_JOB])
   @Patch(':id')
   async update(
     @Param('id') id: string,

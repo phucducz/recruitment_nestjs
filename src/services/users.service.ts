@@ -347,24 +347,6 @@ export class UsersService {
             currentUser.avatarUrl,
           );
 
-        // console.log({
-        //   fullName: variable.fullName,
-        //   ...(variable.jobPositionsId && {
-        //     jobPosition: await this.jobPositionService.findById(
-        //       +variable.jobPositionsId,
-        //     ),
-        //   }),
-        //   ...(variable.placementsId && {
-        //     placement: await this.placementsService.findById(
-        //       +variable.placementsId,
-        //     ),
-        //   }),
-        //   ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
-        //   ...(variable.companyName && { companyName: variable.companyName }),
-        //   ...(variable.companyUrl && { companyUrl: variable.companyUrl }),
-        //   ...(variable.file && { avatarUrl }),
-        // });
-
         const result = await transactionalEntityManager.update(
           User,
           currentUser.id,
