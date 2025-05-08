@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -66,9 +67,14 @@ export class AchivementsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findOne(@Request() request: any, @Res() res: Response) {
+  async findOne(
+    @Query() desiredJobQueries: DesiredJobQueries,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
     try {
-      const result = await this.achivementsService.findOne(request.user.userId);
+      const userId = desiredJobQueries?.id || request.user.userId;
+      const result = await this.achivementsService.findOne(userId);
 
       return res.status(200).json({ statusCode: 200, result: result });
     } catch (error) {
