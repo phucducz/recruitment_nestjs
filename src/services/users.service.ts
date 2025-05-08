@@ -71,7 +71,10 @@ export class UsersService {
   async findById(
     id: number,
     options?: IGenerateRelationshipOptional,
+    isGetMenuView?: boolean,
   ): Promise<User | null> {
+    let viewGroups: ViewGroupsResponseDto;
+
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
@@ -92,7 +95,8 @@ export class UsersService {
       select: ['id', 'menuViewId', 'code'],
     });
 
-    const viewGroups = await this.buildViewGroups(functionalIds, functionals);
+    if (isGetMenuView)
+      viewGroups = await this.buildViewGroups(functionalIds, functionals);
 
     const userWithExtras: UserWithExtrasDto = {
       ...result,

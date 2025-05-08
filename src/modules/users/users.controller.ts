@@ -77,9 +77,13 @@ export class UsersController {
   @Get('/me')
   async findMe(@Res() res: Response, @Request() request: any) {
     try {
-      const result = await this.usersService.findById(request.user.userId, {
-        hasRelations: false,
-      });
+      const result = await this.usersService.findById(
+        request.user.userId,
+        {
+          hasRelations: false,
+        },
+        true,
+      );
 
       if (!result?.id)
         return res
