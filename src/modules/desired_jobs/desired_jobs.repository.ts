@@ -13,6 +13,7 @@ import { filterColumns, getPaginationParams } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class DesiredJobsRepository {
@@ -20,6 +21,11 @@ export class DesiredJobsRepository {
     @InjectRepository(DesiredJob)
     private readonly desiredJobRepository: Repository<DesiredJob>,
   ) {}
+
+  private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
+    ...removeColumns,
+    'password',
+  ]) as FindOptionsSelect<User>;
 
   private readonly desiredJobSelect = filterColumns(
     ENTITIES.FIELDS.DESIRED_JOB,
@@ -29,21 +35,24 @@ export class DesiredJobsRepository {
   private readonly desiredJobOptions = {
     relations: [
       'user',
+      'jobField',
       'desiredJobsPlacement',
       'desiredJobsPosition',
-      'jobField',
-      'user.curriculumVitae',
-      'desiredJobsPlacement.placement',
-      'desiredJobsPosition.jobPosition',
+      'user.placement',
       'user.achivement',
       'user.userLanguages',
+      'user.curriculumVitae',
+      'user.workExperiences',
       'user.userLanguages.foreignLanguage',
+      'desiredJobsPlacement.placement',
+      'desiredJobsPosition.jobPosition',
     ],
     select: {
       ...this.desiredJobSelect,
       user: {
-        fullName: true,
+        ...this.userFields,
         achivement: { description: true },
+        placement: { id: true, title: true },
         curriculumVitae: filterColumns(
           ENTITIES.FIELDS.CURRICULUM_VITAE,
           removeColumns,
@@ -105,12 +114,19 @@ export class DesiredJobsRepository {
   }
 
   async findAll(desiredJobsQueries: IFindDesiredJobsQueries) {
-    const { page, pageSize, jobFieldsId, placementsId, totalYearExperience } =
-      desiredJobsQueries;
+    const {
+      id,
+      page,
+      pageSize,
+      jobFieldsId,
+      placementsId,
+      totalYearExperience,
+    } = desiredJobsQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.desiredJobRepository.findAndCount({
       where: {
+        ...(id && { id }),
         ...(placementsId && {
           desiredJobsPlacement: {
             placement: { id: +placementsId },
