@@ -29,13 +29,17 @@ export class DesiredJobsRepository {
 
   private readonly desiredJobSelect = filterColumns(
     ENTITIES.FIELDS.DESIRED_JOB,
-    ['updateBy', 'updateAt', 'createBy'],
+    ['updateBy', 'updateAt', 'createBy', 'approveBy'],
   ) as FindOptionsSelect<DesiredJob>;
 
   private readonly desiredJobOptions = {
     relations: [
       'user',
+      'status',
       'jobField',
+      'creator',
+      'updater',
+      'approver',
       'desiredJobsPlacement',
       'desiredJobsPosition',
       'user.placement',
@@ -75,6 +79,10 @@ export class DesiredJobsRepository {
         jobPositionsId: true,
         jobPosition: { title: true },
       },
+      creator: { id: true, fullName: true },
+      updater: { id: true, fullName: true },
+      approver: { id: true, fullName: true },
+      status: { id: true, code: true, title: true },
       jobField: {
         id: true,
         title: true,
@@ -84,7 +92,7 @@ export class DesiredJobsRepository {
 
   async create(
     createDesiredJobDto: ICreate<
-      CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user'>
+      CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user' | 'status'>
     >,
   ) {
     const { createBy, variable, transactionalEntityManager } =
@@ -97,6 +105,7 @@ export class DesiredJobsRepository {
       totalYearExperience: variable.totalYearExperience,
       yearOfBirth: variable.yearOfBirth,
       jobField: variable.jobField,
+      status: variable.status,
       user: variable.user,
     };
 
@@ -137,6 +146,7 @@ export class DesiredJobsRepository {
         }),
         ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
       },
+      order: { createAt: 'DESC' },
       ...this.desiredJobOptions,
       ...paginationParams,
     });
@@ -154,6 +164,28 @@ export class DesiredJobsRepository {
       ...options,
       ...this.desiredJobOptions,
     });
+  }
+
+  async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
+    const { updateBy, variable, transactionalEntityManager } =
+      updateDesiredJobDto;
+
+    const paramsUpdate = {
+      status: variable.status,
+      approveBy: updateBy,
+      approveAt: new Date().toString(),
+    } as Partial<DesiredJob>;
+
+    let result = { affected: 0 } as UpdateResult;
+    if (transactionalEntityManager)
+      result = await (transactionalEntityManager as EntityManager).update(
+        DesiredJob,
+        id,
+        paramsUpdate,
+      );
+    else result = await this.desiredJobRepository.update(id, paramsUpdate);
+
+    return result;
   }
 
   async update(

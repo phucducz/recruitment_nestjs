@@ -15,6 +15,7 @@ import { PlacementsModule } from '../placements/placements.module';
 import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { SkillsModule } from '../skills/skills.module';
+import { StatusModule } from '../status/status.module';
 import { UsersModule } from '../users/users.module';
 import { UsersForeignLanguagesModule } from '../users_foreign_languages/users_foreign_languages.module';
 import { UsersSkillsModule } from '../users_skills/users_skills.module';
@@ -28,6 +29,7 @@ import { DesiredJobsRepository } from './desired_jobs.repository';
     JobFieldsModule,
     UsersSkillsModule,
     SkillsModule,
+    StatusModule,
     DesiredJobsPlacementsModule,
     DesiredJobsPositionsModule,
     PlacementsModule,

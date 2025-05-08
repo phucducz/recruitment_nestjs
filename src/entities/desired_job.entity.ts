@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
+  Timestamp,
 } from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
@@ -14,9 +15,22 @@ import { DesiredJobsPlacement } from './desired_jobs_placement.entity';
 import { DesiredJobsPosition } from './desired_jobs_position.entity';
 import { JobField } from './job_field.entity';
 import { User } from './user.entity';
+import { Status } from './status.entity';
 
 @Entity({ name: 'desired_jobs' })
 export class DesiredJob extends BaseEntity {
+  @Field()
+  @Column({ type: 'int', nullable: true, name: 'approve_by' })
+  approveBy: number;
+
+  @Field()
+  @Column({
+    nullable: true,
+    name: 'approve_at',
+    type: 'timestamp without time zone',
+  })
+  approveAt: Timestamp | string;
+
   @Field()
   @Column({ type: 'int', name: 'salary_expectation' })
   salarayExpectation: number;
@@ -46,6 +60,10 @@ export class DesiredJob extends BaseEntity {
   @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   user: User;
 
+  @ManyToOne(() => Status, (status) => status.desiredJobs)
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  status: Status;
+
   @OneToMany(
     () => DesiredJobsPlacement,
     (desiredJobsPlacement) => desiredJobsPlacement.desiredJob,
@@ -57,4 +75,16 @@ export class DesiredJob extends BaseEntity {
     (desiredJobsPosition) => desiredJobsPosition.desiredJob,
   )
   desiredJobsPosition: DesiredJobsPosition[];
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'approve_by' })
+  approver: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'create_by' })
+  creator: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'update_by' })
+  updater: User;
 }

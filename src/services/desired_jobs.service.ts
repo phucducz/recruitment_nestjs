@@ -2,7 +2,10 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DataSource, FindOneOptions } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
-import { START_AFTER_OFFER_DESIRED_JOB } from 'src/common/utils/enums';
+import {
+  START_AFTER_OFFER_DESIRED_JOB,
+  STATUS_CODE,
+} from 'src/common/utils/enums';
 import { filterColumns, getItemsDiff } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
@@ -18,6 +21,7 @@ import { JobPositionsRepository } from 'src/modules/job_positions/job_positions.
 import { PlacementsRepository } from 'src/modules/placements/placements.repository';
 import { UsersForeignLanguagesRepository } from 'src/modules/users_foreign_languages/user_foreign_languages.repository';
 import { ForeignLanguagesService } from './foreign_languages.service';
+import { StatusService } from './status.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -37,16 +41,15 @@ export class DesiredJobsService {
     private readonly jobFieldRepository: JobFieldsRepository,
     @Inject(AchivementsRepository)
     private readonly achivementRepository: AchivementsRepository,
-    // @Inject(UsersSkillsRepository)
-    // private readonly userSkillRepository: UsersSkillsRepository,
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     @Inject(UsersForeignLanguagesRepository)
     private readonly usersForeignLanguagesRepository: UsersForeignLanguagesRepository,
-    @Inject(DataSource) private readonly dataSource: DataSource,
     @Inject(ForeignLanguagesService)
     private readonly foreignLanguagesService: ForeignLanguagesService,
-    // @Inject(SkillsService) private readonly skillService: SkillsService,
+    @Inject(StatusService)
+    private readonly statusService: StatusService,
+    @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
   checkValidStartAfterOfferField(startAfterOffer: string) {
@@ -146,10 +149,13 @@ export class DesiredJobsService {
           ...createDesiredJobDto,
           variable: {
             ...createDesiredJobDto.variable,
+            user,
+            status: await this.statusService.findByCode(
+              STATUS_CODE.APPROVAL_PENDING,
+            ),
             jobField: await this.jobFieldRepository.findById(
               variable.jobFieldsId,
             ),
-            user,
           },
           transactionalEntityManager,
         });
@@ -217,6 +223,21 @@ export class DesiredJobsService {
 
   async findOneBy(options: FindOneOptions<DesiredJob>) {
     return await this.desiredJobRepository.findOneBy(options);
+  }
+
+  async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
+    const { updateBy, variable } = updateDesiredJobDto;
+
+    return await this.desiredJobRepository.approve(+id, {
+      updateBy,
+      variable: {
+        status: await this.statusService.findByCode(
+          variable.type === 'approve'
+            ? STATUS_CODE.APPROVAL_APPROVED
+            : STATUS_CODE.APPROVAL_REJECTED,
+        ),
+      },
+    });
   }
 
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
