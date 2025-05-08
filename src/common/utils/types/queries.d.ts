@@ -47,6 +47,7 @@ interface IFindApplicantsQueries extends BaseQueries {
 }
 
 interface IFindDesiredJobsQueries extends BaseQueries {
+  id?: number;
   jobFieldsId?: string;
   totalYearExperience?: string;
   placementsId?: string;
@@ -140,4 +141,8 @@ interface MenuViewGroupQueries extends BaseQueries {
   orderIndex?: number;
   createdDate?: string;
   menuViewIds?: number[];
+}
+
+interface DesiredJobQueries {
+  id?: number;
 }

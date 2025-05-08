@@ -8,6 +8,10 @@ import {
 import { Reflector } from '@nestjs/core';
 
 import {
+  IPermission,
+  PERMISSIONS_KEY,
+} from 'src/common/decorators/permissions.decorator';
+import {
   FORBIDDEN_EXCEPTION_MESSAGE,
   PERMISSION,
   UNAUTHORIZED_EXCEPTION_MESSAGE,
@@ -23,12 +27,25 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const requiredPermissions = this.reflector.get<PERMISSION[]>(
-      'permissions',
+    const requiredPermissions = this.reflector.get<IPermission>(
+      PERMISSIONS_KEY,
       context.getHandler(),
     );
 
-    if (!requiredPermissions || !requiredPermissions?.length) return true;
+    if (
+      !requiredPermissions ||
+      (Array.isArray(requiredPermissions) && !requiredPermissions?.length)
+    )
+      return true;
+
+    let permissions: PERMISSION[];
+    let match: 'all' | 'any' = 'all';
+
+    if (Array.isArray(requiredPermissions)) permissions = requiredPermissions;
+    else {
+      match = requiredPermissions.match;
+      permissions = requiredPermissions.permissions;
+    }
 
     const user = request.user;
     if (!user)
@@ -39,9 +56,10 @@ export class PermissionGuard implements CanActivate {
     const userPermissions =
       await this.redisService.getFunctionalsFromCacheByRole(user.roleId);
 
-    const hasPermission = requiredPermissions?.every((permission) =>
-      userPermissions.includes(permission),
-    );
+    const hasPermission =
+      match === 'all'
+        ? permissions?.every((p) => userPermissions.includes(p))
+        : permissions?.some((p) => userPermissions.includes(p));
 
     if (!hasPermission)
       throw new ForbiddenException(

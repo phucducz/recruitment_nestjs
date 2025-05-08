@@ -71,7 +71,10 @@ export class UsersService {
   async findById(
     id: number,
     options?: IGenerateRelationshipOptional,
+    isGetMenuView?: boolean,
   ): Promise<User | null> {
+    let viewGroups: ViewGroupsResponseDto;
+
     const result = await this.userRepository.findById(id, options);
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
@@ -92,7 +95,8 @@ export class UsersService {
       select: ['id', 'menuViewId', 'code'],
     });
 
-    const viewGroups = await this.buildViewGroups(functionalIds, functionals);
+    if (isGetMenuView)
+      viewGroups = await this.buildViewGroups(functionalIds, functionals);
 
     const userWithExtras: UserWithExtrasDto = {
       ...result,
@@ -346,24 +350,6 @@ export class UsersService {
             variable.file,
             currentUser.avatarUrl,
           );
-
-        // console.log({
-        //   fullName: variable.fullName,
-        //   ...(variable.jobPositionsId && {
-        //     jobPosition: await this.jobPositionService.findById(
-        //       +variable.jobPositionsId,
-        //     ),
-        //   }),
-        //   ...(variable.placementsId && {
-        //     placement: await this.placementsService.findById(
-        //       +variable.placementsId,
-        //     ),
-        //   }),
-        //   ...(variable.phoneNumber && { phoneNumber: variable.phoneNumber }),
-        //   ...(variable.companyName && { companyName: variable.companyName }),
-        //   ...(variable.companyUrl && { companyUrl: variable.companyUrl }),
-        //   ...(variable.file && { avatarUrl }),
-        // });
 
         const result = await transactionalEntityManager.update(
           User,

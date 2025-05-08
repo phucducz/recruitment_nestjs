@@ -38,7 +38,7 @@ export class CurriculumVitaesController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.DELETE_RESUME)
+  @Permissions([PERMISSION.DELETE_RESUME])
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
     try {

@@ -29,7 +29,7 @@ export class CloudinaryController {
   ) {}
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.UPLOAD_RESUME)
+  @Permissions([PERMISSION.UPLOAD_RESUME])
   @Post('/upload/CVs')
   @UseInterceptors(
     FilesInterceptor('files', 10, { storage: cloudinaryStorageCV }),

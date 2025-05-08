@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -26,7 +27,7 @@ export class AchivementsController {
   constructor(private readonly achivementsService: AchivementsService) {}
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Post()
   async create(
     @Body() createAchivementDto: CreateAchivementDto,
@@ -66,9 +67,14 @@ export class AchivementsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findOne(@Request() request: any, @Res() res: Response) {
+  async findOne(
+    @Query() desiredJobQueries: DesiredJobQueries,
+    @Request() request: any,
+    @Res() res: Response,
+  ) {
     try {
-      const result = await this.achivementsService.findOne(request.user.userId);
+      const userId = desiredJobQueries?.id || request.user.userId;
+      const result = await this.achivementsService.findOne(userId);
 
       return res.status(200).json({ statusCode: 200, result: result });
     } catch (error) {
@@ -80,7 +86,7 @@ export class AchivementsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -111,7 +117,7 @@ export class AchivementsController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions([PERMISSION.EDIT_USER_PROFILE])
   @Delete(':id')
   async remove(
     @Param('id') id: string,

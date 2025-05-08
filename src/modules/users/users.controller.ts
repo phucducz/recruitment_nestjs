@@ -77,9 +77,13 @@ export class UsersController {
   @Get('/me')
   async findMe(@Res() res: Response, @Request() request: any) {
     try {
-      const result = await this.usersService.findById(request.user.userId, {
-        hasRelations: false,
-      });
+      const result = await this.usersService.findById(
+        request.user.userId,
+        {
+          hasRelations: false,
+        },
+        true,
+      );
 
       if (!result?.id)
         return res
@@ -142,7 +146,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.USER_UPDATE_ACCOUNT)
+  @Permissions([PERMISSION.USER_UPDATE_ACCOUNT])
   @Patch('/account-info')
   @UseInterceptors(FileInterceptor('file'))
   async updateAccountInfo(
@@ -220,7 +224,13 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @Permissions(PERMISSION.EDIT_PROFILE)
+  @Permissions({
+    match: 'any',
+    permissions: [
+      PERMISSION.EDIT_USER_PROFILE,
+      PERMISSION.EDIT_EMPLOYER_PROFILE,
+    ],
+  })
   @Patch('/personal-info')
   @UseInterceptors(FileInterceptor('file'))
   async updatePersonalInfo(
