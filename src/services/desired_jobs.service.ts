@@ -236,6 +236,7 @@ export class DesiredJobsService {
             ? STATUS_CODE.APPROVAL_APPROVED
             : STATUS_CODE.APPROVAL_REJECTED,
         ),
+        ...variable,
       },
     });
   }

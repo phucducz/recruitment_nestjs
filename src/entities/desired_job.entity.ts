@@ -52,6 +52,10 @@ export class DesiredJob extends BaseEntity {
   @Column({ type: 'varchar', name: 'year_of_birth' })
   yearOfBirth: string;
 
+  @Field()
+  @Column({ type: 'varchar', name: 'reject_reason', nullable: true })
+  rejectReason: string;
+
   @ManyToOne(() => JobField, (jobField) => jobField.desiredJobs)
   @JoinColumn({ name: 'job_fields_id', referencedColumnName: 'id' })
   jobField: JobField;

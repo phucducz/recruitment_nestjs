@@ -10,5 +10,9 @@ export class UpdateDesiredJobDto extends PartialType(CreateDesiredJobDto) {
 
   @IsString()
   @IsOptional()
+  rejectReason?: string;
+
+  @IsString()
+  @IsOptional()
   status?: Status;
 }

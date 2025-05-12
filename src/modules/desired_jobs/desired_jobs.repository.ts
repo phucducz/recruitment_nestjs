@@ -172,6 +172,7 @@ export class DesiredJobsRepository {
 
     const paramsUpdate = {
       status: variable.status,
+      rejectReason: variable.rejectReason,
       approveBy: updateBy,
       approveAt: new Date().toString(),
     } as Partial<DesiredJob>;
