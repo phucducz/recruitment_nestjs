@@ -1,15 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import {
+  Between,
   EntityManager,
   FindOneOptions,
   FindOptionsSelect,
+  Raw,
   Repository,
   UpdateResult,
 } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
-import { filterColumns, getPaginationParams } from 'src/common/utils/function';
+import {
+  filterColumns,
+  formatParams,
+  getPaginationParams,
+} from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
 import { DesiredJob } from 'src/entities/desired_job.entity';
@@ -33,41 +40,26 @@ export class DesiredJobsRepository {
   ) as FindOptionsSelect<DesiredJob>;
 
   private readonly desiredJobOptions = {
-    relations: [
-      'user',
-      'status',
-      'jobField',
-      'creator',
-      'updater',
-      'approver',
-      'desiredJobsPlacement',
-      'desiredJobsPosition',
-      'user.placement',
-      'user.achivement',
-      'user.userLanguages',
-      'user.curriculumVitae',
-      'user.workExperiences',
-      'user.userLanguages.foreignLanguage',
-      'desiredJobsPlacement.placement',
-      'desiredJobsPosition.jobPosition',
-    ],
+    relations: {
+      user: true,
+      status: true,
+      creator: true,
+      updater: true,
+      approver: true,
+      jobField: true,
+      desiredJobsPlacement: {
+        placement: true,
+      },
+      desiredJobsPosition: {
+        jobPosition: true,
+      },
+    },
     select: {
       ...this.desiredJobSelect,
       user: {
-        ...this.userFields,
-        achivement: { description: true },
-        placement: { id: true, title: true },
-        curriculumVitae: filterColumns(
-          ENTITIES.FIELDS.CURRICULUM_VITAE,
-          removeColumns,
-        ),
-        userLanguages: {
-          usersId: true,
-          foreignLanguage: filterColumns(
-            ENTITIES.FIELDS.FOREIGN_LANGUAGE,
-            removeColumns,
-          ),
-        },
+        id: true,
+        email: true,
+        fullName: true,
       },
       desiredJobsPlacement: {
         desiredJobsId: true,
@@ -124,30 +116,79 @@ export class DesiredJobsRepository {
 
   async findAll(desiredJobsQueries: IFindDesiredJobsQueries) {
     const {
-      id,
+      type,
       page,
       pageSize,
-      jobFieldsId,
-      placementsId,
-      totalYearExperience,
+      fullName,
+      statusId,
+      jobFieldId,
+      placementId,
+      createdDate,
+      ...rest
     } = desiredJobsQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
+    const enhancedOptions: FindOneOptions<DesiredJob> =
+      type === 'more'
+        ? {
+            relations: {
+              ...this.desiredJobOptions.relations,
+              user: {
+                placement: true,
+                achivement: true,
+                curriculumVitae: true,
+                userLanguages: {
+                  foreignLanguage: true,
+                },
+              },
+            },
+            select: {
+              ...this.desiredJobOptions.select,
+              user: {
+                ...this.userFields,
+                placement: { id: true, title: true },
+                achivement: { id: true, description: true },
+                curriculumVitae: filterColumns(
+                  ENTITIES.FIELDS.CURRICULUM_VITAE,
+                  removeColumns,
+                ),
+                userLanguages: {
+                  level: true,
+                  foreignLanguage: {
+                    id: true,
+                    title: true,
+                    imageUrl: true,
+                  },
+                },
+              },
+            },
+          }
+        : this.desiredJobOptions;
+
     return await this.desiredJobRepository.findAndCount({
       where: {
-        ...(id && { id }),
-        ...(placementsId && {
-          desiredJobsPlacement: {
-            placement: { id: +placementsId },
+        ...(fullName && {
+          user: {
+            fullName: Raw((value) => `${value} ILIKE :fullName`, {
+              fullName: `%${fullName}%`,
+            }),
           },
         }),
-        ...(totalYearExperience && {
-          totalYearExperience: +totalYearExperience,
+        ...(statusId && { status: { id: +statusId } }),
+        ...(jobFieldId && { jobField: { id: +jobFieldId } }),
+        ...(placementId && {
+          desiredJobsPlacement: { placement: { id: +placementId } },
         }),
-        ...(jobFieldsId && { jobField: { id: +jobFieldsId } }),
+        ...(createdDate && {
+          createAt: Between(
+            dayjs(createdDate).startOf('day').toDate(),
+            dayjs(createdDate).endOf('day').toDate(),
+          ),
+        }),
+        ...formatParams(rest),
       },
       order: { createAt: 'DESC' },
-      ...this.desiredJobOptions,
+      ...enhancedOptions,
       ...paginationParams,
     });
   }
