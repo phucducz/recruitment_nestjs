@@ -19,17 +19,17 @@ import { Status } from './status.entity';
 
 @Entity({ name: 'desired_jobs' })
 export class DesiredJob extends BaseEntity {
-  @Field()
-  @Column({ type: 'int', nullable: true, name: 'approve_by' })
-  approveBy: number;
+  // @Field()
+  // @Column({ type: 'int', nullable: true, name: 'approve_by' })
+  // approveBy: number;
 
-  @Field()
-  @Column({
-    nullable: true,
-    name: 'approve_at',
-    type: 'timestamp without time zone',
-  })
-  approveAt: Timestamp | string;
+  // @Field()
+  // @Column({
+  //   nullable: true,
+  //   name: 'approve_at',
+  //   type: 'timestamp without time zone',
+  // })
+  // approveAt: Timestamp | string;
 
   @Field()
   @Column({ type: 'int', name: 'salary_expectation' })
@@ -52,9 +52,9 @@ export class DesiredJob extends BaseEntity {
   @Column({ type: 'varchar', name: 'year_of_birth' })
   yearOfBirth: string;
 
-  @Field()
-  @Column({ type: 'varchar', name: 'reject_reason', nullable: true })
-  rejectReason: string;
+  // @Field()
+  // @Column({ type: 'varchar', name: 'reject_reason', nullable: true })
+  // rejectReason: string;
 
   @ManyToOne(() => JobField, (jobField) => jobField.desiredJobs)
   @JoinColumn({ name: 'job_fields_id', referencedColumnName: 'id' })
@@ -64,9 +64,9 @@ export class DesiredJob extends BaseEntity {
   @JoinColumn({ name: 'users_id', referencedColumnName: 'id' })
   user: User;
 
-  @ManyToOne(() => Status, (status) => status.desiredJobs)
-  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
-  status: Status;
+  // @ManyToOne(() => Status, (status) => status.desiredJobs)
+  // @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  // status: Status;
 
   @OneToMany(
     () => DesiredJobsPlacement,
@@ -80,9 +80,9 @@ export class DesiredJob extends BaseEntity {
   )
   desiredJobsPosition: DesiredJobsPosition[];
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'approve_by' })
-  approver: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn({ name: 'approve_by' })
+  // approver: User;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'create_by' })

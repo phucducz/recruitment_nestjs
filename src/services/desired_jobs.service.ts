@@ -23,6 +23,8 @@ import { UsersForeignLanguagesRepository } from 'src/modules/users_foreign_langu
 import { ForeignLanguagesService } from './foreign_languages.service';
 import { StatusService } from './status.service';
 import { UsersService } from './users.service';
+import { ApprovalsRepository } from 'src/modules/approvals/approvals.repository';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class DesiredJobsService {
@@ -45,6 +47,8 @@ export class DesiredJobsService {
     private readonly userService: UsersService,
     @Inject(UsersForeignLanguagesRepository)
     private readonly usersForeignLanguagesRepository: UsersForeignLanguagesRepository,
+    @Inject(ApprovalsRepository)
+    private readonly approvalRepository: ApprovalsRepository,
     @Inject(ForeignLanguagesService)
     private readonly foreignLanguagesService: ForeignLanguagesService,
     @Inject(StatusService)
@@ -150,9 +154,9 @@ export class DesiredJobsService {
           variable: {
             ...createDesiredJobDto.variable,
             user,
-            status: await this.statusService.findByCode(
-              STATUS_CODE.APPROVAL_PENDING,
-            ),
+            // status: await this.statusService.findByCode(
+            //   STATUS_CODE.APPROVAL_PENDING,
+            // ),
             jobField: await this.jobFieldRepository.findById(
               variable.jobFieldsId,
             ),
@@ -184,6 +188,16 @@ export class DesiredJobsService {
             jobPosition,
           })),
           transactionalEntityManager,
+        });
+
+        await this.approvalRepository.create({
+          createBy,
+          variable: {
+            desiredJob,
+            status: await this.statusService.findByCode(
+              STATUS_CODE.APPROVAL_PENDING,
+            ),
+          },
         });
 
         return desiredJob;
@@ -225,21 +239,21 @@ export class DesiredJobsService {
     return await this.desiredJobRepository.findOneBy(options);
   }
 
-  async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
-    const { updateBy, variable } = updateDesiredJobDto;
+  // async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
+  //   const { updateBy, variable } = updateDesiredJobDto;
 
-    return await this.desiredJobRepository.approve(+id, {
-      updateBy,
-      variable: {
-        status: await this.statusService.findByCode(
-          variable.type === 'approve'
-            ? STATUS_CODE.APPROVAL_APPROVED
-            : STATUS_CODE.APPROVAL_REJECTED,
-        ),
-        ...variable,
-      },
-    });
-  }
+  //   return await this.desiredJobRepository.approve(+id, {
+  //     updateBy,
+  //     variable: {
+  //       // status: await this.statusService.findByCode(
+  //       //   variable.type === 'approve'
+  //       //     ? STATUS_CODE.APPROVAL_APPROVED
+  //       //     : STATUS_CODE.APPROVAL_REJECTED,
+  //       // ),
+  //       ...variable,
+  //     },
+  //   });
+  // }
 
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
     const { updateBy, variable } = updateDesiredJobDto;
@@ -322,6 +336,16 @@ export class DesiredJobsService {
             });
           }
         }
+
+        // await this.approvalRepository.create({
+        //   createBy: updateBy,
+        //   variable: {
+        //     desiredJob,
+        //     status: await this.statusService.findByCode(
+        //       STATUS_CODE.APPROVAL_PENDING,
+        //     ),
+        //   },
+        // });
 
         return await this.desiredJobRepository.update(id, {
           ...updateDesiredJobDto,

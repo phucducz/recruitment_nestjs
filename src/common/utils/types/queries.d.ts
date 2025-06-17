@@ -151,3 +151,5 @@ interface MenuViewGroupQueries extends BaseQueries {
 interface DesiredJobQueries {
   id?: number;
 }
+
+interface ApprovalQueries extends BaseQueries {}

@@ -42,10 +42,10 @@ export class DesiredJobsRepository {
   private readonly desiredJobOptions = {
     relations: {
       user: true,
-      status: true,
+      // status: true,
       creator: true,
       updater: true,
-      approver: true,
+      // approver: true,
       jobField: true,
       desiredJobsPlacement: {
         placement: true,
@@ -73,8 +73,8 @@ export class DesiredJobsRepository {
       },
       creator: { id: true, fullName: true },
       updater: { id: true, fullName: true },
-      approver: { id: true, fullName: true },
-      status: { id: true, code: true, title: true },
+      // approver: { id: true, fullName: true },
+      // status: { id: true, code: true, title: true },
       jobField: {
         id: true,
         title: true,
@@ -84,7 +84,8 @@ export class DesiredJobsRepository {
 
   async create(
     createDesiredJobDto: ICreate<
-      CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user' | 'status'>
+      // CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user' | 'status'>
+      CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user'>
     >,
   ) {
     const { createBy, variable, transactionalEntityManager } =
@@ -97,7 +98,7 @@ export class DesiredJobsRepository {
       totalYearExperience: variable.totalYearExperience,
       yearOfBirth: variable.yearOfBirth,
       jobField: variable.jobField,
-      status: variable.status,
+      // status: variable.status,
       user: variable.user,
     };
 
@@ -174,7 +175,7 @@ export class DesiredJobsRepository {
             }),
           },
         }),
-        ...(statusId && { status: { id: +statusId } }),
+        // ...(statusId && { status: { id: +statusId } }),
         ...(jobFieldId && { jobField: { id: +jobFieldId } }),
         ...(placementId && {
           desiredJobsPlacement: { placement: { id: +placementId } },
@@ -207,28 +208,28 @@ export class DesiredJobsRepository {
     });
   }
 
-  async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
-    const { updateBy, variable, transactionalEntityManager } =
-      updateDesiredJobDto;
+  // async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
+  //   const { updateBy, variable, transactionalEntityManager } =
+  //     updateDesiredJobDto;
 
-    const paramsUpdate = {
-      status: variable.status,
-      rejectReason: variable.rejectReason,
-      approveBy: updateBy,
-      approveAt: new Date().toString(),
-    } as Partial<DesiredJob>;
+  //   const paramsUpdate = {
+  //     // status: variable.status,
+  //     // rejectReason: variable.rejectReason,
+  //     approveBy: updateBy,
+  //     approveAt: new Date().toString(),
+  //   } as Partial<DesiredJob>;
 
-    let result = { affected: 0 } as UpdateResult;
-    if (transactionalEntityManager)
-      result = await (transactionalEntityManager as EntityManager).update(
-        DesiredJob,
-        id,
-        paramsUpdate,
-      );
-    else result = await this.desiredJobRepository.update(id, paramsUpdate);
+  //   let result = { affected: 0 } as UpdateResult;
+  //   if (transactionalEntityManager)
+  //     result = await (transactionalEntityManager as EntityManager).update(
+  //       DesiredJob,
+  //       id,
+  //       paramsUpdate,
+  //     );
+  //   else result = await this.desiredJobRepository.update(id, paramsUpdate);
 
-    return result;
-  }
+  //   return result;
+  // }
 
   async update(
     id: number,

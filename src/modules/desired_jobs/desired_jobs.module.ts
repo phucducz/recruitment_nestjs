@@ -21,12 +21,14 @@ import { UsersForeignLanguagesModule } from '../users_foreign_languages/users_fo
 import { UsersSkillsModule } from '../users_skills/users_skills.module';
 import { DesiredJobsController } from './desired_jobs.controller';
 import { DesiredJobsRepository } from './desired_jobs.repository';
+import { ApprovalsModule } from '../approvals/approvals.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DesiredJob, JobField]),
     RedisModule,
     JobFieldsModule,
+    ApprovalsModule,
     UsersSkillsModule,
     SkillsModule,
     StatusModule,

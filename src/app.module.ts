@@ -13,6 +13,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AchivementsModule } from './modules/achivements/achivements.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { CurriculumVitaesModule } from './modules/curriculum_vitaes/curriculum_vitaes.module';
@@ -114,6 +115,7 @@ import { WorkTypesModule } from './modules/work_types/work_types.module';
     MenuViewsModule,
     MenuViewGroupsModule,
     RedisModule,
+    ApprovalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
