@@ -87,9 +87,9 @@ export class DesiredJobsController {
   @Get()
   async findOne(@Request() request: any, @Res() res: Response) {
     try {
-      const result = await this.desiredJobsService.findOneBy({
-        where: { user: { id: request.user.userId } },
-      });
+      const result = await this.desiredJobsService.findOneByUserId(
+        request.user.userId,
+      );
 
       return res.status(200).json({
         statusCode: 200,
@@ -135,42 +135,6 @@ export class DesiredJobsController {
       });
     }
   }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Patch('/approve/:id')
-  // async approve(
-  //   @Param('id') id: string,
-  //   @Body() updateDesiredJobDto: UpdateDesiredJobDto,
-  //   @Res() res: Response,
-  //   @Request() request: any,
-  // ) {
-  //   try {
-  //     // const { type } = updateDesiredJobDto;
-  //     const result = await this.desiredJobsService.approve(+id, {
-  //       updateBy: request.user.userId,
-  //       variable: updateDesiredJobDto,
-  //     });
-
-  //     if (!result)
-  //       return res.status(401).json({
-  //         message: 'Không thể cập nhật trạng thái hồ sơ!',
-  //         statusCode: 401,
-  //       });
-
-  //     return res.status(200).json({
-  //       message: '',
-  //         // type === 'approve'
-  //         //   ? 'Hồ sơ đã được phê duyệt thành công!'
-  //         //   : 'Hồ sơ đã bị từ chối',
-  //       statusCode: 200,
-  //     });
-  //   } catch (error) {
-  //     return res.status(500).json({
-  //       message: `Lỗi khi cập nhật trạng thái hồ sơ: ${error?.message ?? error}!`,
-  //       statusCode: 500,
-  //     });
-  //   }
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import {
   Between,
+  DataSource,
   EntityManager,
   FindOneOptions,
   FindOptionsSelect,
@@ -19,6 +20,7 @@ import {
 } from 'src/common/utils/function';
 import { CreateDesiredJobDto } from 'src/dto/desired_jobs/create-desired_job.dto';
 import { UpdateDesiredJobDto } from 'src/dto/desired_jobs/update-desired_job.dto';
+import { Approval } from 'src/entities/approval.entity';
 import { DesiredJob } from 'src/entities/desired_job.entity';
 import { User } from 'src/entities/user.entity';
 
@@ -27,6 +29,7 @@ export class DesiredJobsRepository {
   constructor(
     @InjectRepository(DesiredJob)
     private readonly desiredJobRepository: Repository<DesiredJob>,
+    private readonly dataSource: DataSource,
   ) {}
 
   private readonly userFields = filterColumns(ENTITIES.FIELDS.USER, [
@@ -42,11 +45,12 @@ export class DesiredJobsRepository {
   private readonly desiredJobOptions = {
     relations: {
       user: true,
-      // status: true,
       creator: true,
       updater: true,
-      // approver: true,
       jobField: true,
+      approvals: {
+        status: true,
+      },
       desiredJobsPlacement: {
         placement: true,
       },
@@ -71,20 +75,133 @@ export class DesiredJobsRepository {
         jobPositionsId: true,
         jobPosition: { title: true },
       },
-      creator: { id: true, fullName: true },
-      updater: { id: true, fullName: true },
-      // approver: { id: true, fullName: true },
-      // status: { id: true, code: true, title: true },
       jobField: {
         id: true,
         title: true,
       },
+      approvals: {
+        id: true,
+        status: { id: true, code: true, title: true },
+      },
+      creator: { id: true, fullName: true },
+      updater: { id: true, fullName: true },
     },
   } as FindOneOptions<DesiredJob>;
 
+  private readonly updatedDesiredJobOptions: FindOneOptions<DesiredJob> = {
+    relations: [
+      'user',
+      'user.role',
+      'user.placement',
+      'user.achivement',
+      'user.jobPosition',
+      'user.userSkills',
+      'user.userSkills.skill',
+      'user.userLanguages',
+      'user.userLanguages.foreignLanguage',
+      'user.curriculumVitae',
+      'user.workExperiences',
+      'user.workExperiences.placement',
+      'user.workExperiences.jobCategory',
+      'user.workExperiences.jobPosition',
+      'jobField',
+      'desiredJobsPosition',
+      'desiredJobsPlacement',
+      'desiredJobsPlacement.placement',
+      'desiredJobsPosition.jobPosition',
+    ],
+    select: {
+      user: {
+        id: true,
+        email: true,
+        fullName: true,
+        avatarUrl: true,
+        companyUrl: true,
+        companyName: true,
+        phoneNumber: true,
+        jobPosition: {
+          id: true,
+          title: true,
+        },
+        role: {
+          id: true,
+          title: true,
+          description: true,
+        },
+        placement: {
+          id: true,
+          title: true,
+        },
+        achivement: {
+          id: true,
+
+          description: true,
+        },
+        desiredJob: {
+          totalYearExperience: true,
+        },
+        userSkills: {
+          level: true,
+          usersId: true,
+          skillsId: true,
+          skill: {
+            id: true,
+            title: true,
+          },
+        },
+        userLanguages: {
+          level: true,
+          usersId: true,
+          foreignLanguagesId: true,
+          foreignLanguage: {
+            id: true,
+            title: true,
+            imageUrl: true,
+          },
+        },
+        curriculumVitae: {
+          id: true,
+          url: true,
+          fileName: true,
+          isDeleted: true,
+        },
+        workExperiences: {
+          id: true,
+          endDate: true as any,
+          startDate: true as any,
+          companyName: true,
+          description: true,
+          isWorking: true,
+          placement: {
+            id: true,
+            title: true,
+          },
+          jobCategory: {
+            id: true,
+            name: true,
+            description: true,
+          },
+          jobPosition: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+      desiredJobsPlacement: {
+        desiredJobsId: true,
+        placementsId: true,
+        placement: { title: true },
+      },
+      desiredJobsPosition: {
+        desiredJobsId: true,
+        jobPositionsId: true,
+        jobPosition: { title: true },
+      },
+    },
+  };
+
   async create(
     createDesiredJobDto: ICreate<
-      // CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user' | 'status'>
       CreateDesiredJobDto & Pick<DesiredJob, 'jobField' | 'user'>
     >,
   ) {
@@ -98,7 +215,6 @@ export class DesiredJobsRepository {
       totalYearExperience: variable.totalYearExperience,
       yearOfBirth: variable.yearOfBirth,
       jobField: variable.jobField,
-      // status: variable.status,
       user: variable.user,
     };
 
@@ -208,28 +324,85 @@ export class DesiredJobsRepository {
     });
   }
 
-  // async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
-  //   const { updateBy, variable, transactionalEntityManager } =
-  //     updateDesiredJobDto;
+  async findOneByUserId(userId: number) {
+    const latestApprovalSubquery = this.dataSource
+      .createQueryBuilder(Approval, 'a')
+      .select('a.id')
+      .where('a.desired_job_id = dj.id')
+      .orderBy('a.create_at', 'DESC')
+      .limit(1);
 
-  //   const paramsUpdate = {
-  //     // status: variable.status,
-  //     // rejectReason: variable.rejectReason,
-  //     approveBy: updateBy,
-  //     approveAt: new Date().toString(),
-  //   } as Partial<DesiredJob>;
+    const query = this.desiredJobRepository
+      .createQueryBuilder('dj')
+      .leftJoin('dj.user', 'user')
+      .addSelect(['user.id', 'user.fullName', 'user.email'])
 
-  //   let result = { affected: 0 } as UpdateResult;
-  //   if (transactionalEntityManager)
-  //     result = await (transactionalEntityManager as EntityManager).update(
-  //       DesiredJob,
-  //       id,
-  //       paramsUpdate,
-  //     );
-  //   else result = await this.desiredJobRepository.update(id, paramsUpdate);
+      .leftJoin('dj.creator', 'creator')
+      .addSelect(['creator.id', 'creator.fullName'])
 
-  //   return result;
-  // }
+      .leftJoin('dj.updater', 'updater')
+      .addSelect(['updater.id', 'updater.fullName'])
+
+      .leftJoin('dj.jobField', 'jobField')
+      .addSelect(['jobField.id', 'jobField.title'])
+
+      .leftJoin('dj.desiredJobsPlacement', 'djPlacement')
+      .addSelect([
+        'djPlacement.desiredJobsId',
+        'djPlacement.placementsId',
+        'djPlacement.placement',
+      ])
+
+      .leftJoin('dj.desiredJobsPosition', 'djPosition')
+      .addSelect([
+        'djPosition.desiredJobsId',
+        'djPosition.jobPositionsId',
+        'djPosition.jobPosition',
+      ])
+
+      .leftJoin(
+        'dj.approvals',
+        'approval',
+        `approval.id = (${latestApprovalSubquery.getQuery()})`,
+      )
+      .leftJoin('approval.status', 'status')
+      .addSelect([
+        'approval.id',
+        'approval.rejectReason',
+        'status.id',
+        'status.code',
+        'status.title',
+      ])
+
+      .leftJoinAndSelect('djPlacement.placement', 'placement')
+      .leftJoinAndSelect('djPosition.jobPosition', 'jobPosition')
+
+      .where('user.id = :userId', { userId })
+      .setParameters(latestApprovalSubquery.getParameters());
+
+    const result = await query.getOne();
+
+    return { ...result, approvals: result?.approvals?.[0] };
+  }
+
+  async retrieveDesiredJob(updatedOptions: {
+    id: number;
+    transactionalEntityManager?: EntityManager;
+  }) {
+    const { id, transactionalEntityManager } = updatedOptions;
+
+    const updatedDesiredJob = await (transactionalEntityManager
+      ? transactionalEntityManager.findOneOrFail(DesiredJob, {
+          where: { id },
+          ...this.updatedDesiredJobOptions,
+        })
+      : this.desiredJobRepository.findOneOrFail({
+          where: { id },
+          ...this.updatedDesiredJobOptions,
+        }));
+
+    return updatedDesiredJob;
+  }
 
   async update(
     id: number,
@@ -254,6 +427,7 @@ export class DesiredJobsRepository {
       updateAt: new Date().toString(),
       updateBy,
     } as Partial<DesiredJob>;
+
     let result = { affected: 0 } as UpdateResult;
 
     if (transactionalEntityManager)
@@ -264,6 +438,6 @@ export class DesiredJobsRepository {
       );
     else result = await this.desiredJobRepository.update(id, paramsUpdate);
 
-    return result?.affected > 0;
+    return result;
   }
 }

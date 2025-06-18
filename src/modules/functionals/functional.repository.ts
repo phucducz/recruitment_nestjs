@@ -101,6 +101,7 @@ export class FunctionalRepository {
   async update(id: number, updateFunctionalDto: IUpdate<UpdateFunctionalDto>) {
     const { variable, updateBy, transactionalEntityManager } =
       updateFunctionalDto;
+
     const updateParams = {
       ...(variable.code && { code: variable.code }),
       ...(variable.title && { title: variable.title }),

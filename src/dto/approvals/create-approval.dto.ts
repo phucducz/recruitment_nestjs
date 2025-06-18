@@ -8,8 +8,8 @@ export class CreateApprovalDto {
   rejectReason?: string;
 
   @IsJSON()
-  desiredJob: DesiredJob;
+  desiredJob?: DesiredJob;
 
   @IsJSON()
-  status: Status;
+  status?: Status;
 }

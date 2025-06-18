@@ -1,7 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, Timestamp } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  Timestamp,
+} from 'typeorm';
 
 import { Field } from 'src/common/decorators/field.decorator';
 import { BaseEntity } from './base.entity';
+import { DesiredJob } from './desired_job.entity';
+import { DesiredJobsPlacement } from './desired_jobs_placement.entity';
+import { DesiredJobsPosition } from './desired_jobs_position.entity';
 import { Status } from './status.entity';
 import { User } from './user.entity';
 
@@ -25,7 +35,11 @@ export class Approval extends BaseEntity {
 
   @Field()
   @Column({ type: 'jsonb', nullable: true, name: 'desired_job_snapshot' })
-  desiredJob: Record<string, any>;
+  desiredJobSnapshot: Record<string, any>;
+
+  @ManyToOne(() => DesiredJob, (desiredJob) => desiredJob.approvals)
+  @JoinColumn({ name: 'desired_job_id', referencedColumnName: 'id' })
+  desiredJob: DesiredJob;
 
   @ManyToOne(() => Status, (status) => status.desiredJobs)
   @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
@@ -34,4 +48,16 @@ export class Approval extends BaseEntity {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'approve_by' })
   approver: User;
+
+  @OneToMany(
+    () => DesiredJobsPlacement,
+    (desiredJobsPlacement) => desiredJobsPlacement.desiredJob,
+  )
+  desiredJobsPlacement: DesiredJobsPlacement[];
+
+  @OneToMany(
+    () => DesiredJobsPosition,
+    (desiredJobsPosition) => desiredJobsPosition.desiredJob,
+  )
+  desiredJobsPosition: DesiredJobsPosition[];
 }

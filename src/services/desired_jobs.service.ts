@@ -13,6 +13,7 @@ import { DesiredJob } from 'src/entities/desired_job.entity';
 import { DesiredJobsPlacement } from 'src/entities/desired_jobs_placement.entity';
 import { DesiredJobsPosition } from 'src/entities/desired_jobs_position.entity';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
+import { ApprovalsRepository } from 'src/modules/approvals/approvals.repository';
 import { DesiredJobsRepository } from 'src/modules/desired_jobs/desired_jobs.repository';
 import { DesiredJobsPlacementRepository } from 'src/modules/desired_jobs_placements/desired_jobs_placement.repository';
 import { DesiredJobsPositionRepository } from 'src/modules/desired_jobs_positions/desired_jobs_position.repository';
@@ -23,8 +24,6 @@ import { UsersForeignLanguagesRepository } from 'src/modules/users_foreign_langu
 import { ForeignLanguagesService } from './foreign_languages.service';
 import { StatusService } from './status.service';
 import { UsersService } from './users.service';
-import { ApprovalsRepository } from 'src/modules/approvals/approvals.repository';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class DesiredJobsService {
@@ -154,9 +153,6 @@ export class DesiredJobsService {
           variable: {
             ...createDesiredJobDto.variable,
             user,
-            // status: await this.statusService.findByCode(
-            //   STATUS_CODE.APPROVAL_PENDING,
-            // ),
             jobField: await this.jobFieldRepository.findById(
               variable.jobFieldsId,
             ),
@@ -190,14 +186,21 @@ export class DesiredJobsService {
           transactionalEntityManager,
         });
 
+        const createdDesiredJob =
+          await this.desiredJobRepository.retrieveDesiredJob({
+            id: desiredJob.id,
+            transactionalEntityManager,
+          });
+
         await this.approvalRepository.create({
           createBy,
           variable: {
-            desiredJob,
+            desiredJob: createdDesiredJob,
             status: await this.statusService.findByCode(
               STATUS_CODE.APPROVAL_PENDING,
             ),
           },
+          transactionalEntityManager,
         });
 
         return desiredJob;
@@ -239,21 +242,9 @@ export class DesiredJobsService {
     return await this.desiredJobRepository.findOneBy(options);
   }
 
-  // async approve(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
-  //   const { updateBy, variable } = updateDesiredJobDto;
-
-  //   return await this.desiredJobRepository.approve(+id, {
-  //     updateBy,
-  //     variable: {
-  //       // status: await this.statusService.findByCode(
-  //       //   variable.type === 'approve'
-  //       //     ? STATUS_CODE.APPROVAL_APPROVED
-  //       //     : STATUS_CODE.APPROVAL_REJECTED,
-  //       // ),
-  //       ...variable,
-  //     },
-  //   });
-  // }
+  async findOneByUserId(userId: number) {
+    return await this.desiredJobRepository.findOneByUserId(userId);
+  }
 
   async update(id: number, updateDesiredJobDto: IUpdate<UpdateDesiredJobDto>) {
     const { updateBy, variable } = updateDesiredJobDto;
@@ -262,7 +253,19 @@ export class DesiredJobsService {
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
+        const user = await this.userService.findById(updateBy);
         const desiredJob = await this.desiredJobRepository.findById(id);
+
+        if (user.achivement) {
+          const achivements = await this.achivementRepository.findById(
+            user.achivement.id,
+          );
+
+          await this.achivementRepository.update(achivements.id, {
+            updateBy,
+            variable: { description: variable.achivements },
+          });
+        }
 
         if ((variable?.jobPositionIds ?? []).length > 0) {
           const {
@@ -337,17 +340,7 @@ export class DesiredJobsService {
           }
         }
 
-        // await this.approvalRepository.create({
-        //   createBy: updateBy,
-        //   variable: {
-        //     desiredJob,
-        //     status: await this.statusService.findByCode(
-        //       STATUS_CODE.APPROVAL_PENDING,
-        //     ),
-        //   },
-        // });
-
-        return await this.desiredJobRepository.update(id, {
+        const result = await this.desiredJobRepository.update(id, {
           ...updateDesiredJobDto,
           variable: {
             ...variable,
@@ -359,6 +352,39 @@ export class DesiredJobsService {
           },
           transactionalEntityManager,
         });
+
+        const updatedDesiredJob =
+          await this.desiredJobRepository.retrieveDesiredJob({
+            id,
+            transactionalEntityManager,
+          });
+
+        const approval = await this.approvalRepository.findPendingApproval(
+          desiredJob.id,
+        );
+
+        if (approval) {
+          await this.approvalRepository.update(approval.id, {
+            updateBy,
+            variable: {
+              desiredJobSnapshot: updatedDesiredJob,
+            },
+            transactionalEntityManager,
+          });
+        } else {
+          await this.approvalRepository.create({
+            createBy: updateBy,
+            variable: {
+              desiredJob: updatedDesiredJob,
+              status: await this.statusService.findByCode(
+                STATUS_CODE.APPROVAL_PENDING,
+              ),
+            },
+            transactionalEntityManager,
+          });
+        }
+
+        return result?.affected > 0;
       },
     );
   }
