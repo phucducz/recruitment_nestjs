@@ -28,15 +28,15 @@ export enum JOB_STATUS {
 }
 
 export enum START_AFTER_OFFER_DESIRED_JOB {
-  AFTERTHRIDTYDAYS = 'Sau 30 ngày',
   NOW = 'Bắt đầu ngay',
-  AFTERONEORTWOWEEK = '1-2 tuần',
-  NOTIFYLATER = 'Sẽ thông báo khi có offer',
+  AFTER_ONE_OR_TWO_WEEK = '1-2 tuần',
+  AFTER_THIRTY_DAYS = 'Sau 30 ngày',
+  NOTIFY_LATER = 'Sẽ thông báo khi có offer',
 }
 
 export enum APPLICANT_SOURCES {
-  ADDED_BY_EMPLOYEE = 'Thêm bởi thành viên',
   APPLY = 'Ứng tuyển',
+  ADDED_BY_EMPLOYEE = 'Thêm bởi thành viên',
 }
 
 export enum STATUS_TITLES {
