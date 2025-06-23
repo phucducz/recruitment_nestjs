@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsJSON, IsOptional, IsString } from 'class-validator';
 import { STATUS_CODE } from 'src/common/utils/enums';
 import { CreateApprovalDto } from './create-approval.dto';
 
@@ -12,7 +12,7 @@ export class UpdateApprovalDto extends PartialType(CreateApprovalDto) {
   @IsOptional()
   rejectReason?: string;
 
-  @IsObject()
+  @IsJSON()
   @IsOptional()
   desiredJobSnapshot: Record<string, any>;
 }
