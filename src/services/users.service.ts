@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from 'src/dto/auth/register.dto';
 import { ChangePasswordDto } from 'src/dto/users/change-password.dto';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 
 import { PERMISSION_TYPE, STATUS_CODE } from 'src/common/utils/enums';
 import { ViewGroupsResponseDto } from 'src/dto/menu_view_groups/get-menu_view_group.dto';
@@ -72,10 +72,18 @@ export class UsersService {
     id: number,
     options?: IGenerateRelationshipOptional,
     isGetMenuView?: boolean,
+    transactionalEntityManager?: EntityManager,
   ): Promise<User | null> {
+    let result: User;
     let viewGroups: ViewGroupsResponseDto;
 
-    const result = await this.userRepository.findById(id, options);
+    if (transactionalEntityManager) {
+      result = await transactionalEntityManager.findOne(User, {
+        where: { id },
+        ...this.userRepository.generateRelationshipOptionals(options),
+      });
+    } else result = await this.userRepository.findById(id, options);
+
     if (!result) throw new NotFoundException('Không tìm thấy người dùng');
 
     const [desiredJob, rolesFunctionals, hasPassword] = await Promise.all([
@@ -332,17 +340,6 @@ export class UsersService {
 
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
-        const desiredJob = await this.desiredJobService.findOneBy({
-          where: { user: { id: currentUser.id } },
-        });
-
-        if (desiredJob)
-          await this.desiredJobService.update(desiredJob.id, {
-            updateBy,
-            variable: { totalYearExperience: +variable.totalYearExperience },
-            transactionalEntityManager,
-          });
-
         let avatarUrl: string | null = null;
 
         if (variable.file)
@@ -372,6 +369,17 @@ export class UsersService {
             ...(variable.file && { avatarUrl }),
           },
         );
+
+        const desiredJob = await this.desiredJobService.findOneBy({
+          where: { user: { id: currentUser.id } },
+        });
+
+        if (desiredJob)
+          await this.desiredJobService.update(desiredJob.id, {
+            updateBy,
+            variable: { totalYearExperience: +variable.totalYearExperience },
+            transactionalEntityManager,
+          });
 
         return result.affected > 0;
       },

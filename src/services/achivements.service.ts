@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { CreateAchivementDto } from 'src/dto/achivements/create-achivement.dto';
 import { UpdateAchivementDto } from 'src/dto/achivements/update-achivement.dto';
 import { AchivementsRepository } from 'src/modules/achivements/achivements.repository';
+import { DesiredJobsService } from './desired_jobs.service';
 import { UsersService } from './users.service';
 
 @Injectable()
@@ -11,6 +13,10 @@ export class AchivementsService {
     @Inject(AchivementsRepository)
     private readonly achivementRepository: AchivementsRepository,
     @Inject(UsersService) private readonly userService: UsersService,
+    @Inject(forwardRef(() => DesiredJobsService))
+    private readonly desiredJobService: DesiredJobsService,
+    @Inject(DataSource)
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createAchivementDto: ICreate<CreateAchivementDto>) {
@@ -40,7 +46,26 @@ export class AchivementsService {
   }
 
   async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {
-    return await this.achivementRepository.update(id, updateAchivementDto);
+    const { updateBy, variable, transactionalEntityManager } =
+      updateAchivementDto;
+
+    const result = await this.achivementRepository.update(
+      id,
+      updateAchivementDto,
+    );
+
+    const desiredJob = await this.desiredJobService.findOneBy({
+      where: { user: { id: updateBy } },
+    });
+
+    if (desiredJob)
+      await this.desiredJobService.update(desiredJob.id, {
+        updateBy,
+        variable: { achivements: variable.description },
+        transactionalEntityManager,
+      });
+
+    return result.affected > 0;
   }
 
   async remove(userId: number, id: number) {

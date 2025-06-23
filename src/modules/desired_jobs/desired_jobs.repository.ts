@@ -91,7 +91,7 @@ export class DesiredJobsRepository {
   private readonly updatedDesiredJobOptions: FindOneOptions<DesiredJob> = {
     relations: [
       'user',
-      'user.role',
+      // 'user.role',
       'user.placement',
       'user.achivement',
       'user.jobPosition',
@@ -123,11 +123,11 @@ export class DesiredJobsRepository {
           id: true,
           title: true,
         },
-        role: {
-          id: true,
-          title: true,
-          description: true,
-        },
+        // role: {
+        //   id: true,
+        //   title: true,
+        //   description: true,
+        // },
         placement: {
           id: true,
           title: true,
@@ -190,12 +190,12 @@ export class DesiredJobsRepository {
       desiredJobsPlacement: {
         desiredJobsId: true,
         placementsId: true,
-        placement: { title: true },
+        placement: { id: true, title: true },
       },
       desiredJobsPosition: {
         desiredJobsId: true,
         jobPositionsId: true,
-        jobPosition: { title: true },
+        jobPosition: { id: true, title: true },
       },
     },
   };
@@ -291,7 +291,6 @@ export class DesiredJobsRepository {
             }),
           },
         }),
-        // ...(statusId && { status: { id: +statusId } }),
         ...(jobFieldId && { jobField: { id: +jobFieldId } }),
         ...(placementId && {
           desiredJobsPlacement: { placement: { id: +placementId } },
@@ -392,11 +391,11 @@ export class DesiredJobsRepository {
     const { id, transactionalEntityManager } = updatedOptions;
 
     const updatedDesiredJob = await (transactionalEntityManager
-      ? transactionalEntityManager.findOneOrFail(DesiredJob, {
+      ? transactionalEntityManager.findOne(DesiredJob, {
           where: { id },
           ...this.updatedDesiredJobOptions,
         })
-      : this.desiredJobRepository.findOneOrFail({
+      : this.desiredJobRepository.findOne({
           where: { id },
           ...this.updatedDesiredJobOptions,
         }));

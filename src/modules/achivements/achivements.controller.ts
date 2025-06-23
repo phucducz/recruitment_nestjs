@@ -98,6 +98,7 @@ export class AchivementsController {
       const result = await this.achivementsService.update(+id, {
         updateBy: request.user.userId,
         variable: updateAchivementDto,
+        transactionalEntityManager: request.transactionalEntityManager,
       });
 
       if (!result)

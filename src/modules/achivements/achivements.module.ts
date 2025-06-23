@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Achivement } from 'src/entities/achivement.entity';
 import { AchivementsService } from '../../services/achivements.service';
 import { AuthModule } from '../auth/auth.module';
+import { DesiredJobsModule } from '../desired_jobs/desired_jobs.module';
 import { RedisModule } from '../redis/redis.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 import { UsersModule } from '../users/users.module';
@@ -16,6 +17,7 @@ import { AchivementsRepository } from './achivements.repository';
     UsersModule,
     RedisModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => DesiredJobsModule),
     forwardRef(() => RefreshTokenModule),
   ],
   controllers: [AchivementsController],

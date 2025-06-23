@@ -126,7 +126,7 @@ export class UsersRepository {
     },
   };
 
-  private generateRelationshipOptionals(
+  public generateRelationshipOptionals(
     options: IGenerateRelationshipOptional = {},
   ): FindOneOptions<User> {
     const { hasPassword = false, hasRelations = true, relationships } = options;

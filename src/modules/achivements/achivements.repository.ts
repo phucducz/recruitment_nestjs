@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { DataSource, FindOneOptions, Repository, UpdateResult } from 'typeorm';
 
 import { ENTITIES, removeColumns } from 'src/common/utils/constants';
 import { filterColumns } from 'src/common/utils/function';
@@ -13,6 +13,7 @@ export class AchivementsRepository {
   constructor(
     @InjectRepository(Achivement)
     private readonly achivementRepository: Repository<Achivement>,
+    @Inject(DataSource) private readonly dataSource: DataSource,
   ) {}
 
   async create(
@@ -31,15 +32,22 @@ export class AchivementsRepository {
   }
 
   async update(id: number, updateAchivementDto: IUpdate<UpdateAchivementDto>) {
-    const { updateBy, variable } = updateAchivementDto;
+    const { updateBy, variable, transactionalEntityManager } =
+      updateAchivementDto;
 
-    const { affected } = await this.achivementRepository.update(id, {
-      description: variable.description,
-      updateAt: new Date().toString(),
-      updateBy,
-    });
+    const result = transactionalEntityManager
+      ? await transactionalEntityManager.update(Achivement, id, {
+          description: variable.description,
+          updateAt: new Date().toString(),
+          updateBy,
+        })
+      : await this.achivementRepository.update(id, {
+          description: variable.description,
+          updateAt: new Date().toString(),
+          updateBy,
+        });
 
-    return affected > 0;
+    return result;
   }
 
   async findById(id: number) {
