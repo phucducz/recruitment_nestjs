@@ -11,6 +11,8 @@ import {
 import { ENTITIES } from 'src/common/utils/constants';
 import { STATUS_CODE } from 'src/common/utils/enums';
 import {
+  buildDateRangeFilter,
+  buildJsonFieldSearch,
   filterColumns,
   formatParams,
   getPaginationParams,
@@ -68,11 +70,33 @@ export class ApprovalsRepository {
   }
 
   async findAll(approvalQueries: ApprovalQueries) {
-    const { page, pageSize } = approvalQueries;
+    const {
+      page,
+      pageSize,
+      fullName,
+      statusId,
+      jobFieldId,
+      createdDate,
+      startAfterOffer,
+      totalYearExperience,
+    } = approvalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
     return await this.approvalRepository.findAndCount({
-      where: {},
+      where: {
+        ...buildJsonFieldSearch({
+          entityKey: 'desiredJobSnapshot',
+          jsonColumnName: 'desired_job_snapshot',
+          filterGroups: {
+            startAfterOffer,
+            user: { fullName },
+            jobField: { id: jobFieldId },
+            totalYearExperience: +totalYearExperience,
+          },
+        }),
+        ...buildDateRangeFilter('createAt', createdDate),
+        status: { id: statusId },
+      },
       order: { createAt: 'DESC' },
       ...this.approvalOptions,
       ...paginationParams,

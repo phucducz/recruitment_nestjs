@@ -1,3 +1,6 @@
+import dayjs from 'dayjs';
+import { Between, Raw } from 'typeorm';
+
 import { PaginationDto } from 'src/dto/pagination/pagination.dto';
 
 export const getPaginationParams = (
@@ -55,7 +58,7 @@ export const snakeToCamelCase = (fieldName: string) => {
 export const filterColumns = (
   columns: string[],
   removeColumns: string[],
-): Object => {
+): object => {
   return columns.reduce((acc, field) => {
     if (removeColumns.includes(field)) acc[field] = false;
     else acc[field] = true;
@@ -126,4 +129,69 @@ export const formatParams = <T extends object>(params: T): T => {
   );
 
   return formatedParams;
+};
+
+export const buildJsonFieldSearch = (options: {
+  entityKey: string;
+  jsonColumnName: string;
+  filterGroups: Record<string, Record<string, any>> | any;
+}) => {
+  const { entityKey, jsonColumnName, filterGroups } = options;
+
+  const condition: string[] = [];
+  const parameters: Record<string, any> = {};
+
+  const stringOperator = 'ILIKE';
+  const numberOperator = '::int =';
+
+  Object.entries(filterGroups).forEach((item) => {
+    const [jsonKey, fields] = item;
+
+    if (typeof fields === 'object')
+      Object.entries(fields).forEach((val) => {
+        const [key, value] = val;
+
+        const paramKey = `${jsonKey}_${key}`;
+        const isNumber = typeof value === 'number';
+
+        if (value) {
+          const expr = isNumber
+            ? `("${jsonColumnName}"->'${jsonKey}'->>'${key}')::int ${numberOperator} :${paramKey}`
+            : `"${jsonColumnName}"->'${jsonKey}'->>'${key}' ${stringOperator} :${paramKey}`;
+
+          parameters[paramKey] = isNumber ? +value : `%${value}%`;
+          condition.push(expr);
+        }
+      }, []);
+    else if (fields) {
+      const isNumber = typeof fields === 'number';
+      const expr = isNumber
+        ? `("${jsonColumnName}"->>'${jsonKey}') ${numberOperator} :${jsonKey}`
+        : `"${jsonColumnName}"->>'${jsonKey}' ${stringOperator} :${jsonKey}`;
+
+      parameters[jsonKey] = isNumber ? +fields : `%${fields}%`;
+      condition.push(expr);
+    }
+
+    return { condition, parameters };
+  });
+
+  return condition.length && Object.keys(parameters).length
+    ? {
+        [entityKey]: Raw(() => condition?.join(' AND '), parameters),
+      }
+    : {};
+};
+
+export const buildDateRangeFilter = (
+  field: string,
+  date?: string | Date,
+): Record<string, any> => {
+  if (!date) return {};
+  return {
+    [field]: Between(
+      dayjs(date).startOf('day').toDate(),
+      dayjs(date).endOf('day').toDate(),
+    ),
+  };
 };

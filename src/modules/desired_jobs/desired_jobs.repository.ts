@@ -91,7 +91,6 @@ export class DesiredJobsRepository {
   private readonly updatedDesiredJobOptions: FindOneOptions<DesiredJob> = {
     relations: [
       'user',
-      // 'user.role',
       'user.placement',
       'user.achivement',
       'user.jobPosition',
@@ -109,6 +108,8 @@ export class DesiredJobsRepository {
       'desiredJobsPlacement',
       'desiredJobsPlacement.placement',
       'desiredJobsPosition.jobPosition',
+      'creator',
+      'updater',
     ],
     select: {
       user: {
@@ -123,11 +124,6 @@ export class DesiredJobsRepository {
           id: true,
           title: true,
         },
-        // role: {
-        //   id: true,
-        //   title: true,
-        //   description: true,
-        // },
         placement: {
           id: true,
           title: true,
@@ -197,6 +193,8 @@ export class DesiredJobsRepository {
         jobPositionsId: true,
         jobPosition: { id: true, title: true },
       },
+      creator: { id: true, fullName: true },
+      updater: { id: true, fullName: true },
     },
   };
 

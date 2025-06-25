@@ -152,4 +152,11 @@ interface DesiredJobQueries {
   id?: number;
 }
 
-interface ApprovalQueries extends BaseQueries {}
+interface ApprovalQueries extends BaseQueries {
+  fullName?: string;
+  statusId?: number;
+  jobFieldId?: number;
+  createdDate?: string;
+  startAfterOffer?: string;
+  totalYearExperience?: number;
+}
