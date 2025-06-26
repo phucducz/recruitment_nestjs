@@ -4,6 +4,7 @@ import {
   EntityManager,
   FindOneOptions,
   FindOptionsSelect,
+  Like,
   Repository,
   UpdateResult,
 } from 'typeorm';
@@ -74,6 +75,7 @@ export class ApprovalsRepository {
       page,
       pageSize,
       fullName,
+      approver,
       statusId,
       jobFieldId,
       createdDate,
@@ -82,21 +84,40 @@ export class ApprovalsRepository {
     } = approvalQueries;
     const paginationParams = getPaginationParams({ page, pageSize });
 
+    const commonFilter = {
+      ...buildJsonFieldSearch({
+        entityKey: 'desiredJobSnapshot',
+        jsonColumnName: 'desired_job_snapshot',
+        filterGroups: {
+          startAfterOffer,
+          user: { fullName },
+          jobField: { id: jobFieldId },
+          totalYearExperience: +totalYearExperience,
+        },
+      }),
+      ...buildDateRangeFilter('createAt', createdDate),
+      ...(statusId && { status: { id: statusId } }),
+    };
+
     return await this.approvalRepository.findAndCount({
-      where: {
-        ...buildJsonFieldSearch({
-          entityKey: 'desiredJobSnapshot',
-          jsonColumnName: 'desired_job_snapshot',
-          filterGroups: {
-            startAfterOffer,
-            user: { fullName },
-            jobField: { id: jobFieldId },
-            totalYearExperience: +totalYearExperience,
-          },
-        }),
-        ...buildDateRangeFilter('createAt', createdDate),
-        status: { id: statusId },
-      },
+      where: [
+        {
+          ...commonFilter,
+          ...(approver && {
+            approver: {
+              email: Like(`%${approver}%`),
+            },
+          }),
+        },
+        {
+          ...commonFilter,
+          ...(approver && {
+            approver: {
+              fullName: Like(`%${approver}%`),
+            },
+          }),
+        },
+      ],
       order: { createAt: 'DESC' },
       ...this.approvalOptions,
       ...paginationParams,
