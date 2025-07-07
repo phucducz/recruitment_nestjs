@@ -235,7 +235,6 @@ export class DesiredJobsRepository {
       page,
       pageSize,
       fullName,
-      statusId,
       jobFieldId,
       placementId,
       createdDate,

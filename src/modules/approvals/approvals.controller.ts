@@ -64,10 +64,36 @@ export class ApprovalsController {
     try {
       const { page, pageSize } = approvalQueries;
       const result = await this.approvalsService.findAll(approvalQueries);
-
       return res.status(200).json({
         statusCode: 200,
         ...rtPageInfoAndItems({ page, pageSize }, result),
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: error?.message ?? error, statusCode: 500 });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/shared-candidates')
+  async findAllCandidateProfile(
+    @Query() candidateProfileQueries: CandidateProfileQueries,
+    @Res() res: Response,
+  ) {
+    try {
+      const { page, pageSize } = candidateProfileQueries;
+      const { items, total } =
+        await this.approvalsService.findAllCandidateProfile(
+          candidateProfileQueries,
+        );
+
+      return res.status(200).json({
+        statusCode: 200,
+        ...rtPageInfoAndItems({ page, pageSize }, [
+          items,
+          Number(total?.count),
+        ]),
       });
     } catch (error) {
       return res

@@ -179,8 +179,8 @@ export class UsersRepository {
     const {
       id,
       email,
-      statusId,
       roleId,
+      statusId,
       jobFieldsId,
       jobPositionsId,
       createdDate,
@@ -201,8 +201,11 @@ export class UsersRepository {
           ...(statusId && { id: statusId }),
         },
         role: {
-          ...(roleId && { rolesFunctionals: { rolesId: roleId } }),
+          ...(roleId && { id: roleId }),
         },
+        // role: {
+        //   ...(roleId && { rolesFunctionals: { rolesId: roleId } }),
+        // },
         usersJobFields: {
           ...(jobFieldsId && { jobFieldsId: +jobFieldsId }),
         },

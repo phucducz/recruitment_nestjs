@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
@@ -22,12 +22,15 @@ import { CreateApprovalDto } from 'src/dto/approvals/create-approval.dto';
 import { UpdateApprovalDto } from 'src/dto/approvals/update-approval.dto';
 import { Approval } from 'src/entities/approval.entity';
 import { Status } from 'src/entities/status.entity';
+import { StatusRepository } from '../status/status.repository';
 
 @Injectable()
 export class ApprovalsRepository {
   constructor(
     @InjectRepository(Approval)
     private readonly approvalRepository: Repository<Approval>,
+    @Inject()
+    private readonly statusRepository: StatusRepository,
   ) {}
 
   private readonly approvalSelect: FindOptionsSelect<Approval> = filterColumns(
@@ -122,6 +125,37 @@ export class ApprovalsRepository {
       ...this.approvalOptions,
       ...paginationParams,
     });
+  }
+
+  async findAllCandidateProfile(candidateProfile: CandidateProfileQueries) {
+    const { page, pageSize } = candidateProfile;
+    const paginationParams = getPaginationParams({ page, pageSize });
+
+    const { id: statusId } = await this.statusRepository.findByCode(
+      STATUS_CODE.APPROVAL_APPROVED,
+    );
+
+    const [items, total] = await Promise.all([
+      this.approvalRepository
+        .createQueryBuilder('approval')
+        .distinctOn(['approval.desired_job_id'])
+        .where('approval.status_id = :statusId', { statusId })
+        .orderBy('approval.desired_job_id', 'ASC')
+        .addOrderBy('approval.createAt', 'DESC')
+        .skip(paginationParams.skip)
+        .take(paginationParams.take)
+        .getMany(),
+      this.approvalRepository
+        .createQueryBuilder('approval')
+        .select('COUNT(DISTINCT approval.desired_job_id)', 'count')
+        .where('approval.status_id = :statusId', { statusId })
+        .getRawOne(),
+    ]);
+
+    return {
+      items,
+      total,
+    };
   }
 
   async findOne(options: FindOneOptions<Approval>) {

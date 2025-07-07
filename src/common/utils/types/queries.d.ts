@@ -49,7 +49,6 @@ interface IFindApplicantsQueries extends BaseQueries {
 interface IFindDesiredJobsQueries extends BaseQueries {
   id?: number;
   fullName?: string;
-  statusId?: number;
   placementId?: number;
   createdDate?: string;
   jobFieldId?: number;
@@ -160,4 +159,8 @@ interface ApprovalQueries extends BaseQueries {
   createdDate?: string;
   startAfterOffer?: string;
   totalYearExperience?: number;
+}
+
+interface CandidateProfileQueries extends BaseQueries {
+  id?: number;
 }

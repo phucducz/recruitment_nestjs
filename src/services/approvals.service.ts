@@ -24,6 +24,12 @@ export class ApprovalsService {
     return await this.approvalsRepository.findAll(approvalQueries);
   }
 
+  async findAllCandidateProfile(candidateProfile: CandidateProfileQueries) {
+    return await this.approvalsRepository.findAllCandidateProfile(
+      candidateProfile,
+    );
+  }
+
   async approve(id: number, updateApprovalDto: IUpdate<UpdateApprovalDto>) {
     const { variable } = updateApprovalDto;
     const status = await this.statusRepository.findByCode(variable.code);
@@ -36,10 +42,6 @@ export class ApprovalsService {
 
   async findOne(options: FindOneOptions<Approval>) {
     return await this.approvalsRepository.findOne(options);
-  }
-
-  update(id: number, updateApprovalDto: UpdateApprovalDto) {
-    return `This action updates a #${id} approval`;
   }
 
   remove(id: number) {
